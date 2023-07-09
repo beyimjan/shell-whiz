@@ -1,0 +1,2 @@
+class ShellWhizTranslationError(Exception):
+    pass
