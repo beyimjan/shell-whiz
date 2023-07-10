@@ -7,8 +7,8 @@ from inquirer.themes import GreenPassion
 from openai import OpenAIError
 from prompt_toolkit import prompt as pptk_prompt
 
-from .exceptions import ShellWhizTranslationError
-from .openai import translate_natural_language_to_shell_command
+from shell_whiz.exceptions import ShellWhizTranslationError
+from shell_whiz.openai import translate_natural_language_to_shell_command
 
 SHELL_WHIZ_DESCRIPTION = "Shell Whiz: AI assistant right in your terminal"
 
