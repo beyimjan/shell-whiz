@@ -10,7 +10,7 @@ Shell Whiz will help you generate shell commands from your natural language quer
 - **Easy to install:** run `pip install shell-whiz` and you're good to go.
 - **Easy to use:** Shell Whiz is a command-line tool.
     - Run `sw ask` to generate shell commands from your natural language queries.
-    - Run `sw explain` to get an explanation of any shell command..
+    - Run `sw explain` to get an explanation of any shell command.
 
 ## License
 Shell Whiz is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for more information.
