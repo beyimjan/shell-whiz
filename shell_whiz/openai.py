@@ -146,15 +146,7 @@ def get_explanation_of_shell_command(command):
         messages=[
             {
                 "role": "system",
-                "content": 'Your role is to generate a Python list containing dictionaries with the following structure:\n[\n\t{"ch": "command or part of a command", "ex": "clear but short explanations of what this chunk does or what it is used for",\n\t"children": [{"ch": "", "ex": "", "children": [...]}, ...]},\n\t...\n]\n\nDictionaries in the "children" key usually contain command arguments.\n\nFill in the details for each "ch" and "ex" key.',
-            },
-            {
-                "role": "user",
-                "content": f"{DELIMITER}\nconvert -rotate 90 image.png image.png\n{DELIMITER}",
-            },
-            {
-                "role": "assistant",
-                "content": '[{"ch": "is used to convert images between different formats.",\n\t"children": [\n\t\t{"ch": "-rotate 90", "ex": "specifies that we want to rotate the image by 90 degrees."},\n\t\t{"ch": "image.png", "ex": "is the input file."},\n\t\t{"ch": "image.png", "ex": "is the output file."}\n\t]\n}]',
+                "content": 'Your role is to generate a Python list containing dictionaries with the following structure:\n[\n\t{\n\t\t"ch": "command or part of the beginning of command", "ex": "clear but short explanations of what this chunk does or what it is used for",\n\t\t"children": [\n\t\t\t{"ch": "arguments associated with the command", "ex": "","children": [...]},\n\t\t\t...\n\t\t]\n\t}\n]',
             },
             {
                 "role": "user",
@@ -162,7 +154,7 @@ def get_explanation_of_shell_command(command):
             },
             {
                 "role": "assistant",
-                "content": '[\n\t{"ch": "w", "ex": "displays information about currently logged-in users."},\n\t{\n\t\t"ch": "tail", "ex": "outputs the last part of files.",\n\t\t"children": [{"ch": "-n +3", "ex": "displays lines starting from the third line."}]\n\t},\n\t{\n\t\t"ch": "| cut", "ex": "extracts usernames from the previous command output.",\n\t\t"children": [\n\t\t\t{"ch": "-d \' \'", "ex": "specifies the delimiter as a space."},\n\t\t\t{"ch": "-f 1", "ex": "indicates that we want to select the first field."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| grep -v ^avst$", "ex": "excludes username \'avst\'.",\n\t\t"children": [\n\t\t\t{"ch": "-v", "ex": "inverts the match."},\n\t\t\t{"ch": "^avst$", "ex": "is a regex that exactly matches \'avst\'."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| sort", "ex": "sorts output in lexicographical order.",\n\t\t"children": [{"ch": "-u", "ex": "outputs only the unique lines."}]\n\t},\n\t{"ch": "| wc -l","ex": "counts the number of lines."}\n]',
+                "content": '[\n\t{"ch": "w", "ex": "displays information about currently logged-in users."},\n\t{\n\t\t"ch": "tail", "ex": "outputs the last part of files.",\n\t\t"children": [{"ch": "-n +3", "ex": "displays lines starting from the third line."}]\n\t},\n\t{\n\t\t"ch": "| cut", "ex": "extracts usernames from the previous command output.",\n\t\t"children": [\n\t\t\t{"ch": "-d \' \'", "ex": "specifies the delimiter as a space."},\n\t\t\t{"ch": "-f 1", "ex": "indicates that we want to select the first field."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| grep -v ^avst$", "ex": "excludes username \'avst\'.",\n\t\t"children": [\n\t\t\t{"ch": "-v", "ex": "inverts the match."},\n\t\t\t{"ch": "^avst$", "ex": "is a regex that exactly matches \'avst\'."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| sort", "ex": "sorts output in lexicographical order.",\n\t\t"children": [{"ch": "-u", "ex": "outputs only the unique lines."}]\n\t},\n\t{"ch": "| wc -l", "ex": "counts the number of lines."}\n]',
             },
             {
                 "role": "user",
