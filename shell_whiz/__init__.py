@@ -2,16 +2,26 @@ import argparse
 import subprocess
 import sys
 
+import colorama
 import inquirer
+from colorama import Fore, Style
 from inquirer.themes import GreenPassion
 from openai import OpenAIError
 from prompt_toolkit import prompt as pptk_prompt
 
 from shell_whiz.config import shell_whiz_config, shell_whiz_update_config
-from shell_whiz.exceptions import ShellWhizTranslationError
-from shell_whiz.openai import translate_natural_language_to_shell_command
-
-SHELL_WHIZ_DESCRIPTION = "Shell Whiz: AI assistant right in your terminal"
+from shell_whiz.constants import (
+    OPENAI_CONNECTION_ERROR,
+    SHELL_WHIZ_DESCRIPTION,
+)
+from shell_whiz.exceptions import (
+    ShellWhizExplanationError,
+    ShellWhizTranslationError,
+)
+from shell_whiz.openai import (
+    get_explanation_of_shell_command,
+    translate_natural_language_to_shell_command,
+)
 
 
 def shell_whiz_ask(prompt):
@@ -23,11 +33,32 @@ def shell_whiz_ask(prompt):
         print()
         shell_command = translate_natural_language_to_shell_command(prompt)
     except OpenAIError:
-        print("Couldn't connect to OpenAI API.", file=sys.stderr)
+        print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
         sys.exit(2)
     except ShellWhizTranslationError:
         print("Shell Whiz doesn't understand your query.", file=sys.stderr)
         return
+
+    print(
+        " ==================== "
+        + f"{Fore.GREEN}Command{Style.RESET_ALL}"
+        + " ===================="
+    )
+    print(f"\n {shell_command}\n")
+
+    print(
+        " ================== "
+        + f"{Fore.GREEN}Explanation{Style.RESET_ALL}"
+        + " ==================\n"
+    )
+    try:
+        explanation = get_explanation_of_shell_command(shell_command)
+        print(explanation)
+    except OpenAIError:
+        print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
+        sys.exit(2)
+    except ShellWhizExplanationError:
+        print(" Shell Whiz couldn't generate an explanation.\n")
 
     questions = [
         inquirer.List(
@@ -37,9 +68,6 @@ def shell_whiz_ask(prompt):
             choices=["Run this command", "Exit"],
         )
     ]
-
-    print(" ==================== Command ====================")
-    print(f"\n {shell_command}\n")
 
     answers = inquirer.prompt(questions, theme=GreenPassion())
     choice = answers["action"]
@@ -63,6 +91,8 @@ def main():
     )
 
     args = parser.parse_args()
+
+    colorama.init()
     if args.command == "config":
         shell_whiz_update_config()
     elif args.command == "ask":

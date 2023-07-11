@@ -2,9 +2,14 @@ import json
 from json import JSONDecodeError
 
 import openai
+from colorama import Fore, Style
 from yaspin import yaspin
 
-from .exceptions import ShellWhizTranslationError
+from shell_whiz.constants import SHELL_WHIZ_WAIT_MESSAGE
+from shell_whiz.exceptions import (
+    ShellWhizExplanationError,
+    ShellWhizTranslationError,
+)
 
 DELIMITER = "####"
 SHELL = "Bash"
@@ -60,7 +65,7 @@ def extract_shell_command_from_text(haystack):
     return extracted_shell_command
 
 
-@yaspin(text="Wait, Shell Whiz is thinking", color="green")
+@yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
 def translate_natural_language_to_shell_command(query):
     translation = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -86,3 +91,98 @@ def translate_natural_language_to_shell_command(query):
     )
 
     return shell_command
+
+
+def format_explanatory_message(explanation):
+    def traverse_explanation(explanation, level=0):
+        explanation_str = ""
+
+        if explanation is None:
+            return ""
+
+        if not isinstance(explanation, list):
+            raise ShellWhizExplanationError(
+                "Explanation is not a list of dictionaries."
+            )
+
+        if len(explanation) == 0:
+            return ""
+
+        for chunk in explanation:
+            if not isinstance(chunk, dict):
+                raise ShellWhizExplanationError("Chunk is not a dictionary.")
+
+            command = chunk.get("ch", None)
+            explanation = chunk.get("ex", None)
+            children = chunk.get("children", None)
+
+            if (
+                command is None
+                or explanation is None
+                or not isinstance(command, str)
+                or not isinstance(explanation, str)
+            ):
+                raise ShellWhizExplanationError(
+                    "Chunk or explanation is not a str."
+                )
+
+            explanation_str += (
+                " "
+                + "  " * level
+                + f"* {Fore.GREEN + command + Style.RESET_ALL} {explanation}\n"
+            )
+            if "children" in chunk:
+                explanation_str += traverse_explanation(children, level + 1)
+
+        return explanation_str
+
+    return traverse_explanation(explanation)
+
+
+@yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
+def get_explanation_of_shell_command(command):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": 'Your role is to generate a Python list containing dictionaries with the following structure:\n[\n\t{"ch": "command or part of a command", "ex": "clear but short explanations of what this chunk does or what it is used for",\n\t"children": [{"ch": "", "ex": "", "children": [...]}, ...]},\n\t...\n]\n\nDictionaries in the "children" key usually contain command arguments.\n\nFill in the details for each "ch" and "ex" key.',
+            },
+            {
+                "role": "user",
+                "content": f"{DELIMITER}\nconvert -rotate 90 image.png image.png\n{DELIMITER}",
+            },
+            {
+                "role": "assistant",
+                "content": '[{"ch": "is used to convert images between different formats.",\n\t"children": [\n\t\t{"ch": "-rotate 90", "ex": "specifies that we want to rotate the image by 90 degrees."},\n\t\t{"ch": "image.png", "ex": "is the input file."},\n\t\t{"ch": "image.png", "ex": "is the output file."}\n\t]\n}]',
+            },
+            {
+                "role": "user",
+                "content": f"{DELIMITER}\nw | tail -n +3 | cut -d ' ' -f 1 | grep -v ^avst$ | sort -u | wc -l\n{DELIMITER}",
+            },
+            {
+                "role": "assistant",
+                "content": '[\n\t{"ch": "w", "ex": "displays information about currently logged-in users."},\n\t{\n\t\t"ch": "tail", "ex": "outputs the last part of files.",\n\t\t"children": [{"ch": "-n +3", "ex": "displays lines starting from the third line."}]\n\t},\n\t{\n\t\t"ch": "| cut", "ex": "extracts usernames from the previous command output.",\n\t\t"children": [\n\t\t\t{"ch": "-d \' \'", "ex": "specifies the delimiter as a space."},\n\t\t\t{"ch": "-f 1", "ex": "indicates that we want to select the first field."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| grep -v ^avst$", "ex": "excludes username \'avst\'.",\n\t\t"children": [\n\t\t\t{"ch": "-v", "ex": "inverts the match."},\n\t\t\t{"ch": "^avst$", "ex": "is a regex that exactly matches \'avst\'."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| sort", "ex": "sorts output in lexicographical order.",\n\t\t"children": [{"ch": "-u", "ex": "outputs only the unique lines."}]\n\t},\n\t{"ch": "| wc -l","ex": "counts the number of lines."}\n]',
+            },
+            {
+                "role": "user",
+                "content": f"{DELIMITER}\ndocker stop $(docker ps -a -q)\n{DELIMITER}",
+            },
+            {
+                "role": "assistant",
+                "content": '[{"ch": "docker stop", "ex": "stops a running container.",\n\t"children": [{\n\t\t"ch": "$( ... )", "ex": "replaces itself with the command output inside.",\n\t\t"children": [{\n\t\t\t"ch": "docker ps", "ex": "lists all running containers.",\n\t\t\t"children": [\n\t\t\t\t{"ch": "-a", "ex": "shows all containers (including stopped ones)."},\n\t\t\t\t{"ch": "-q", "ex": "only displays container IDs."}\n\t\t\t]\n\t\t}]\n\t}]\n}]',
+            },
+            {
+                "role": "user",
+                "content": f"{DELIMITER}\n{command}\n{DELIMITER}",
+            },
+        ],
+        max_tokens=1024,
+    )
+
+    try:
+        explanation = json.loads(response.choices[0].message["content"])
+    except JSONDecodeError:
+        raise ShellWhizExplanationError("Could not extract JSON.")
+
+    return format_explanatory_message(explanation)
