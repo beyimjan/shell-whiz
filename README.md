@@ -1,8 +1,9 @@
-# Shell Whiz: AI assistant right in your terminal
 ![PyPI](https://img.shields.io/pypi/v/shell-whiz)
 ![GitHub stars](https://img.shields.io/github/stars/beimzhan/shell-whiz)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/beimzhan/shell-whiz)
 ![GitHub license](https://img.shields.io/github/license/beimzhan/shell-whiz)
+
+# Shell Whiz: AI assistant right in your terminal
 
 Shell Whiz will help you generate shell commands from your natural language queries. It is powered by OpenAI's `gpt-3.5-turbo` and is free to use.
 
