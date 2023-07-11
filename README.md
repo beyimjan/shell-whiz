@@ -7,7 +7,7 @@ Shell Whiz will help you generate shell commands from your natural language quer
 
 ## All features
 - **Pay as you go:** you only pay for what you use; no subscription is required. Just receive an API key from https://platform.openai.com/account/api-keys.
-- **Easy to install:** just run `pip install shell-whiz` and you're good to go.
+- **Easy to install:** run `pip install shell-whiz` and you're good to go.
 - **Easy to use:** Shell Whiz is a command-line tool.
     - Run `sw ask` to generate shell commands from your natural language queries.
     - Run `sw explain` to get an explanation of any shell command..
