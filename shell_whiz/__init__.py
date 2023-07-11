@@ -24,6 +24,15 @@ from shell_whiz.openai import (
 )
 
 
+def print_explanation(explanation):
+    print(
+        " ================== "
+        + f"{Fore.GREEN}Explanation{Style.RESET_ALL}"
+        + " ==================\n"
+    )
+    print(explanation)
+
+
 def shell_whiz_ask(prompt):
     prompt = prompt.strip()
     if prompt == "":
@@ -77,10 +86,28 @@ def shell_whiz_ask(prompt):
         subprocess.run(shell_command, shell=True)
 
 
+def shell_whiz_explain(prompt):
+    prompt = prompt.strip()
+    if prompt == "":
+        prompt = pptk_prompt("Command to explain: ")
+
+    try:
+        print()
+        explanation = get_explanation_of_shell_command(prompt)
+    except OpenAIError:
+        print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
+        sys.exit(2)
+    except ShellWhizExplanationError:
+        print("Shell Whiz couldn't generate an explanation.", file=sys.stderr)
+        return
+
+    print_explanation(explanation)
+
+
 def main():
     parser = argparse.ArgumentParser(description=SHELL_WHIZ_DESCRIPTION)
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="sw_command", required=True)
 
     config_parser = subparsers.add_parser(
         "config", help="Configure Shell Whiz"
@@ -90,11 +117,21 @@ def main():
         "question", nargs="*", type=str, help="Question to ask Shell Whiz"
     )
 
+    explain_parser = subparsers.add_parser(
+        "explain", help="Explain a shell command"
+    )
+    explain_parser.add_argument(
+        "command", nargs="*", type=str, help="Shell command to explain"
+    )
+
     args = parser.parse_args()
 
     colorama.init()
-    if args.command == "config":
+    if args.sw_command == "config":
         shell_whiz_update_config()
-    elif args.command == "ask":
+    elif args.sw_command == "ask":
         shell_whiz_config()
         shell_whiz_ask(" ".join(args.question) if args.question else "")
+    elif args.sw_command == "explain":
+        shell_whiz_config()
+        shell_whiz_explain(" ".join(args.command) if args.command else "")
