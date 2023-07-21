@@ -10,8 +10,12 @@ from inquirer.themes import GreenPassion
 def shell_whiz_config_file():
     if "XDG_CONFIG_HOME" in os.environ:
         config_dir = os.environ["XDG_CONFIG_HOME"]
-    else:
+    elif "APPDATA" in os.environ:  # for Windows
+        config_dir = os.environ["APPDATA"]
+    elif "HOME" in os.environ:
         config_dir = os.path.join(os.environ["HOME"], ".config")
+    else:
+        config_dir = os.getcwd()
 
     sw_config_dir = os.path.join(config_dir, "shell-whiz")
     sw_config_file = os.path.join(sw_config_dir, "config.json")
