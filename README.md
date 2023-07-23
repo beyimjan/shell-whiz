@@ -1,11 +1,22 @@
-![PyPI](https://img.shields.io/pypi/v/shell-whiz)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/shell-whiz)
-![GitHub stars](https://img.shields.io/github/stars/beimzhan/shell-whiz)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/beimzhan/shell-whiz)
-![GitHub license](https://img.shields.io/github/license/beimzhan/shell-whiz)
+<p align="center">
+  <img src="./images/shell-whiz.png" />
+</p>
 
 <p align="center">
-    <img src="./images/shell-whiz.png">
+  <img src="https://img.shields.io/pypi/v/shell-whiz" alt="PyPI" />
+  <img src="https://img.shields.io/pypi/dm/shell-whiz" alt="PyPI - Downloads" />
+  <img
+    src="https://img.shields.io/github/stars/beimzhan/shell-whiz"
+    alt="GitHub stars"
+  />
+  <img
+    src="https://img.shields.io/github/commit-activity/m/beimzhan/shell-whiz"
+    alt="GitHub commit activity"
+  />
+  <img
+    src="https://img.shields.io/github/license/beimzhan/shell-whiz"
+    alt="GitHub license"
+  />
 </p>
 
 Shell Whiz will help you generate shell commands from your natural language queries. It is powered by OpenAI's `gpt-3.5-turbo` and is free to use.
