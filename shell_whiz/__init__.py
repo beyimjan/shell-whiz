@@ -88,7 +88,6 @@ def shell_whiz_explain(prompt):
         prompt = pptk_prompt("Command to explain: ")
 
     try:
-        print()
         explanation = get_explanation_of_shell_command(prompt)
     except OpenAIError:
         print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
@@ -97,7 +96,16 @@ def shell_whiz_explain(prompt):
         print("Shell Whiz couldn't generate an explanation.", file=sys.stderr)
         return
 
+    print()
     print_explanation(explanation)
+
+
+def run_ai_assistant(args):
+    shell_whiz_config()
+    if args.sw_command == "ask":
+        shell_whiz_ask(" ".join(args.question) if args.question else "")
+    elif args.sw_command == "explain":
+        shell_whiz_explain(" ".join(args.command) if args.command else "")
 
 
 def main():
@@ -123,11 +131,10 @@ def main():
     args = parser.parse_args()
 
     colorama.init()
-    if args.sw_command == "config":
-        shell_whiz_update_config()
-    elif args.sw_command == "ask":
-        shell_whiz_config()
-        shell_whiz_ask(" ".join(args.question) if args.question else "")
-    elif args.sw_command == "explain":
-        shell_whiz_config()
-        shell_whiz_explain(" ".join(args.command) if args.command else "")
+    try:
+        if args.sw_command == "config":
+            shell_whiz_update_config()
+        else:
+            run_ai_assistant(args)
+    except KeyboardInterrupt:
+        pass
