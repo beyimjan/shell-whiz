@@ -1,8 +1,10 @@
 import json
 from json import JSONDecodeError
 
+import jsonschema
 import openai
 from colorama import Fore, Style
+from jsonschema import validate
 from yaspin import yaspin
 
 from shell_whiz.constants import SHELL_WHIZ_WAIT_MESSAGE
@@ -38,6 +40,16 @@ def extract_shell_command_from_text(haystack):
         ],
     )
 
+    json_schema = {
+        "type": "object",
+        "properties": {
+            "shell_command": {"type": "string"},
+            "dangerous_to_run": {"type": "boolean"},
+            "dangerous_consequences": {"type": "string"},
+        },
+        "required": ["shell_command", "dangerous_to_run"],
+    }
+
     try:
         extracted_json = json.loads(
             extracted_json.choices[0].message["content"]
@@ -45,50 +57,29 @@ def extract_shell_command_from_text(haystack):
     except JSONDecodeError:
         raise ShellWhizTranslationError("Could not extract JSON.")
 
-    if not isinstance(extracted_json, dict):
+    try:
+        validate(instance=extracted_json, schema=json_schema)
+    except jsonschema.ValidationError:
         raise ShellWhizTranslationError("Generated JSON is not valid.")
 
-    extracted_shell_command = extracted_json.get("shell_command", None)
-    is_extracted_shell_command_dangerous = extracted_json.get(
-        "dangerous_to_run", False
-    )
-    extracted_shell_command_dangerous_consequences = extracted_json.get(
-        "dangerous_consequences", None
-    )
-    if extracted_shell_command is None:
-        raise ShellWhizTranslationError(
-            "Generated JSON doesn't have 'shell_command' key."
-        )
-    if not isinstance(extracted_shell_command, str) or not isinstance(
-        is_extracted_shell_command_dangerous, bool
-    ):
-        raise ShellWhizTranslationError(
-            "Extracted shell command or dangerous flag is not a string."
-        )
-    if is_extracted_shell_command_dangerous and not isinstance(
-        extracted_shell_command_dangerous_consequences, str
-    ):
-        raise ShellWhizTranslationError(
-            "Extracted shell command dangerous consequences is not a string."
-        )
+    shell_command = extracted_json.get("shell_command", "").strip()
+    is_dangerous = extracted_json.get("dangerous_to_run", False)
+    dangerous_consequences = extracted_json.get(
+        "dangerous_consequences", ""
+    ).strip()
 
-    extracted_shell_command = extracted_shell_command.strip()
-    if extracted_shell_command == "":
+    if shell_command == "":
         raise ShellWhizTranslationError("Extracted shell command is empty.")
 
-    if extracted_shell_command_dangerous_consequences is not None:
-        extracted_shell_command_dangerous_consequences = (
-            extracted_shell_command_dangerous_consequences.strip()
+    if is_dangerous and dangerous_consequences == "":
+        raise ShellWhizTranslationError(
+            "Extracted dangerous consequences are empty."
         )
-        if extracted_shell_command_dangerous_consequences == "":
-            raise ShellWhizTranslationError(
-                "Extracted shell command dangerous consequences is empty."
-            )
 
     return (
-        extracted_shell_command,
-        is_extracted_shell_command_dangerous,
-        extracted_shell_command_dangerous_consequences,
+        shell_command,
+        is_dangerous,
+        dangerous_consequences,
     )
 
 
@@ -119,36 +110,40 @@ def translate_natural_language_to_shell_command(query):
 
 
 def format_explanatory_message(explanation):
+    json_schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "ch": {"type": "string"},
+                "ex": {"type": "string"},
+                "children": {"type": "array"},
+            },
+            "required": ["ch", "ex"],
+        },
+    }
+
     def traverse_explanation(explanation, level=0):
         explanation_str = ""
 
         if explanation is None:
             return ""
 
-        if not isinstance(explanation, list):
-            raise ShellWhizExplanationError(
-                "Explanation is not a list of dictionaries."
-            )
+        try:
+            validate(instance=explanation, schema=json_schema)
+        except jsonschema.ValidationError:
+            raise ShellWhizExplanationError("Generated JSON is not valid.")
 
         if len(explanation) == 0:
             return ""
 
         for chunk in explanation:
-            if not isinstance(chunk, dict):
-                raise ShellWhizExplanationError("Chunk is not a dictionary.")
+            command = chunk.get("ch", "").strip()
+            explanation = chunk.get("ex", "").strip()
 
-            command = chunk.get("ch", None)
-            explanation = chunk.get("ex", None)
-            children = chunk.get("children", None)
-
-            if (
-                command is None
-                or explanation is None
-                or not isinstance(command, str)
-                or not isinstance(explanation, str)
-            ):
+            if command == "" or explanation == "":
                 raise ShellWhizExplanationError(
-                    "Chunk or explanation is not a str."
+                    "Extracted command or explanation is empty."
                 )
 
             command_lines = command.splitlines()
@@ -168,7 +163,9 @@ def format_explanatory_message(explanation):
             explanation_str += f" {explanation}\n"
 
             if "children" in chunk:
-                explanation_str += traverse_explanation(children, level + 1)
+                explanation_str += traverse_explanation(
+                    chunk.get("children", None), level + 1
+                )
 
         return explanation_str
 
