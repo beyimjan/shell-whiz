@@ -39,7 +39,11 @@ def shell_whiz_ask(prompt):
         prompt = pptk_prompt("Ask Shell Whiz: ")
 
     try:
-        shell_command = translate_natural_language_to_shell_command(prompt)
+        (
+            shell_command,
+            is_dangerous,
+            dangerous_consequences,
+        ) = translate_natural_language_to_shell_command(prompt)
     except OpenAIError:
         print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
         sys.exit(2)
@@ -55,6 +59,12 @@ def shell_whiz_ask(prompt):
     for line in shell_command.splitlines():
         print(f" {line}")
     print()
+
+    if is_dangerous:
+        print(
+            f" {Fore.RED}Warning:{Style.RESET_ALL} "
+            + f"{Fore.YELLOW}{dangerous_consequences}{Style.RESET_ALL}\n"
+        )
 
     print(
         " ================== "

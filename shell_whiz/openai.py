@@ -29,11 +29,11 @@ def extract_shell_command_from_text(haystack):
         messages=[
             {
                 "role": "system",
-                "content": 'Extract JSON from user messages with a single key "shell_command". Only generate JSON to make your output machine readable.',
+                "content": 'Extract JSON from user messages with keys "shell_command" (required), "dangerous_to_run" (required, boolean), and "dangerous_consequences" (required if "dangerous_to_run" is true; explain in simple words, maximum 12 words).\n\nOnly generate JSON to make your output machine readable.',
             },
             {
                 "role": "user",
-                "content": f"{DELIMITER}\n{haystack}\n{DELIMITER}",
+                "content": f"{DELIMITER}\n{haystack}\n{DELIMITER}\n\nMost commands are safe to execute.",
             },
         ],
     )
@@ -49,20 +49,47 @@ def extract_shell_command_from_text(haystack):
         raise ShellWhizTranslationError("Generated JSON is not valid.")
 
     extracted_shell_command = extracted_json.get("shell_command", None)
+    is_extracted_shell_command_dangerous = extracted_json.get(
+        "dangerous_to_run", False
+    )
+    extracted_shell_command_dangerous_consequences = extracted_json.get(
+        "dangerous_consequences", None
+    )
     if extracted_shell_command is None:
         raise ShellWhizTranslationError(
             "Generated JSON doesn't have 'shell_command' key."
         )
-    elif not isinstance(extracted_shell_command, str):
+    if not isinstance(extracted_shell_command, str) or not isinstance(
+        is_extracted_shell_command_dangerous, bool
+    ):
         raise ShellWhizTranslationError(
-            "Extracted shell command is not a str."
+            "Extracted shell command or dangerous flag is not a string."
+        )
+    if is_extracted_shell_command_dangerous and not isinstance(
+        extracted_shell_command_dangerous_consequences, str
+    ):
+        raise ShellWhizTranslationError(
+            "Extracted shell command dangerous consequences is not a string."
         )
 
     extracted_shell_command = extracted_shell_command.strip()
     if extracted_shell_command == "":
         raise ShellWhizTranslationError("Extracted shell command is empty.")
 
-    return extracted_shell_command
+    if extracted_shell_command_dangerous_consequences is not None:
+        extracted_shell_command_dangerous_consequences = (
+            extracted_shell_command_dangerous_consequences.strip()
+        )
+        if extracted_shell_command_dangerous_consequences == "":
+            raise ShellWhizTranslationError(
+                "Extracted shell command dangerous consequences is empty."
+            )
+
+    return (
+        extracted_shell_command,
+        is_extracted_shell_command_dangerous,
+        extracted_shell_command_dangerous_consequences,
+    )
 
 
 @yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
@@ -86,11 +113,9 @@ def translate_natural_language_to_shell_command(query):
     )
 
     # Translation sometimes contains not only the commmand
-    shell_command = extract_shell_command_from_text(
+    return extract_shell_command_from_text(
         translation.choices[0].message["content"]
     )
-
-    return shell_command
 
 
 def format_explanatory_message(explanation):
@@ -126,11 +151,22 @@ def format_explanatory_message(explanation):
                     "Chunk or explanation is not a str."
                 )
 
+            command_lines = command.splitlines()
+
             explanation_str += (
                 " "
                 + "  " * level
-                + f"* {Fore.GREEN + command + Style.RESET_ALL} {explanation}\n"
+                + f"* {Fore.GREEN + command_lines[0] + Style.RESET_ALL}"
             )
+            for line in command_lines[1:]:
+                explanation_str += (
+                    "\n"
+                    + "  " * level
+                    + f"   {Fore.GREEN + line + Style.RESET_ALL}"
+                )
+
+            explanation_str += f" {explanation}\n"
+
             if "children" in chunk:
                 explanation_str += traverse_explanation(children, level + 1)
 
