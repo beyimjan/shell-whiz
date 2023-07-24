@@ -62,10 +62,7 @@ def shell_whiz_ask(prompt):
     try:
         explanation = get_explanation_of_shell_command(shell_command)
         print(explanation)
-    except OpenAIError:
-        print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
-        sys.exit(2)
-    except ShellWhizExplanationError:
+    except (OpenAIError, ShellWhizExplanationError):
         print(" Shell Whiz couldn't generate an explanation.\n")
 
     questions = [
