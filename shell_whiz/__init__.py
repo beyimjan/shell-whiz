@@ -50,9 +50,11 @@ def shell_whiz_ask(prompt):
     print(
         "\n ==================== "
         + f"{Fore.GREEN}Command{Style.RESET_ALL}"
-        + " ===================="
+        + " ====================\n"
     )
-    print(f"\n {shell_command}\n")
+    for line in shell_command.splitlines():
+        print(f" {line}")
+    print()
 
     print(
         " ================== "
