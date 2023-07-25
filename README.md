@@ -60,7 +60,7 @@ $ pip install --upgrade shell-whiz
   />
 </p>
 
-You can ran Shell Whiz directly using `sw`, but I recommend creating an alias for it. For example, you can add the following line to your `.bashrc` file:
+You can run Shell Whiz directly using `sw`, but I recommend creating an alias for it. For example, you can add the following line to your `.bashrc` file:
 ```
 alias ??='sw ask'
 ```

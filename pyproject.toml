@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shell-whiz"
-version = "0.1.7"
+version = "0.1.8"
 description = "Shell Whiz: AI assistant right in your terminal"
 authors = ["Tamerlan Bimzhanov <bimzhanovt.net@gmail.com>"]
 readme = "README.md"
