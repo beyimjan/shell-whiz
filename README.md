@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./images/shell-whiz.png" />
+  <img src="https://github.com/beimzhan/shell-whiz/raw/main/images/shell-whiz.png" />
 </p>
 
 <p align="center">
