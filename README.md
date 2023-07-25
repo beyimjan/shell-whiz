@@ -72,14 +72,16 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
   <img
     src="https://github.com/beimzhan/shell-whiz/blob/main/examples/create_a_4_GB_file_with_random_data.gif?raw=true"
   />
-  <br />
+</p>
+<p align="center">
   <img
     src="https://github.com/beimzhan/shell-whiz/blob/main/examples/list_processes_sorted_by_memory_usage.gif?raw=true"
   />
+</p>
+<p align="center">
   <img
     src="https://github.com/beimzhan/shell-whiz/blob/main/examples/most_frequently_modified_files_in_the_repository.gif?raw=true"
   />
-  <br />
 </p>
 
 ## License
