@@ -43,9 +43,8 @@ To use Shell Whiz, you need an API key from OpenAI. You can get this key by visi
 
 Then, run `sw config` to set up your API key.
 
-<details closed><summary>A note about the free API plan for new users</summary>
+### Free API plan for new users
 New users receive $5 for free to try and test the API during the first 3 months. However, it is recommended to upgrade to a paid plan in order to have a more comfortable experience using Shell Whiz. This is because the free plan has restrictions on the number of requests allowed per minute.
-</details>
 
 ## Upgrading
 To upgrade GitHub Copilot CLI, run the following command:
