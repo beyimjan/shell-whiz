@@ -54,8 +54,11 @@ $ pip install --upgrade shell-whiz
 ```
 
 ## Usage
-![](./examples/files_modified_in_the_last_7_days.gif)
-![](./examples/list_processes_sorted_by_memory_usage.gif)
+<p align="center">
+  <img
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days.gif?raw=true"
+  />
+</p>
 
 You can ran Shell Whiz directly using `sw`, but I recommend creating an alias for it. For example, you can add the following line to your `.bashrc` file:
 ```
@@ -63,6 +66,19 @@ alias ??='sw ask'
 ```
 
 To track API usage and costs, you can check the [OpenAI API Usage](https://platform.openai.com/account/usage) page.
+
+## More examples
+<p align="center">
+  <img
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/create_a_4_GB_file_with_random_data.gif?raw=true"
+  />
+  <img
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/list_processes_sorted_by_memory_usage.gif?raw=true"
+  />
+  <img
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/most_frequently_modified_files_in_the_repository.gif?raw=true"
+  />
+</p>
 
 ## License
 Shell Whiz is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for more information.
