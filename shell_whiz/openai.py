@@ -18,28 +18,17 @@ SHELL = "Bash"
 
 NL_TO_SHELL_COMMAND_PMT = """You are a {SHELL} command translator. Your role is to translate natural language into a {SHELL} command. Think that all necessary programs are installed.
 
+Create JSON from user messages with keys "shell_command", "dangerous_to_run" (boolean), and "dangerous_consequences" (required if "dangerous_to_run" is true; explain in simple words, maximum 12 words).
+
 Provide only a ready-to-execute command. Do not write any explanation.
+
+Only generate JSON to make your output machine readable.
 
 Queries will be separated by {DELIMITER} characters."""
 
 
-def extract_shell_command_from_text(haystack):
-    extracted_json = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        temperature=0,
-        max_tokens=256,
-        messages=[
-            {
-                "role": "system",
-                "content": 'Extract JSON from user messages with keys "shell_command" (required), "dangerous_to_run" (required, boolean), and "dangerous_consequences" (required if "dangerous_to_run" is true; explain in simple words, maximum 12 words).\n\nOnly generate JSON to make your output machine readable.',
-            },
-            {
-                "role": "user",
-                "content": f"{DELIMITER}\n{haystack}\n{DELIMITER}\n\nMost commands are safe to execute.",
-            },
-        ],
-    )
-
+@yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
+def translate_natural_language_to_shell_command(query):
     json_schema = {
         "type": "object",
         "properties": {
@@ -47,44 +36,9 @@ def extract_shell_command_from_text(haystack):
             "dangerous_to_run": {"type": "boolean"},
             "dangerous_consequences": {"type": "string"},
         },
-        "required": ["shell_command", "dangerous_to_run"],
+        "required": ["shell_command"],
     }
 
-    try:
-        extracted_json = json.loads(
-            extracted_json.choices[0].message["content"]
-        )
-    except JSONDecodeError:
-        raise ShellWhizTranslationError("Could not extract JSON.")
-
-    try:
-        validate(instance=extracted_json, schema=json_schema)
-    except jsonschema.ValidationError:
-        raise ShellWhizTranslationError("Generated JSON is not valid.")
-
-    shell_command = extracted_json.get("shell_command", "").strip()
-    is_dangerous = extracted_json.get("dangerous_to_run", False)
-    dangerous_consequences = extracted_json.get(
-        "dangerous_consequences", ""
-    ).strip()
-
-    if shell_command == "":
-        raise ShellWhizTranslationError("Extracted shell command is empty.")
-
-    if is_dangerous and dangerous_consequences == "":
-        raise ShellWhizTranslationError(
-            "Extracted dangerous consequences are empty."
-        )
-
-    return (
-        shell_command,
-        is_dangerous,
-        dangerous_consequences,
-    )
-
-
-@yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
-def translate_natural_language_to_shell_command(query):
     translation = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         temperature=0.35,
@@ -103,10 +57,33 @@ def translate_natural_language_to_shell_command(query):
         ],
     )
 
-    # Translation sometimes contains not only the commmand
-    return extract_shell_command_from_text(
-        translation.choices[0].message["content"]
-    )
+    try:
+        translation_json = json.loads(
+            translation.choices[0].message["content"]
+        )
+    except JSONDecodeError:
+        raise ShellWhizTranslationError("Could not extract JSON.")
+
+    try:
+        validate(instance=translation_json, schema=json_schema)
+    except jsonschema.ValidationError:
+        raise ShellWhizTranslationError("Generated JSON is not valid.")
+
+    shell_command = translation_json.get("shell_command", "").strip()
+    is_dangerous = translation_json.get("dangerous_to_run", False)
+    dangerous_consequences = translation_json.get(
+        "dangerous_consequences", ""
+    ).strip()
+
+    if shell_command == "":
+        raise ShellWhizTranslationError("Extracted shell command is empty.")
+
+    if is_dangerous and dangerous_consequences == "":
+        raise ShellWhizTranslationError(
+            "Extracted dangerous consequences are empty."
+        )
+
+    return shell_command, is_dangerous, dangerous_consequences
 
 
 def format_explanatory_message(explanation):
