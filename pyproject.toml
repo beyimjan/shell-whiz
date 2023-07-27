@@ -2,6 +2,7 @@
 name = "shell-whiz"
 version = "0.2.2"
 description = "Shell Whiz: AI assistant right in your terminal"
+license = "GPL-3.0-only"
 authors = ["Tamerlan Bimzhanov <bimzhanovt.net@gmail.com>"]
 readme = "README.md"
 packages = [{include = "shell_whiz"}]
