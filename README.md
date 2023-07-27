@@ -47,7 +47,7 @@ Then, run `sw config` to set up your API key.
 New users receive $5 for free to try and test the API during the first 3 months. However, it is recommended to upgrade to a paid plan in order to have a more comfortable experience using Shell Whiz. This is because the free plan has restrictions on the number of requests allowed per minute.
 
 ## Upgrading
-To upgrade GitHub Copilot CLI, run the following command:
+To upgrade Shell Whiz, run the following command:
 ```
 $ pip install --upgrade shell-whiz
 ```
