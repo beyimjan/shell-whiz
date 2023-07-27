@@ -1,35 +1,39 @@
 import json
-from json import JSONDecodeError
 
 import jsonschema
 import openai
-from colorama import Fore, Style
+import yaspin
 from jsonschema import validate
-from yaspin import yaspin
 
-from shell_whiz.constants import SHELL_WHIZ_WAIT_MESSAGE
-from shell_whiz.exceptions import (
-    ShellWhizExplanationError,
-    ShellWhizTranslationError,
-)
-
-DELIMITER = "####"
-SHELL = "Bash"
-
-NL_TO_SHELL_COMMAND_PMT = """You are a {SHELL} command translator. Your role is to translate natural language into a {SHELL} command. Think that all necessary programs are installed.
-
-Create JSON from user messages with keys "shell_command", "dangerous_to_run" (boolean), and "dangerous_consequences" (required if "dangerous_to_run" is true; explain in simple words, maximum 12 words).
-
-Provide only a ready-to-execute command. Do not write any explanation.
-
-Only generate JSON to make your output machine readable.
-
-Queries will be separated by {DELIMITER} characters."""
+from shell_whiz.constants import DELIMITER, SHELL, SHELL_WHIZ_WAIT_MESSAGE
+from shell_whiz.exceptions import ShellWhizTranslationError
 
 
-@yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
-def translate_natural_language_to_shell_command(query):
-    json_schema = {
+def translate_natural_language_to_shell_command_openai(prompt):
+    return (
+        openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            temperature=0.35,
+            max_tokens=256,
+            messages=[
+                {
+                    "role": "system",
+                    "content": f'You are a {SHELL} command translator. Your role is to translate natural language into a {SHELL} command. Think that all necessary programs are installed.\n\nCreate JSON from user messages with keys "shell_command", "dangerous_to_run" (boolean), and "dangerous_consequences" (required if "dangerous_to_run" is true; explain in simple words, maximum 12 words).\n\nProvide only a ready-to-execute command. Do not write any explanation.\n\nOnly generate JSON to make your output machine readable.\n\nQueries will be separated by {DELIMITER} characters.',
+                },
+                {
+                    "role": "user",
+                    "content": f"{DELIMITER}\n{prompt}\n{DELIMITER}",
+                },
+            ],
+        )
+        .choices[0]
+        .message["content"]
+    )
+
+
+@yaspin.yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
+def translate_natural_language_to_shell_command(prompt):
+    translation_json_schema = {
         "type": "object",
         "properties": {
             "shell_command": {"type": "string"},
@@ -39,33 +43,15 @@ def translate_natural_language_to_shell_command(query):
         "required": ["shell_command"],
     }
 
-    translation = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        temperature=0.35,
-        max_tokens=256,
-        messages=[
-            {
-                "role": "system",
-                "content": NL_TO_SHELL_COMMAND_PMT.format(
-                    SHELL=SHELL, DELIMITER=DELIMITER
-                ),
-            },
-            {
-                "role": "user",
-                "content": f"{DELIMITER}\n{query}\n{DELIMITER}",
-            },
-        ],
-    )
+    translation = translate_natural_language_to_shell_command_openai(prompt)
 
     try:
-        translation_json = json.loads(
-            translation.choices[0].message["content"]
-        )
-    except JSONDecodeError:
+        translation_json = json.loads(translation)
+    except json.JSONDecodeError:
         raise ShellWhizTranslationError("Could not extract JSON.")
 
     try:
-        validate(instance=translation_json, schema=json_schema)
+        validate(instance=translation_json, schema=translation_json_schema)
     except jsonschema.ValidationError:
         raise ShellWhizTranslationError("Generated JSON is not valid.")
 
@@ -86,105 +72,55 @@ def translate_natural_language_to_shell_command(query):
     return shell_command, is_dangerous, dangerous_consequences
 
 
-def format_explanatory_message(explanation):
-    json_schema = {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "properties": {
-                "ch": {"type": "string"},
-                "ex": {"type": "string"},
-                "children": {"type": "array"},
-            },
-            "required": ["ch", "ex"],
-        },
-    }
-
-    def traverse_explanation(explanation, level=0):
-        explanation_str = ""
-
-        if explanation is None:
-            return ""
-
-        try:
-            validate(instance=explanation, schema=json_schema)
-        except jsonschema.ValidationError:
-            raise ShellWhizExplanationError("Generated JSON is not valid.")
-
-        if len(explanation) == 0:
-            return ""
-
-        for chunk in explanation:
-            command = chunk.get("ch", "").strip()
-            explanation = chunk.get("ex", "").strip()
-
-            if command == "" or explanation == "":
-                raise ShellWhizExplanationError(
-                    "Extracted command or explanation is empty."
-                )
-
-            command_lines = command.splitlines()
-
-            explanation_str += (
-                " "
-                + "  " * level
-                + f"* {Fore.GREEN + command_lines[0] + Style.RESET_ALL}"
-            )
-            for line in command_lines[1:]:
-                explanation_str += (
-                    "\n"
-                    + "  " * level
-                    + f"   {Fore.GREEN + line + Style.RESET_ALL}"
-                )
-
-            explanation_str += f" {explanation}\n"
-
-            if "children" in chunk:
-                explanation_str += traverse_explanation(
-                    chunk.get("children", None), level + 1
-                )
-
-        return explanation_str
-
-    return traverse_explanation(explanation)
-
-
-@yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
-def get_explanation_of_shell_command(command):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {
-                "role": "system",
-                "content": 'Your role is to generate a Python list containing dictionaries with the following structure:\n[\n\t{\n\t\t"ch": "command or part of the beginning of command", "ex": "clear but short explanations of what this chunk does or what it is used for",\n\t\t"children": [\n\t\t\t{"ch": "arguments associated with the command", "ex": "","children": [...]},\n\t\t\t...\n\t\t]\n\t}\n]',
-            },
-            {
-                "role": "user",
-                "content": f"{DELIMITER}\nw | tail -n +3 | cut -d ' ' -f 1 | grep -v ^avst$ | sort -u | wc -l\n{DELIMITER}",
-            },
-            {
-                "role": "assistant",
-                "content": '[\n\t{"ch": "w", "ex": "displays information about currently logged-in users."},\n\t{\n\t\t"ch": "tail", "ex": "outputs the last part of files.",\n\t\t"children": [{"ch": "-n +3", "ex": "displays lines starting from the third line."}]\n\t},\n\t{\n\t\t"ch": "| cut", "ex": "extracts usernames from the previous command output.",\n\t\t"children": [\n\t\t\t{"ch": "-d \' \'", "ex": "specifies the delimiter as a space."},\n\t\t\t{"ch": "-f 1", "ex": "indicates that we want to select the first field."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| grep -v ^avst$", "ex": "excludes username \'avst\'.",\n\t\t"children": [\n\t\t\t{"ch": "-v", "ex": "inverts the match."},\n\t\t\t{"ch": "^avst$", "ex": "is a regex that exactly matches \'avst\'."}\n\t\t]\n\t},\n\t{\n\t\t"ch": "| sort", "ex": "sorts output in lexicographical order.",\n\t\t"children": [{"ch": "-u", "ex": "outputs only the unique lines."}]\n\t},\n\t{"ch": "| wc -l", "ex": "counts the number of lines."}\n]',
-            },
-            {
-                "role": "user",
-                "content": f"{DELIMITER}\ndocker stop $(docker ps -a -q)\n{DELIMITER}",
-            },
-            {
-                "role": "assistant",
-                "content": '[{"ch": "docker stop", "ex": "stops a running container.",\n\t"children": [{\n\t\t"ch": "$( ... )", "ex": "replaces itself with the command output inside.",\n\t\t"children": [{\n\t\t\t"ch": "docker ps", "ex": "lists all running containers.",\n\t\t\t"children": [\n\t\t\t\t{"ch": "-a", "ex": "shows all containers (including stopped ones)."},\n\t\t\t\t{"ch": "-q", "ex": "only displays container IDs."}\n\t\t\t]\n\t\t}]\n\t}]\n}]',
-            },
-            {
-                "role": "user",
-                "content": f"{DELIMITER}\n{command}\n{DELIMITER}",
-            },
-        ],
-        max_tokens=1024,
+def get_explanation_of_shell_command_openai(shell_command):
+    return (
+        openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            temperature=0.1,
+            max_tokens=256,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            messages=[
+                {
+                    "role": "system",
+                    "content": 'Create a bulleted list that explains, piece by piece, what the command does for advanced users of command line.\n\n* Do not explain basic command line concepts such as pipes, command substitution, variables, etc.\n* When you begin explaining arguments, increase the level of nesting. You can include as many levels as needed for an easy-to-read explanation.\n* Use backticks to indicate code.\n\n* All items in the list must follow the format of "piece" followed by a verb (such as "`^avst$` is a regex that exactly matches \'avst\'" or "`-n +3` displays lines starting from the third line").\n* To make it easier to read and understand, you must limit each line to 45 characters.\n* Use two spaces as indents when specifying different nesting levels in your bulleted list.\n* Only create a bulleted list and use 2 spaces for nesting to make your output easy to read.\n\nStart from the most general description of the overall command and continue by adding more details explaining each argument.',
+                },
+                {
+                    "role": "user",
+                    "content": f"{DELIMITER}\nw | tail -n +3 | cut -d ' ' -f 1 | grep -v ^avst$ | sort -u | wc -l\n{DELIMITER}",
+                },
+                {
+                    "role": "assistant",
+                    "content": "* `w` displays information about currently logged-in users.\n* `| tail -n +3` displays lines starting from the third line.\n* `| cut extracts usernames from the previous command output.\n  * `-d ' '` specifies the delimiter as a space.\n  * `-f 1` selects the first field.\n* `| grep -v ^avst$` excludes username 'avst'.\n    * `-v` inverts the match, so it selects lines that do not match the pattern.\n    * `^avst$` is a regex that exactly matches 'avst'.\n  * `sort -u` sorts the lines in alphabetical order and removes duplicates.\n  * `wc -l` counts the number of lines in the output.",
+                },
+                {
+                    "role": "user",
+                    "content": f"{DELIMITER}\ngit log --name-only --pretty=format: | sort | uniq -c | sort -nr | head\n{DELIMITER}",
+                },
+                {
+                    "role": "assistant",
+                    "content": "* `git log` displays the commit history of a Git repository.\n  * `--name-only` shows only the names of the files that were changed in each commit.\n  * `--pretty=format:` specifies the format of the log output as empty.\n* `| sort` sorts the file names in alphabetical order.\n* `| uniq -c` counts the number of occurrences of each file name.\n* `| sort -nr` sorts the file names in descending order based on the count.\n* `| head` displays the first few lines of the output, which are the files with the highest count.",
+                },
+                {
+                    "role": "user",
+                    "content": f"{DELIMITER}\ndocker stop $(docker ps -a -q)\n{DELIMITER}",
+                },
+                {
+                    "role": "assistant",
+                    "content": "* `docker stop` stops a running container.\n  * `$( ... )` replaces itself with the command output inside.\n    * `docker ps` lists all running containers.\n      * `-a` shows all containers (including stopped ones).\n      * `-q` only displays container IDs.",
+                },
+                {
+                    "role": "user",
+                    "content": f"{DELIMITER}\n{shell_command}\n{DELIMITER}",
+                },
+            ],
+        )
+        .choices[0]
+        .message["content"]
     )
 
-    try:
-        explanation = json.loads(response.choices[0].message["content"])
-    except JSONDecodeError:
-        raise ShellWhizExplanationError("Could not extract JSON.")
 
-    return format_explanatory_message(explanation)
+@yaspin.yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
+def get_explanation_of_shell_command(shell_command):
+    return get_explanation_of_shell_command_openai(shell_command)
