@@ -1,3 +1,4 @@
+import asyncio
 import subprocess
 import sys
 
@@ -6,14 +7,19 @@ import rich
 from inquirer.themes import GreenPassion
 from openai import OpenAIError
 from rich.markdown import Markdown
+from yaspin import yaspin
 
 from shell_whiz.argparse import create_argument_parser
 from shell_whiz.config import shell_whiz_config, shell_whiz_update_config
 from shell_whiz.console import console
-from shell_whiz.constants import OPENAI_CONNECTION_ERROR
+from shell_whiz.constants import (
+    OPENAI_CONNECTION_ERROR,
+    SHELL_WHIZ_WAIT_MESSAGE,
+)
 from shell_whiz.exceptions import ShellWhizTranslationError
 from shell_whiz.openai import (
     get_explanation_of_shell_command,
+    recognize_dangerous_command,
     translate_natural_language_to_shell_command,
 )
 
@@ -24,7 +30,7 @@ def print_explanation():
     )
 
 
-def print_command(shell_command, is_dangerous, dangerous_consequences):
+def print_command(shell_command):
     rich.print(
         "\n ==================== [bold green]Command[/] ====================\n"
     )
@@ -32,33 +38,46 @@ def print_command(shell_command, is_dangerous, dangerous_consequences):
     for line in shell_command.splitlines():
         print(f" {line}")
 
-    if is_dangerous:
-        rich.print(
-            f"\n[bold red] Warning:[/] [bold yellow]{dangerous_consequences}[/]"
-        )
-
     print()
 
 
-def shell_whiz_ask(prompt):
+async def shell_whiz_ask(prompt):
     try:
-        (
-            shell_command,
-            is_dangerous,
-            dangerous_consequences,
-        ) = translate_natural_language_to_shell_command(prompt)
+        shell_command = translate_natural_language_to_shell_command(prompt)
     except OpenAIError:
         rich.print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
         sys.exit(2)
     except ShellWhizTranslationError:
         print("Shell Whiz doesn't understand your query.", file=sys.stderr)
-        return
+        sys.exit(3)
 
-    print_command(shell_command, is_dangerous, dangerous_consequences)
+    print_command(shell_command)
+
+    explanation_task = asyncio.create_task(
+        get_explanation_of_shell_command(shell_command)
+    )
+
+    try:
+        is_dangerous, dangerous_consequences = recognize_dangerous_command(
+            shell_command
+        )
+    except OpenAIError:
+        rich.print(OPENAI_CONNECTION_ERROR, file=sys.stderr)
+        sys.exit(2)
+    except ShellWhizTranslationError:
+        pass
+
+    if is_dangerous:
+        rich.print(
+            f"[bold red] Warning:[/] [bold yellow]{dangerous_consequences}[/]\n"
+        )
+
+    with yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green"):
+        explanation = await explanation_task
 
     print_explanation()
+
     try:
-        explanation = get_explanation_of_shell_command(shell_command)
         console.print(
             Markdown(
                 explanation,
@@ -98,7 +117,7 @@ def shell_whiz_explain(shell_command):
     console.print(Markdown(explanation))
 
 
-def run_ai_assistant(args):
+async def run_ai_assistant(args):
     shell_whiz_config()
 
     if args.sw_command == "ask":
@@ -106,7 +125,7 @@ def run_ai_assistant(args):
         if shell_command == "":
             print("Please provide a prompt.", file=sys.stderr)
             sys.exit(1)
-        shell_whiz_ask(shell_command)
+        await shell_whiz_ask(shell_command)
     elif args.sw_command == "explain":
         shell_command = " ".join(args.command).strip()
         if shell_command == "":
@@ -115,18 +134,18 @@ def run_ai_assistant(args):
         shell_whiz_explain(shell_command)
 
 
-def main():
+async def main():
     args = create_argument_parser().parse_args()
 
     if args.sw_command == "config":
         shell_whiz_update_config()
     else:
-        run_ai_assistant(args)
+        await run_ai_assistant(args)
 
 
 def run():
     try:
-        main()
+        asyncio.run(main())
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit(0)
