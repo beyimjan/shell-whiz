@@ -68,7 +68,7 @@ def recognize_dangerous_command_openai(shell_command):
     return (
         openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            temperature=0.25,
+            temperature=0,
             max_tokens=96,
             messages=[
                 {
