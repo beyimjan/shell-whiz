@@ -12,6 +12,7 @@ from shell_whiz.exceptions import (
 )
 
 
+# https://platform.openai.com/playground/p/FdYUdbAGL530Lfh5VesLlVD8?model=gpt-3.5-turbo
 def translate_natural_language_to_shell_command_openai(prompt):
     return (
         openai.ChatCompletion.create(
@@ -62,6 +63,7 @@ def translate_natural_language_to_shell_command(prompt):
     return shell_command
 
 
+# https://platform.openai.com/playground/p/H3HMz4fgnQQUTT6PI17qDtzQ?model=gpt-3.5-turbo
 def recognize_dangerous_command_openai(shell_command):
     return (
         openai.ChatCompletion.create(
@@ -119,6 +121,7 @@ def recognize_dangerous_command(shell_command):
     return is_dangerous, dangerous_consequences
 
 
+# https://platform.openai.com/playground/p/SXqnxM1MPDvywzFUlAjvYNlm?model=gpt-3.5-turbo
 def get_explanation_of_shell_command_openai(shell_command):
     return (
         openai.ChatCompletion.create(
