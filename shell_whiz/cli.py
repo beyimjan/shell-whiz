@@ -22,11 +22,13 @@ from shell_whiz.constants import (
 from shell_whiz.exceptions import (
     ShellWhizTranslationError,
     ShellWhizWarningError,
+    ShellWhizEditError,
 )
 from shell_whiz.openai import (
     get_explanation_of_shell_command,
     recognize_dangerous_command,
-    translate_natural_language_to_shell_command,
+    translate_nl_to_shell_command,
+    edit_shell_command,
 )
 
 
@@ -50,50 +52,79 @@ def print_command(shell_command):
 
 
 async def shell_whiz_ask(prompt):
+    first_run = True
+    edit_prompt = ""
+
     try:
-        shell_command = translate_natural_language_to_shell_command(prompt)
+        shell_command = translate_nl_to_shell_command(prompt)
     except ShellWhizTranslationError:
         rich.print(f"{SW_ERROR}: Shell Whiz doesn't know how to do this.")
         sys.exit(SW_ERROR_EXIT_CODE)
 
-    print_command(shell_command)
+    while True:
+        if first_run:
+            first_run = False
+        elif edit_prompt != "":
+            try:
+                shell_command = await edit_shell_command(
+                    shell_command, edit_prompt
+                )
+            except ShellWhizEditError:
+                pass
 
-    explanation_task = asyncio.create_task(
-        get_explanation_of_shell_command(shell_command)
-    )
+        print_command(shell_command)
 
-    try:
-        is_dangerous, dangerous_consequences = recognize_dangerous_command(
-            shell_command
+        explanation_task = asyncio.create_task(
+            get_explanation_of_shell_command(shell_command)
         )
-    except ShellWhizWarningError:
-        is_dangerous = False
 
-    if is_dangerous:
-        rich.print(
-            f" [bold red]Warning[/]: [bold yellow]{dangerous_consequences}[/]\n"
+        try:
+            is_dangerous, dangerous_consequences = recognize_dangerous_command(
+                shell_command
+            )
+        except ShellWhizWarningError:
+            is_dangerous = False
+
+        if is_dangerous:
+            rich.print(
+                f" [bold red]Warning[/]: [bold yellow]{dangerous_consequences}[/]\n"
+            )
+
+        with yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR):
+            explanation = await explanation_task
+
+        print_explanation(explanation)
+
+        edit_prompt = ""
+
+        questions = [
+            inquirer.List(
+                "action",
+                message="Select an action",
+                carousel=True,
+                choices=[
+                    "Run this command",
+                    "Revise query",
+                    "Edit manually",
+                    "Exit",
+                ],
+            )
+        ]
+
+        answers = inquirer.prompt(
+            questions, theme=inquirer.themes.GreenPassion()
         )
-
-    with yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR):
-        explanation = await explanation_task
-
-    print_explanation(explanation)
-
-    questions = [
-        inquirer.List(
-            "action",
-            message="Select an action",
-            carousel=True,
-            choices=["Run this command", "Exit"],
-        )
-    ]
-
-    answers = inquirer.prompt(questions, theme=inquirer.themes.GreenPassion())
-    choice = answers["action"]
-    if choice == "Exit":
-        sys.exit()
-    elif choice == "Run this command":
-        subprocess.run(shell_command, shell=True)
+        choice = answers["action"]
+        if choice == "Exit":
+            sys.exit()
+        elif choice == "Revise query":
+            edit_prompt = inquirer.text(message="Revise query")
+        elif choice == "Edit manually":
+            shell_command = inquirer.text(
+                message="Edit command", default=shell_command
+            )
+        elif choice == "Run this command":
+            subprocess.run(shell_command, shell=True)
 
 
 async def run_ai_assistant(args):

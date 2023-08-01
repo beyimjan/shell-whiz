@@ -7,13 +7,14 @@ from jsonschema import validate
 
 from shell_whiz.constants import DELIMITER, SW_WAIT_MSG, SW_WAIT_MSG_COLOR
 from shell_whiz.exceptions import (
+    ShellWhizEditError,
     ShellWhizTranslationError,
     ShellWhizWarningError,
 )
 
 
 # https://platform.openai.com/playground/p/FdYUdbAGL530Lfh5VesLlVD8?model=gpt-3.5-turbo
-def translate_natural_language_to_shell_command_openai(prompt):
+def translate_nl_to_shell_command_openai(prompt):
     return (
         openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -36,14 +37,14 @@ def translate_natural_language_to_shell_command_openai(prompt):
 
 
 @yaspin.yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR)
-def translate_natural_language_to_shell_command(prompt):
+def translate_nl_to_shell_command(prompt):
     translation_json_schema = {
         "type": "object",
         "properties": {"shell_command": {"type": "string"}},
         "required": ["shell_command"],
     }
 
-    translation = translate_natural_language_to_shell_command_openai(prompt)
+    translation = translate_nl_to_shell_command_openai(prompt)
 
     try:
         translation_json = json.loads(translation)
@@ -170,3 +171,47 @@ def get_explanation_of_shell_command_openai(shell_command):
 
 async def get_explanation_of_shell_command(shell_command):
     return get_explanation_of_shell_command_openai(shell_command)
+
+
+def edit_shell_command_openai(shell_command, prompt):
+    return (
+        openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Shell command to edit: ####\n{shell_command}\n####\n\nUser prompt to edit this shell command: ####\n{prompt}\n####\n\nEdit the command according to the user's prompt and generate a JSON object with one key \"edited_shell_command\". If you can't edit the command as requested, output an empty JSON object.\n\nOnly generate JSON to make your output machine readable.",
+                }
+            ],
+            temperature=0.2,
+            max_tokens=256,
+        )
+        .choices[0]
+        .message["content"]
+    )
+
+
+async def edit_shell_command(shell_command, prompt):
+    edited_sc_json_schema = {
+        "type": "object",
+        "properties": {"edited_shell_command": {"type": "string"}},
+        "required": ["edited_shell_command"],
+    }
+
+    edited_sc = edit_shell_command_openai(shell_command, prompt)
+
+    try:
+        edited_sc_json = json.loads(edited_sc)
+    except json.JSONDecodeError:
+        raise ShellWhizEditError("Could not extract JSON.")
+
+    try:
+        validate(instance=edited_sc_json, schema=edited_sc_json_schema)
+    except jsonschema.ValidationError:
+        raise ShellWhizEditError("Generated JSON is not valid.")
+
+    edited_sc = edited_sc_json["edited_shell_command"]
+    if edited_sc == "":
+        raise ShellWhizEditError("Edited shell command is empty.")
+
+    return edited_sc

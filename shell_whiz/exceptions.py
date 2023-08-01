@@ -4,3 +4,7 @@ class ShellWhizTranslationError(Exception):
 
 class ShellWhizWarningError(Exception):
     pass
+
+
+class ShellWhizEditError(Exception):
+    pass
