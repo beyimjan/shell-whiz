@@ -5,7 +5,7 @@ import openai
 import yaspin
 from jsonschema import validate
 
-from shell_whiz.constants import DELIMITER, SHELL, SHELL_WHIZ_WAIT_MESSAGE
+from shell_whiz.constants import DELIMITER, SW_WAIT_MSG, SW_WAIT_MSG_COLOR
 from shell_whiz.exceptions import (
     ShellWhizTranslationError,
     ShellWhizWarningError,
@@ -22,7 +22,7 @@ def translate_natural_language_to_shell_command_openai(prompt):
             messages=[
                 {
                     "role": "system",
-                    "content": f'You are a {SHELL} command translator. Your role is to translate natural language into a {SHELL} command. Think that all necessary programs are installed.\n\nProvide only a ready-to-execute command. Do not write any explanation.\n\nCreate a JSON with the "shell_command" key, if query cannot be translated into a shell command, output an empty JSON object.\n\nOnly generate JSON to make your output machine readable.\n\nQueries will be separated by {DELIMITER} characters.',
+                    "content": f'You are a Bash command translator. Your role is to translate natural language into a Bash command. Think that all necessary programs are installed.\n\nProvide only a ready-to-execute command. Do not write any explanation.\n\nCreate a JSON with the "shell_command" key, if query cannot be translated into a shell command, output an empty JSON object.\n\nOnly generate JSON to make your output machine readable.\n\nQueries will be separated by {DELIMITER} characters.',
                 },
                 {
                     "role": "user",
@@ -35,7 +35,7 @@ def translate_natural_language_to_shell_command_openai(prompt):
     )
 
 
-@yaspin.yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
+@yaspin.yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR)
 def translate_natural_language_to_shell_command(prompt):
     translation_json_schema = {
         "type": "object",
@@ -82,7 +82,7 @@ def recognize_dangerous_command_openai(shell_command):
     )
 
 
-@yaspin.yaspin(text=SHELL_WHIZ_WAIT_MESSAGE, color="green")
+@yaspin.yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR)
 def recognize_dangerous_command(shell_command):
     dangerous_command_json_schema = {
         "type": "object",

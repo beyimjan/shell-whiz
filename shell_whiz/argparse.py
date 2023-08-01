@@ -15,11 +15,4 @@ def create_argument_parser():
         "prompt", nargs="+", type=str, help="Question to ask Shell Whiz"
     )
 
-    explain_parser = subparsers.add_parser(
-        "explain", help="Explain a shell command"
-    )
-    explain_parser.add_argument(
-        "command", nargs="+", type=str, help="Shell command to explain"
-    )
-
     return parser

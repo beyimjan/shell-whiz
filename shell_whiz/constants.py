@@ -1,6 +1,10 @@
-SHELL_WHIZ_WAIT_MESSAGE = "Wait, Shell Whiz is thinking"
+SW_ERROR = "[bold yellow]Error[/]"
 
-OPENAI_CONNECTION_ERROR = "[bold yellow]Error[/]: Failed to connect to OpenAI API.\nCheck your internet connection and API key. Run [bold green]sw config[/] to set up the API key."
+INV_CLI_ARGS_EXIT_CODE = 1
+OPENAI_ERROR_EXIT_CODE = 2
+SW_ERROR_EXIT_CODE = 3
+
+SW_WAIT_MSG = "Wait, Shell Whiz is thinking"
+SW_WAIT_MSG_COLOR = "green"
 
 DELIMITER = "####"
-SHELL = "Bash"
