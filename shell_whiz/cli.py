@@ -125,6 +125,7 @@ async def shell_whiz_ask(prompt):
             )
         elif choice == "Run this command":
             subprocess.run(shell_command, shell=True)
+            return
 
 
 async def run_ai_assistant(args):
