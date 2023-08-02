@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shell-whiz"
-version = "0.2.5rc3"
+version = "0.2.5rc4"
 description = "Shell Whiz: AI assistant right in your terminal"
 license = "GPL-3.0-only"
 authors = ["Tamerlan Bimzhanov <bimzhanovt.net@gmail.com>"]
@@ -8,12 +8,12 @@ readme = "README.md"
 packages = [{include = "shell_whiz"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8 <4"
+python = ">=3.9 <4"
 openai = "^0.27.8"
 inquirer = "^3.1.3"
 yaspin = "^2.3.0"
 jsonschema = "^4.18.4"
-rich = "^13.4.2"
+rich = "^13.5.2"
 
 [tool.poetry.scripts]
 sw = "shell_whiz.cli:run"
