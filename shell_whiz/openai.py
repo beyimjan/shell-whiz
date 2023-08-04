@@ -2,6 +2,7 @@ import json
 
 import jsonschema
 import openai
+from litellm import completion
 import yaspin
 from jsonschema import validate
 
@@ -14,9 +15,10 @@ from shell_whiz.exceptions import (
 
 
 # https://platform.openai.com/playground/p/FdYUdbAGL530Lfh5VesLlVD8?model=gpt-3.5-turbo
+# see litellm supported models: https://litellm.readthedocs.io/en/latest/supported/
 def translate_nl_to_shell_command_openai(prompt):
     return (
-        openai.ChatCompletion.create(
+        completion(
             model="gpt-3.5-turbo",
             temperature=0.25,
             max_tokens=256,
@@ -67,7 +69,7 @@ def translate_nl_to_shell_command(prompt):
 # https://platform.openai.com/playground/p/H3HMz4fgnQQUTT6PI17qDtzQ?model=gpt-3.5-turbo
 def recognize_dangerous_command_openai(shell_command):
     return (
-        openai.ChatCompletion.create(
+        completion(
             model="gpt-3.5-turbo",
             temperature=0,
             max_tokens=96,
@@ -125,7 +127,7 @@ def recognize_dangerous_command(shell_command):
 # https://platform.openai.com/playground/p/SXqnxM1MPDvywzFUlAjvYNlm?model=gpt-3.5-turbo
 def get_explanation_of_shell_command_openai(shell_command):
     return (
-        openai.ChatCompletion.create(
+        completion(
             model="gpt-3.5-turbo",
             temperature=0.1,
             max_tokens=256,
@@ -175,7 +177,7 @@ async def get_explanation_of_shell_command(shell_command):
 
 def edit_shell_command_openai(shell_command, prompt):
     return (
-        openai.ChatCompletion.create(
+        completion(
             model="gpt-3.5-turbo",
             messages=[
                 {
