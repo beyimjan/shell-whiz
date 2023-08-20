@@ -64,6 +64,9 @@ alias ??='sw ask'
 
 To track API usage and costs, you can check the [OpenAI API Usage](https://platform.openai.com/account/usage) page.
 
+## Tips
+- If you want to pass an argument that starts with a hyphen, you can use `--` to separate the command from the arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
+
 ## More examples
 <p align="center">
   <img
