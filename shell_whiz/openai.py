@@ -2,10 +2,9 @@ import json
 
 import jsonschema
 import openai
-import yaspin
 from jsonschema import validate
 
-from shell_whiz.constants import DELIMITER, SW_WAIT_MSG, SW_WAIT_MSG_COLOR
+from shell_whiz.constants import DELIMITER
 from shell_whiz.exceptions import (
     ShellWhizEditError,
     ShellWhizTranslationError,
@@ -36,7 +35,6 @@ def translate_nl_to_shell_command_openai(prompt):
     )
 
 
-@yaspin.yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR)
 def translate_nl_to_shell_command(prompt):
     translation_json_schema = {
         "type": "object",
@@ -83,7 +81,6 @@ def recognize_dangerous_command_openai(shell_command):
     )
 
 
-@yaspin.yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR)
 def recognize_dangerous_command(shell_command):
     dangerous_command_json_schema = {
         "type": "object",

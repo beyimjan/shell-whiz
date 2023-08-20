@@ -2,12 +2,14 @@ import json
 import os
 from json import JSONDecodeError
 
-import inquirer
 import openai
-from inquirer.themes import GreenPassion
+import questionary
+import rich
+
+from shell_whiz.constants import SW_ERROR
 
 
-def shell_whiz_config_file():
+def sw_get_config_paths():
     if "XDG_CONFIG_HOME" in os.environ:
         config_dir = os.environ["XDG_CONFIG_HOME"]
     elif "APPDATA" in os.environ:  # for Windows
@@ -23,33 +25,37 @@ def shell_whiz_config_file():
     return sw_config_dir, sw_config_file
 
 
-def shell_whiz_config_form():
-    questions = [inquirer.Text("openai_api_key", message="OpenAI API Key")]
+async def sw_get_user_config():
+    rich.print(
+        "Visit https://platform.openai.com/account/api-keys to get your API key."
+    )
+    openai_api_key = await questionary.text(
+        "OpenAI API key",
+        default=os.environ.get("OPENAI_API_KEY", ""),
+    ).unsafe_ask_async()
 
-    answers = inquirer.prompt(questions, theme=GreenPassion())
-
-    return {"openai_api_key": answers["openai_api_key"]}
+    return {"openai_api_key": openai_api_key}
 
 
-def shell_whiz_update_config():
-    sw_config_dir, sw_config_file = shell_whiz_config_file()
+async def sw_edit_config():
+    sw_config_dir, sw_config_file = sw_get_config_paths()
 
-    config = shell_whiz_config_form()
+    sw_config = await sw_get_user_config()
 
     if not os.path.exists(sw_config_dir):
         os.makedirs(sw_config_dir)
 
     try:
         with open(sw_config_file, "w") as f:
-            f.write(json.dumps(config))
+            f.write(json.dumps(sw_config))
     except IOError:
-        return config
+        rich.print(f"{SW_ERROR}: Couldn't write to file {sw_config_file}")
 
-    return config
+    return sw_config
 
 
-def shell_whiz_read_config():
-    _, sw_config_file = shell_whiz_config_file()
+def sw_read_config():
+    _, sw_config_file = sw_get_config_paths()
 
     try:
         with open(sw_config_file, "r") as f:
@@ -60,9 +66,9 @@ def shell_whiz_read_config():
     return config
 
 
-def shell_whiz_config():
-    config = shell_whiz_read_config()
+async def sw_config():
+    config = sw_read_config()
     if "openai_api_key" not in config:
-        config = shell_whiz_update_config()
+        config = await sw_edit_config()
 
     openai.api_key = config["openai_api_key"]

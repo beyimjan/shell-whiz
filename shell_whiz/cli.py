@@ -2,14 +2,14 @@ import asyncio
 import subprocess
 import sys
 
-import inquirer
+import questionary
 import openai
 import rich
 from rich.markdown import Markdown
 from yaspin import yaspin
 
 from shell_whiz.argparse import create_argument_parser
-from shell_whiz.config import shell_whiz_config, shell_whiz_update_config
+from shell_whiz.config import sw_config, sw_edit_config
 from shell_whiz.console import console
 from shell_whiz.constants import (
     INV_CLI_ARGS_EXIT_CODE,
@@ -56,7 +56,8 @@ async def shell_whiz_ask(prompt):
     edit_prompt = ""
 
     try:
-        shell_command = translate_nl_to_shell_command(prompt)
+        with yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR):
+            shell_command = translate_nl_to_shell_command(prompt)
     except ShellWhizTranslationError:
         rich.print(f"{SW_ERROR}: Shell Whiz doesn't know how to do this.")
         sys.exit(SW_ERROR_EXIT_CODE)
@@ -79,9 +80,11 @@ async def shell_whiz_ask(prompt):
         )
 
         try:
-            is_dangerous, dangerous_consequences = recognize_dangerous_command(
-                shell_command
-            )
+            with yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR):
+                (
+                    is_dangerous,
+                    dangerous_consequences,
+                ) = recognize_dangerous_command(shell_command)
         except ShellWhizWarningError:
             is_dangerous = False
 
@@ -97,39 +100,32 @@ async def shell_whiz_ask(prompt):
 
         edit_prompt = ""
 
-        questions = [
-            inquirer.List(
-                "action",
-                message="Select an action",
-                carousel=True,
-                choices=[
-                    "Run this command",
-                    "Revise query",
-                    "Edit manually",
-                    "Exit",
-                ],
-            )
-        ]
-
-        answers = inquirer.prompt(
-            questions, theme=inquirer.themes.GreenPassion()
-        )
-        choice = answers["action"]
+        choice = await questionary.select(
+            "Select an action",
+            choices=[
+                "Run this command",
+                "Revise query",
+                "Edit manually",
+                "Exit",
+            ],
+        ).unsafe_ask_async()
         if choice == "Exit":
             sys.exit()
         elif choice == "Revise query":
-            edit_prompt = inquirer.text(message="Revise query")
+            edit_prompt = await questionary.text(
+                message="Revise query", multiline=True
+            ).unsafe_ask_async()
         elif choice == "Edit manually":
-            shell_command = inquirer.text(
-                message="Edit command", default=shell_command
-            )
+            shell_command = await questionary.text(
+                "Edit command", default=shell_command, multiline=True
+            ).unsafe_ask_async()
         elif choice == "Run this command":
             subprocess.run(shell_command, shell=True)
             return
 
 
 async def run_ai_assistant(args):
-    shell_whiz_config()
+    await sw_config()
 
     if args.sw_command == "ask":
         shell_command = " ".join(args.prompt).strip()
@@ -143,7 +139,7 @@ async def main():
     args = create_argument_parser().parse_args()
 
     if args.sw_command == "config":
-        shell_whiz_update_config()
+        await sw_edit_config()
     elif args.sw_command == "ask":
         await run_ai_assistant(args)
 
