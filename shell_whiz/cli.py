@@ -113,7 +113,7 @@ async def shell_whiz_ask(prompt):
             sys.exit()
         elif choice == "Revise query":
             edit_prompt = await questionary.text(
-                message="Revise query", multiline=True
+                message="Revise query"
             ).unsafe_ask_async()
         elif choice == "Edit manually":
             shell_command = await questionary.text(
