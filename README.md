@@ -57,9 +57,22 @@ $ pip install --upgrade shell-whiz
   />
 </p>
 
-You can run Shell Whiz directly using `sw ask`, but I recommend creating an alias for it. For example, you can add the following line to your `.bashrc` file:
-```
+You can run Shell Whiz directly using `sw ask`, but I recommend creating an alias for it. For example, you can add the following line to your `~/.bashrc` file:
+
+```bash
 alias ??='sw ask'
+```
+
+PowerShell users can create a function in their [PowerShell profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles).
+
+```powershell
+function ?? {
+    param(
+        [string[]]$Prompt
+    )
+
+    sw ask $Prompt
+}
 ```
 
 To track API usage and costs, you can check the [OpenAI API Usage](https://platform.openai.com/account/usage) page.
