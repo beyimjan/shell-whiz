@@ -31,8 +31,8 @@ Shell Whiz is designed to work on various platforms and shells, but it is best s
 
 ## Installation and setup
 To install Shell Whiz, run the following command:
-```
-$ pip install shell-whiz
+```bash
+pip install shell-whiz
 ```
 
 This adds the command `sw` to your PATH.
@@ -46,8 +46,8 @@ New users receive $5 for free to try and test the API during the first 3 months.
 
 ## Upgrading
 To upgrade Shell Whiz, run the following command:
-```
-$ pip install --upgrade shell-whiz
+```bash
+pip install --upgrade shell-whiz
 ```
 
 ## Usage
