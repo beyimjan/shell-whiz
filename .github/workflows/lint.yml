@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - pyproject.toml
+      - .flake8
       - 'shell_whiz/**.py'
 
 jobs:
@@ -12,7 +13,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
 
       - name: Cache pip
         uses: actions/cache@v3
