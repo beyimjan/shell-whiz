@@ -1,7 +1,10 @@
 name: Lint Python code
 
 on:
-  - push
+  push:
+    paths:
+      - pyproject.toml
+      - 'shell_whiz/**.py'
 
 jobs:
   lint:
