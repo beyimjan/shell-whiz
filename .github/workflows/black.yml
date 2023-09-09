@@ -1,0 +1,18 @@
+name: Lint Python code
+
+on:
+  - push
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Black
+        uses: psf/black@stable
+        with:
+          options: --check --diff --color --verbose
+          src: ./shell-whiz
+          version: 23.3.0
