@@ -5,6 +5,5 @@ OPENAI_ERROR_EXIT_CODE = 2
 SW_ERROR_EXIT_CODE = 3
 
 SW_WAIT_MSG = "Wait, Shell Whiz is thinking"
-SW_WAIT_MSG_COLOR = "green"
 
 DELIMITER = "####"

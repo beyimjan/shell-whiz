@@ -16,7 +16,6 @@ from shell_whiz.constants import (
     SW_ERROR,
     SW_ERROR_EXIT_CODE,
     SW_WAIT_MSG,
-    SW_WAIT_MSG_COLOR,
 )
 from shell_whiz.exceptions import (
     ShellWhizTranslationError,
