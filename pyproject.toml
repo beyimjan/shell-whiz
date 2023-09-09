@@ -18,7 +18,9 @@ questionary = "^2.0.0"
 sw = "shell_whiz.cli:run"
 
 [tool.poetry.group.dev.dependencies]
-poetry = "^1.5.1"
+poetry = "1.5.1"
+flake8 = "5.0.4"
+black = "23.3.0"
 
 [build-system]
 requires = ["poetry-core"]
