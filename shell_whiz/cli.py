@@ -6,7 +6,6 @@ import questionary
 import openai
 import rich
 from rich.markdown import Markdown
-from yaspin import yaspin
 
 from shell_whiz.argparse import create_argument_parser
 from shell_whiz.config import sw_config, sw_edit_config
@@ -56,7 +55,7 @@ async def shell_whiz_ask(prompt):
     edit_prompt = ""
 
     try:
-        with yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR):
+        with console.status(SW_WAIT_MSG, spinner="dots"):
             shell_command = translate_nl_to_shell_command(prompt)
     except ShellWhizTranslationError:
         rich.print(f"{SW_ERROR}: Shell Whiz doesn't know how to do this.")
@@ -80,7 +79,7 @@ async def shell_whiz_ask(prompt):
         )
 
         try:
-            with yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR):
+            with console.status(SW_WAIT_MSG, spinner="dots"):
                 (
                     is_dangerous,
                     dangerous_consequences,
@@ -93,7 +92,7 @@ async def shell_whiz_ask(prompt):
                 f" [bold red]Warning[/]: [bold yellow]{dangerous_consequences}[/]\n"
             )
 
-        with yaspin(text=SW_WAIT_MSG, color=SW_WAIT_MSG_COLOR):
+        with console.status(SW_WAIT_MSG, spinner="dots"):
             explanation = await explanation_task
 
         print_explanation(explanation)
