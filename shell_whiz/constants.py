@@ -1,3 +1,5 @@
+SW_DESCRIPTION = "Shell Whiz: AI assistant right in your terminal"
+
 SW_ERROR = "[bold yellow]Error[/]"
 
 INV_CLI_ARGS_EXIT_CODE = 1

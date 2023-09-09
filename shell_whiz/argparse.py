@@ -1,9 +1,17 @@
 import argparse
+from importlib.metadata import version
+
+from shell_whiz.constants import SW_DESCRIPTION
 
 
 def create_argument_parser():
-    parser = argparse.ArgumentParser(
-        description="Shell Whiz: AI assistant right in your terminal"
+    parser = argparse.ArgumentParser(description=SW_DESCRIPTION)
+
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"{SW_DESCRIPTION}. Version {version('shell-whiz')}.",
     )
 
     subparsers = parser.add_subparsers(dest="sw_command", required=True)
