@@ -30,7 +30,7 @@ jobs:
         run: poetry install --only dev
 
       - name: Run Black
-        run: black --color --check --diff --verbose shell_whiz
+        run: poetry run black --color --check --diff --verbose shell_whiz
 
       - name: Run Flake8
-        run: flake8 --color always --verbose shell_whiz
+        run: poetry run flake8 --color always --verbose shell_whiz
