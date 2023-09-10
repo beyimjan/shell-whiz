@@ -77,22 +77,27 @@ async def shell_whiz_ask(prompt):
             get_explanation_of_shell_command(shell_command)
         )
 
-        try:
-            with console.status(SW_WAIT_MSG, spinner="dots"):
+        with console.status(SW_WAIT_MSG, spinner="dots"):
+            try:
                 (
                     is_dangerous,
                     dangerous_consequences,
                 ) = recognize_dangerous_command(shell_command)
-        except ShellWhizWarningError:
-            is_dangerous = False
+                if not is_dangerous:
+                    explanation = await explanation_task
+            except ShellWhizWarningError:
+                is_dangerous = False
+                explanation = await explanation_task
 
         if is_dangerous:
             rich.print(
-                f" [bold red]Warning[/]: [bold yellow]{dangerous_consequences}[/]\n"
+                " [bold red]Warning[/]: [bold yellow]{0}[/]\n".format(
+                    dangerous_consequences
+                )
             )
 
-        with console.status(SW_WAIT_MSG, spinner="dots"):
-            explanation = await explanation_task
+            with console.status(SW_WAIT_MSG, spinner="dots"):
+                explanation = await explanation_task
 
         print_explanation(explanation)
 
