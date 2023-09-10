@@ -3,7 +3,7 @@ line-length = 80
 
 [tool.poetry]
 name = "shell-whiz"
-version = "0.4.1"
+version = "0.4.2"
 description = "Shell Whiz: AI assistant right in your terminal"
 license = "GPL-3.0-only"
 authors = ["Tamerlan Bimzhanov <bimzhanovt.net@gmail.com>"]
