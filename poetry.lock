@@ -418,6 +418,23 @@ files = [
 ]
 
 [[package]]
+name = "isort"
+version = "5.11.5"
+description = "A Python utility / library to sort Python imports."
+optional = false
+python-versions = ">=3.7.0"
+files = [
+    {file = "isort-5.11.5-py3-none-any.whl", hash = "sha256:ba1d72fb2595a01c7895a5128f9585a5cc4b6d395f1c8d514989b9a7eb2a8746"},
+    {file = "isort-5.11.5.tar.gz", hash = "sha256:6be1f76a507cb2ecf16c7cf14a37e41609ca082330be4e3436a18ef74add55db"},
+]
+
+[package.extras]
+colors = ["colorama (>=0.4.3,<0.5.0)"]
+pipfile-deprecated-finder = ["pip-shims (>=0.5.2)", "pipreqs", "requirementslib"]
+plugins = ["setuptools"]
+requirements-deprecated-finder = ["pip-api", "pipreqs"]
+
+[[package]]
 name = "jsonschema"
 version = "4.19.0"
 description = "An implementation of JSON Schema validation for Python"
@@ -1035,4 +1052,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9 <4"
-content-hash = "cc4a01f2f9f14635a76031341b0fc03a35dacd48ff1d7cebbbb3dfca081462b8"
+content-hash = "654ba777f9ace523cae792a3abafa4e3a8527d96e471be86cc5d55a0f57174ac"

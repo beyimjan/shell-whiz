@@ -1,6 +1,9 @@
 [tool.black]
 line-length = 80
 
+[tool.isort]
+profile = "black"
+
 [tool.poetry]
 name = "shell-whiz"
 version = "0.4.2"
@@ -23,6 +26,7 @@ sw = "shell_whiz.cli:run"
 [tool.poetry.group.dev.dependencies]
 flake8 = "5.0.4"
 black = "23.3.0"
+isort = "5.11.5"
 
 [build-system]
 requires = ["poetry-core"]

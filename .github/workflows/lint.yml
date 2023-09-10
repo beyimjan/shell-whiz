@@ -41,3 +41,6 @@ jobs:
 
       - name: Run Flake8
         run: poetry run flake8 --color always --verbose shell_whiz
+
+      - name: Run isort
+        run: poetry run isort --color --check --diff --verbose shell_whiz
