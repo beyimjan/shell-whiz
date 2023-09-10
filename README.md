@@ -53,7 +53,7 @@ pip install --upgrade shell-whiz
 ## Usage
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20230910.gif?raw=true"
   />
 </p>
 
@@ -83,17 +83,17 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 ## More examples
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/create_a_4_GB_file_with_random_data.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/create_a_4_GB_file_with_random_data-20230910.gif?raw=true"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/list_processes_sorted_by_memory_usage.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/list_processes_sorted_by_memory_usage-20230910.gif?raw=true"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/most_frequently_modified_files_in_the_repository.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/most_frequently_modified_files_in_the_repository-20230910.gif?raw=true"
   />
 </p>
 
