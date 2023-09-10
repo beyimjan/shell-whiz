@@ -37,12 +37,10 @@ pip install shell-whiz
 
 This will add the `sw` command to your PATH.
 
-To use Shell Whiz, you need an API key from OpenAI. You can obtain this key by visiting https://platform.openai.com/account/api-keys.
-
-Then, run `sw config` to set up the API key.
+To use Shell Whiz, you need an API key from OpenAI. You can obtain this key by visiting https://platform.openai.com/account/api-keys. Then, run `sw config` to set up the API key.
 
 ### Free API plan for new users
-New users receive $5 for free to try and test the API during the first 3 months. However, it is recommended to upgrade to a paid plan in order to have a more comfortable experience using Shell Whiz. This is because the free plan has restrictions on the number of requests allowed per minute.
+New users receive $5 for free to try and test the API during the first 3 months. However, **it is recommended to upgrade to a paid plan in order to have a more comfortable experience using Shell Whiz**. This is because the free plan has restrictions on the number of requests allowed per minute.
 
 ## Upgrading
 To upgrade Shell Whiz, run the following command:
