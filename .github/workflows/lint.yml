@@ -22,6 +22,11 @@ jobs:
           python-version: 3.9
           cache: poetry
 
+      - name: Install dependencies
+        run: |
+          pip install poetry==1.5.1
+          poetry install --only dev
+
       - name: Run Black
         run: black --color --check --diff --verbose shell_whiz
 
