@@ -18,9 +18,11 @@ def create_argument_parser():
 
     subparsers.add_parser("config", help="Configure Shell Whiz")
 
-    ask_parser = subparsers.add_parser("ask", help="Ask Shell Whiz a question")
+    ask_parser = subparsers.add_parser(
+        "ask", help="Ask Shell Whiz for a shell command"
+    )
     ask_parser.add_argument(
-        "prompt", nargs="+", type=str, help="Question to ask Shell Whiz"
+        "prompt", nargs="+", type=str, help="Prompt for Shell Whiz"
     )
 
     return parser
