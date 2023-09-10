@@ -8,6 +8,7 @@ on:
       - pyproject.toml
       - .flake8
       - 'shell_whiz/**.py'
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -16,6 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Poetry
+        run: pip install poetry==1.5.1
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -23,9 +27,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: |
-          pip install poetry==1.5.1
-          poetry install --only dev
+        run: poetry install --only dev
 
       - name: Run Black
         run: black --color --check --diff --verbose shell_whiz
