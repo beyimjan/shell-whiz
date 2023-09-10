@@ -171,6 +171,7 @@ async def get_explanation_of_shell_command(shell_command):
     return get_explanation_of_shell_command_openai(shell_command)
 
 
+# https://platform.openai.com/playground/p/9GjFtlveQhpN1SBciahtNAQf?model=gpt-3.5-turbo
 def edit_shell_command_openai(shell_command, prompt):
     return (
         openai.ChatCompletion.create(
