@@ -16,20 +16,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Cache pip
-        uses: actions/cache@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          path: ~/.cache/pip
-          key: lint-pip-${{ hashFiles('pyproject.toml') }}
+          python-version: 3.9
+          cache: poetry
 
       - name: Run Black
-        uses: psf/black@stable
-        with:
-          options: --check --diff --color --verbose
-          src: shell_whiz
-          version: 23.3.0
+        run: black --color --check --diff --verbose shell_whiz
 
       - name: Run Flake8
-        run: |
-          pip install flake8==5.0.4
-          flake8 --color always --verbose shell_whiz
+        run: flake8 --color always --verbose shell_whiz
