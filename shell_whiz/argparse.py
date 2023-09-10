@@ -22,6 +22,14 @@ def create_argument_parser():
         "ask", help="Ask Shell Whiz for a shell command"
     )
     ask_parser.add_argument(
+        "-m",
+        "--model",
+        type=str,
+        choices=["gpt-3.5-turbo", "gpt-4"],
+        default="gpt-3.5-turbo",
+        help="select the model to use",
+    )
+    ask_parser.add_argument(
         "prompt", nargs="+", type=str, help="Prompt for Shell Whiz"
     )
 

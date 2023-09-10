@@ -1,4 +1,5 @@
 import json
+import os
 
 import jsonschema
 import openai
@@ -16,7 +17,7 @@ from shell_whiz.exceptions import (
 def translate_nl_to_shell_command_openai(prompt):
     return (
         openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=os.environ["SW_MODEL"],
             temperature=0.25,
             max_tokens=256,
             messages=[
@@ -66,7 +67,7 @@ def translate_nl_to_shell_command(prompt):
 def recognize_dangerous_command_openai(shell_command):
     return (
         openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=os.environ["SW_MODEL"],
             temperature=0,
             max_tokens=96,
             messages=[
@@ -123,7 +124,7 @@ def recognize_dangerous_command(shell_command):
 def get_explanation_of_shell_command_openai(shell_command):
     return (
         openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=os.environ["SW_MODEL"],
             temperature=0.1,
             max_tokens=256,
             messages=[
@@ -173,7 +174,7 @@ async def get_explanation_of_shell_command(shell_command):
 def edit_shell_command_openai(shell_command, prompt):
     return (
         openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=os.environ["SW_MODEL"],
             messages=[
                 {
                     "role": "user",

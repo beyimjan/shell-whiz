@@ -1,9 +1,10 @@
 import asyncio
+import os
 import subprocess
 import sys
 
-import questionary
 import openai
+import questionary
 import rich
 from rich.markdown import Markdown
 
@@ -18,15 +19,15 @@ from shell_whiz.constants import (
     SW_WAIT_MSG,
 )
 from shell_whiz.exceptions import (
+    ShellWhizEditError,
     ShellWhizTranslationError,
     ShellWhizWarningError,
-    ShellWhizEditError,
 )
 from shell_whiz.openai import (
+    edit_shell_command,
     get_explanation_of_shell_command,
     recognize_dangerous_command,
     translate_nl_to_shell_command,
-    edit_shell_command,
 )
 
 
@@ -130,12 +131,14 @@ async def shell_whiz_ask(prompt):
 async def run_ai_assistant(args):
     await sw_config()
 
-    if args.sw_command == "ask":
-        shell_command = " ".join(args.prompt).strip()
-        if shell_command == "":
-            rich.print(f"{SW_ERROR}: Please provide a valid prompt.")
-            sys.exit(INV_CLI_ARGS_EXIT_CODE)
-        await shell_whiz_ask(shell_command)
+    os.environ["SW_MODEL"] = args.model
+
+    shell_command = " ".join(args.prompt).strip()
+    if shell_command == "":
+        rich.print(f"{SW_ERROR}: Please provide a valid prompt.")
+        sys.exit(INV_CLI_ARGS_EXIT_CODE)
+
+    await shell_whiz_ask(shell_command)
 
 
 async def main():
