@@ -8,7 +8,6 @@ on:
       - pyproject.toml
       - .flake8
       - 'shell_whiz/**.py'
-  workflow_dispatch:
 
 jobs:
   lint:
