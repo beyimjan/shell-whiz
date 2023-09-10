@@ -19,15 +19,15 @@
   />
 </p>
 
-Shell Whiz will help you generate shell commands from your natural language queries. It is powered by OpenAI's `gpt-3.5-turbo` and is free to use.
+Shell Whiz is an AI assistant for the command line. It will help you find the right command for your task.
 
 ## All features
-- **Pay as you go:** you only pay for what you use; no subscription is required. Just receive an API key from https://platform.openai.com/account/api-keys.
-- **Easy to install:** run `pip install shell-whiz` and you're good to go.
-- **Easy to use:** Shell Whiz is a command-line tool.
+- **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`.
+- **Command explanations:** It will try to explain, piece by piece, what the suggested command will do, so you can learn new things about your shell and the commands you use.
+- **Revisions:** If the suggested command is not exactly what you need, you are on a different platform, or you want to see other options, you can ask for a revision. It will suggest a different command that is similar to the previous one.
 
 ## Supported platforms
-Shell Whiz is designed to work on various platforms and shells, but it is best suited for Bash on Linux. However, it may sometimes suggest commands that are not compatible with your specific platform or terminal.
+Shell Whiz is designed to work on various platforms and shells, but it is best suited for Bash on Linux. However, it may sometimes suggest commands that are not compatible with your specific platform or terminal. If this happens, feel free to request a revision.
 
 ## Installation and setup
 To install Shell Whiz, run the following command:
@@ -35,11 +35,11 @@ To install Shell Whiz, run the following command:
 pip install shell-whiz
 ```
 
-This adds the command `sw` to your PATH.
+This will add the `sw` command to your PATH.
 
-To use Shell Whiz, you need an API key from OpenAI. You can get this key by visiting https://platform.openai.com/account/api-keys.
+To use Shell Whiz, you need an API key from OpenAI. You can obtain this key by visiting https://platform.openai.com/account/api-keys.
 
-Then, run `sw config` to set up your API key.
+Then, run `sw config` to set up the API key.
 
 ### Free API plan for new users
 New users receive $5 for free to try and test the API during the first 3 months. However, it is recommended to upgrade to a paid plan in order to have a more comfortable experience using Shell Whiz. This is because the free plan has restrictions on the number of requests allowed per minute.
