@@ -137,6 +137,7 @@ async def run_ai_assistant(args):
     await sw_config()
 
     os.environ["SW_MODEL"] = args.model
+    os.environ["SW_EXPLAIN_USING_GPT_4"] = str(args.explain_using_gpt_4)
 
     shell_command = " ".join(args.prompt).strip()
     if shell_command == "":

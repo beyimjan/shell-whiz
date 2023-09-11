@@ -30,6 +30,11 @@ def create_argument_parser():
         help="select the model to use",
     )
     ask_parser.add_argument(
+        "--explain-using-gpt-4",
+        action="store_true",
+        help="use GPT-4 to explain",
+    )
+    ask_parser.add_argument(
         "prompt", nargs="+", type=str, help="Prompt for Shell Whiz"
     )
 
