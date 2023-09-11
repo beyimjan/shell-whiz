@@ -35,7 +35,12 @@ def print_explanation(explanation):
     rich.print(
         " ================== [bold green]Explanation[/] =================="
     )
-    console.print(Markdown(explanation))
+
+    if explanation.startswith("*"):
+        console.print(Markdown(explanation))
+    else:
+        print("\n Sorry, I don't know how to explain this command.")
+
     print()
 
 

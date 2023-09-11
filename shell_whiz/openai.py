@@ -126,35 +126,11 @@ def get_explanation_of_shell_command_openai(shell_command):
         openai.ChatCompletion.create(
             model=os.environ["SW_MODEL"],
             temperature=0.1,
-            max_tokens=256,
+            max_tokens=512,
             messages=[
                 {
                     "role": "system",
-                    "content": 'Create a bulleted list that explains, piece by piece, what the command does for advanced users of command line.\n\n* Do not explain basic command line concepts such as pipes, command substitution, variables, etc.\n* When you begin explaining arguments, increase the level of nesting. You can include as many levels as needed for an easy-to-read explanation.\n* Use backticks to indicate code.\n\n* All items in the list must follow the format of "piece" followed by a verb (such as "`^avst$` is a regex that exactly matches \'avst\'" or "`-n +3` displays lines starting from the third line").\n* To make it easier to read and understand, you must limit each line to 45 characters.\n* Use two spaces as indents when specifying different nesting levels in your bulleted list.\n* Only create a bulleted list and use 2 spaces for nesting to make your output easy to read.\n\nStart from the most general description of the overall command and continue by adding more details explaining each argument.',
-                },
-                {
-                    "role": "user",
-                    "content": f"{DELIMITER}\nw | tail -n +3 | cut -d ' ' -f 1 | grep -v ^avst$ | sort -u | wc -l\n{DELIMITER}",
-                },
-                {
-                    "role": "assistant",
-                    "content": "* `w` displays information about currently logged-in users.\n* `| tail -n +3` displays lines starting from the third line.\n* `| cut extracts usernames from the previous command output.\n  * `-d ' '` specifies the delimiter as a space.\n  * `-f 1` selects the first field.\n* `| grep -v ^avst$` excludes username 'avst'.\n    * `-v` inverts the match, so it selects lines that do not match the pattern.\n    * `^avst$` is a regex that exactly matches 'avst'.\n  * `sort -u` sorts the lines in alphabetical order and removes duplicates.\n  * `wc -l` counts the number of lines in the output.",
-                },
-                {
-                    "role": "user",
-                    "content": f"{DELIMITER}\ngit log --name-only --pretty=format: | sort | uniq -c | sort -nr | head\n{DELIMITER}",
-                },
-                {
-                    "role": "assistant",
-                    "content": "* `git log` displays the commit history of a Git repository.\n  * `--name-only` shows only the names of the files that were changed in each commit.\n  * `--pretty=format:` specifies the format of the log output as empty.\n* `| sort` sorts the file names in alphabetical order.\n* `| uniq -c` counts the number of occurrences of each file name.\n* `| sort -nr` sorts the file names in descending order based on the count.\n* `| head` displays the first few lines of the output, which are the files with the highest count.",
-                },
-                {
-                    "role": "user",
-                    "content": f"{DELIMITER}\ndocker stop $(docker ps -a -q)\n{DELIMITER}",
-                },
-                {
-                    "role": "assistant",
-                    "content": "* `docker stop` stops a running container.\n  * `$( ... )` replaces itself with the command output inside.\n    * `docker ps` lists all running containers.\n      * `-a` shows all containers (including stopped ones).\n      * `-q` only displays container IDs.",
+                    "content": "I want you to act as a shell command explainer. Break down each part of the command and explain it in a list format. Use nested bullets for arguments and increase the level of nesting for clarity. Each line should follow the format of 'command piece' followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists all files and directories in the current directory.\n  * `-l` displays files in a long listing format.\n\nFor `cat file | grep \"foo\"`, the explanation would be:\n* `cat file` outputs the content of the file.\n* `| grep \"foo\"` searches for the string \"foo\" in the output of the cat command.\n\n* Don't repeat arguments in the text.\n* Do not explain basic command line concepts like pipes, variables, etc.\n* Increase nesting levels when explaining arguments.\n* Place code segments in backticks.\n* Keep explanations clear and concise (under 45 characters per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can't provide an explanation for a specific shell command or it's not a shell command, simply answer 'N'.",
                 },
                 {
                     "role": "user",
