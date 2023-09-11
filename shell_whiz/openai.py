@@ -73,7 +73,7 @@ def recognize_dangerous_command_openai(shell_command):
             messages=[
                 {
                     "role": "user",
-                    "content": f'Bash command to execute: ####\n{shell_command}\n####\n\nIs this Bash command dangerous to execute?\n\nGenerate a JSON with the required key "dangerous_to_run" (boolean) and the optional key "dangerous_consequences" (explain in simple words, maximum 12 words) if the command is dangerous to execute.\n\nOnly generate JSON to make your output machine readable.',
+                    "content": f'I want you to act as a warning system for dangerous shell commands. I will provide you with the shell command and your job is to take it and reply back with a JSON object. If you deem the command dangerous, please set the "dangerous_to_run" key to "true". If you believe it won\'t pose any imminent danger, set "dangerous_to_run" key to "false". Optionally, you can also include the "dangerous_consequences" key followed by a brief explanation, no more than 12 words, which describes the potential side effects of running the command. This function should be very low sensitive, only mark a command dangerous when it has very serious consequences.\n\nCommand to execute: ####\n{shell_command}\n####',
                 }
             ],
         )
