@@ -67,7 +67,31 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 - If you want to pass an argument that starts with a hyphen, you can use `--` to separate the command from the arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
 - Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
 - Add `--explain-using-gpt-4` to use only the `gpt-4` model for the explanatory part.
-- Use `-n` or `--dont-explain` to disable automatic explanations. You can request an explanation via the menu when the command is suggested.
+- Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
+
+## Comparison of GPT-3.5 Turbo and GPT-4 explanations
+<table>
+  <tr>
+    <td>
+      <img
+        src="https://github.com/beimzhan/shell-whiz/blob/main/examples\files_modified_in_the_last_7_days-20230915-explanation-gpt-3.5-turbo.png?raw=true"
+      />
+    </td>
+    <td>
+      <img
+        src="https://github.com/beimzhan/shell-whiz/blob/main/examples\files_modified_in_the_last_7_days-20230915-explanation-gpt-4.png?raw=true"
+      />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>GPT-3.5 Turbo</b>
+    </td>
+    <td align="center">
+      <b>GPT-4</b>
+    </td>
+  </tr>
+</table>
 
 ## More examples
 <p align="center">
