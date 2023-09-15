@@ -55,10 +55,17 @@ def print_command(shell_command):
     print()
 
 
-async def shell_whiz_ask(prompt):
-    first_run = True
-    edit_prompt = ""
+async def shell_whiz_edit(shell_command, prompt):
+    try:
+        with console.status(SW_WAIT_MSG, spinner="dots"):
+            shell_command = await edit_shell_command(shell_command, prompt)
+    except ShellWhizEditError:
+        pass
 
+    return shell_command
+
+
+async def shell_whiz_ask(prompt):
     try:
         with console.status(SW_WAIT_MSG, spinner="dots"):
             shell_command = translate_nl_to_shell_command(prompt)
@@ -66,16 +73,10 @@ async def shell_whiz_ask(prompt):
         rich.print(f"{SW_ERROR}: Shell Whiz doesn't know how to do this.")
         sys.exit(SW_ERROR_EXIT_CODE)
 
+    edit_prompt = ""
     while True:
-        if first_run:
-            first_run = False
-        elif edit_prompt != "":
-            try:
-                shell_command = await edit_shell_command(
-                    shell_command, edit_prompt
-                )
-            except ShellWhizEditError:
-                pass
+        if edit_prompt != "":
+            shell_command = await shell_whiz_edit(shell_command, edit_prompt)
 
         print_command(shell_command)
 
@@ -108,7 +109,6 @@ async def shell_whiz_ask(prompt):
         print_explanation(explanation)
 
         edit_prompt = ""
-
         choice = await questionary.select(
             "Select an action",
             choices=[
@@ -121,9 +121,11 @@ async def shell_whiz_ask(prompt):
         if choice == "Exit":
             sys.exit()
         elif choice == "Revise query":
-            edit_prompt = await questionary.text(
-                message="Enter your revision"
-            ).unsafe_ask_async()
+            edit_prompt = (
+                await questionary.text(
+                    message="Enter your revision"
+                ).unsafe_ask_async()
+            ).strip()
         elif choice == "Edit manually":
             shell_command = await questionary.text(
                 "Edit command", default=shell_command, multiline=True
