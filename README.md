@@ -61,24 +61,13 @@ You can run Shell Whiz directly using `sw ask`, but I recommend creating an alia
 alias ??='sw ask'
 ```
 
-PowerShell users can create a function in their [PowerShell profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles).
-
-```powershell
-function ?? {
-    param(
-        [string[]]$Prompt
-    )
-
-    sw ask $Prompt
-}
-```
-
 To track API usage and costs, you can check the [OpenAI API Usage](https://platform.openai.com/account/usage) page.
 
 ## Tips
 - If you want to pass an argument that starts with a hyphen, you can use `--` to separate the command from the arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
-- You can use `--model gpt-4` to use the `gpt-4` model instead of the default `gpt-3.5-turbo` model. However, this will cost more and may take longer.
-- You can use `--explain-using-gpt-4` to use the `gpt-4` model for only the explanation part.
+- Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
+- Add `--explain-using-gpt-4` to use only the `gpt-4` model for the explanatory part.
+- Use `-n` or `--dont-explain` to disable automatic explanations. You can request an explanation via the menu when the command is suggested.
 
 ## More examples
 <p align="center">
