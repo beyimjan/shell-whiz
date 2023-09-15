@@ -32,7 +32,7 @@ from shell_whiz.openai import (
 )
 
 
-def print_explanation(explanation, no_newline=False):
+def print_explanation(explanation):
     rich.print(
         " ================== [bold green]Explanation[/] =================="
     )
@@ -42,8 +42,7 @@ def print_explanation(explanation, no_newline=False):
     else:
         print("\n Sorry, I don't know how to explain this command.")
 
-    if not no_newline:
-        print()
+    print()
 
 
 def print_command(shell_command):
@@ -89,7 +88,7 @@ async def shell_whiz_check_danger(shell_command, safe_commmands):
     return is_dangerous, dangerous_consequences
 
 
-async def shell_whiz_ask_menu(args):
+async def shell_whiz_ask_menu_choice(args):
     choices = [
         "Run this command",
         "Revise query",
@@ -107,6 +106,46 @@ async def shell_whiz_ask_menu(args):
     ).unsafe_ask_async()
 
     return choice
+
+
+async def shell_whiz_ask_menu(shell_command, args):
+    while True:
+        choice = await shell_whiz_ask_menu_choice(args)
+
+        if choice == "Exit":
+            sys.exit()
+        elif choice == "Run this command":
+            subprocess.run(shell_command, shell=True)
+            sys.exit()
+        elif choice.startswith("Explain"):
+            explain_using_gpt_4 = (
+                args.explain_using_gpt_4 or choice == "Explain using GPT-4"
+            )
+
+            print()
+            with console.status(SW_EXPLAINING_MSG, spinner="dots"):
+                explanation = await get_explanation_of_shell_command(
+                    shell_command, explain_using_gpt_4
+                )
+            print_explanation(explanation)
+        elif choice == "Revise query":
+            edit_prompt = ""
+            while edit_prompt == "":
+                edit_prompt = (
+                    await questionary.text(
+                        message="Enter your revision"
+                    ).unsafe_ask_async()
+                ).strip()
+            return shell_command, edit_prompt
+        elif choice == "Edit manually":
+            edited_shell_command = ""
+            while edited_shell_command == "":
+                edited_shell_command = (
+                    await questionary.text(
+                        "Edit command", default=shell_command, multiline=True
+                    ).unsafe_ask_async()
+                ).strip()
+            return edited_shell_command, ""
 
 
 async def shell_whiz_ask(prompt, args):
@@ -153,35 +192,9 @@ async def shell_whiz_ask(prompt, args):
 
             print_explanation(explanation)
 
-        edit_prompt = ""
-
-        choice = await shell_whiz_ask_menu(args)
-        if choice == "Exit":
-            sys.exit()
-        elif choice == "Run this command":
-            subprocess.run(shell_command, shell=True)
-            return
-        elif choice.startswith("Explain"):
-            explain_using_gpt_4 = (
-                args.explain_using_gpt_4 or choice == "Explain using GPT-4"
-            )
-
-            print()
-            with console.status(SW_EXPLAINING_MSG, spinner="dots"):
-                explanation = await get_explanation_of_shell_command(
-                    shell_command, explain_using_gpt_4
-                )
-            print_explanation(explanation, no_newline=True)
-        elif choice == "Revise query":
-            edit_prompt = (
-                await questionary.text(
-                    message="Enter your revision"
-                ).unsafe_ask_async()
-            ).strip()
-        elif choice == "Edit manually":
-            shell_command = await questionary.text(
-                "Edit command", default=shell_command, multiline=True
-            ).unsafe_ask_async()
+        shell_command, edit_prompt = await shell_whiz_ask_menu(
+            shell_command, args
+        )
 
 
 async def run_ai_assistant(args):
