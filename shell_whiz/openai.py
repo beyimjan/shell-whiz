@@ -121,8 +121,8 @@ def recognize_dangerous_command(shell_command):
 
 
 # https://platform.openai.com/playground/p/SXqnxM1MPDvywzFUlAjvYNlm?model=gpt-3.5-turbo
-def get_explanation_of_shell_command_openai(shell_command):
-    if os.environ["SW_EXPLAIN_USING_GPT_4"] == "True":
+def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
+    if explain_using_gpt_4:
         model = "gpt-4"
     else:
         model = os.environ["SW_MODEL"]
@@ -148,8 +148,10 @@ def get_explanation_of_shell_command_openai(shell_command):
     )
 
 
-async def get_explanation_of_shell_command(shell_command):
-    return get_explanation_of_shell_command_openai(shell_command)
+async def get_explanation_of_shell_command(shell_command, explain_using_gpt_4):
+    return get_explanation_of_shell_command_openai(
+        shell_command, explain_using_gpt_4
+    )
 
 
 # https://platform.openai.com/playground/p/9GjFtlveQhpN1SBciahtNAQf?model=gpt-3.5-turbo

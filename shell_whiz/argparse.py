@@ -35,6 +35,12 @@ def create_argument_parser():
         help="use GPT-4 to explain",
     )
     ask_parser.add_argument(
+        "-n",
+        "--dont-explain",
+        action="store_true",
+        help="don't explain the command",
+    )
+    ask_parser.add_argument(
         "prompt", nargs="+", type=str, help="Prompt for Shell Whiz"
     )
 

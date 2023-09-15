@@ -16,7 +16,8 @@ from shell_whiz.constants import (
     OPENAI_ERROR_EXIT_CODE,
     SW_ERROR,
     SW_ERROR_EXIT_CODE,
-    SW_WAIT_MSG,
+    SW_EXPLAINING_MSG,
+    SW_THINKING_MSG,
 )
 from shell_whiz.exceptions import (
     ShellWhizEditError,
@@ -31,7 +32,7 @@ from shell_whiz.openai import (
 )
 
 
-def print_explanation(explanation):
+def print_explanation(explanation, no_newline=False):
     rich.print(
         " ================== [bold green]Explanation[/] =================="
     )
@@ -41,7 +42,8 @@ def print_explanation(explanation):
     else:
         print("\n Sorry, I don't know how to explain this command.")
 
-    print()
+    if not no_newline:
+        print()
 
 
 def print_command(shell_command):
@@ -57,7 +59,7 @@ def print_command(shell_command):
 
 async def shell_whiz_edit(shell_command, prompt):
     try:
-        with console.status(SW_WAIT_MSG, spinner="dots"):
+        with console.status(SW_THINKING_MSG, spinner="dots"):
             shell_command = await edit_shell_command(shell_command, prompt)
     except ShellWhizEditError:
         pass
@@ -65,36 +67,74 @@ async def shell_whiz_edit(shell_command, prompt):
     return shell_command
 
 
-async def shell_whiz_ask(prompt):
+async def shell_whiz_check_danger(shell_command, safe_commmands):
+    if shell_command in safe_commmands:
+        return False, None
+
+    with console.status(
+        "Shell Whiz is checking the command for danger...",
+        spinner="dots",
+    ):
+        try:
+            is_dangerous, dangerous_consequences = recognize_dangerous_command(
+                shell_command
+            )
+        except ShellWhizWarningError:
+            is_dangerous = False
+            dangerous_consequences = None
+
+    if not is_dangerous:
+        safe_commmands.append(shell_command)
+
+    return is_dangerous, dangerous_consequences
+
+
+async def shell_whiz_ask_menu(args):
+    choices = [
+        "Run this command",
+        "Revise query",
+        "Edit manually",
+        "Exit",
+    ]
+
+    if args.dont_explain:
+        choices.insert(1, "Explain this command")
+        if os.environ["SW_MODEL"] != "gpt-4" and not args.explain_using_gpt_4:
+            choices.insert(2, "Explain using GPT-4")
+
+    choice = await questionary.select(
+        "Select an action", choices
+    ).unsafe_ask_async()
+
+    return choice
+
+
+async def shell_whiz_ask(prompt, args):
     try:
-        with console.status(SW_WAIT_MSG, spinner="dots"):
+        with console.status(SW_THINKING_MSG, spinner="dots"):
             shell_command = translate_nl_to_shell_command(prompt)
     except ShellWhizTranslationError:
         rich.print(f"{SW_ERROR}: Shell Whiz doesn't know how to do this.")
         sys.exit(SW_ERROR_EXIT_CODE)
 
     edit_prompt = ""
+    safe_commmands = []
     while True:
         if edit_prompt != "":
             shell_command = await shell_whiz_edit(shell_command, edit_prompt)
 
         print_command(shell_command)
 
-        explanation_task = asyncio.create_task(
-            get_explanation_of_shell_command(shell_command)
-        )
+        if not args.dont_explain:
+            explanation_task = asyncio.create_task(
+                get_explanation_of_shell_command(
+                    shell_command, args.explain_using_gpt_4
+                )
+            )
 
-        with console.status(SW_WAIT_MSG, spinner="dots"):
-            try:
-                (
-                    is_dangerous,
-                    dangerous_consequences,
-                ) = recognize_dangerous_command(shell_command)
-                if not is_dangerous:
-                    explanation = await explanation_task
-            except ShellWhizWarningError:
-                is_dangerous = False
-                explanation = await explanation_task
+        is_dangerous, dangerous_consequences = await shell_whiz_check_danger(
+            shell_command, safe_commmands
+        )
 
         if is_dangerous:
             rich.print(
@@ -102,24 +142,36 @@ async def shell_whiz_ask(prompt):
                     dangerous_consequences
                 )
             )
+        elif args.dont_explain:
+            rich.print(
+                " :grinning_face_with_big_eyes: [bold green]Don't worry, this command is pretty safe.[/]\n"
+            )
 
-            with console.status(SW_WAIT_MSG, spinner="dots"):
+        if not args.dont_explain:
+            with console.status(SW_EXPLAINING_MSG, spinner="dots"):
                 explanation = await explanation_task
 
-        print_explanation(explanation)
+            print_explanation(explanation)
 
         edit_prompt = ""
-        choice = await questionary.select(
-            "Select an action",
-            choices=[
-                "Run this command",
-                "Revise query",
-                "Edit manually",
-                "Exit",
-            ],
-        ).unsafe_ask_async()
+
+        choice = await shell_whiz_ask_menu(args)
         if choice == "Exit":
             sys.exit()
+        elif choice == "Run this command":
+            subprocess.run(shell_command, shell=True)
+            return
+        elif choice.startswith("Explain"):
+            explain_using_gpt_4 = (
+                args.explain_using_gpt_4 or choice == "Explain using GPT-4"
+            )
+
+            print()
+            with console.status(SW_EXPLAINING_MSG, spinner="dots"):
+                explanation = await get_explanation_of_shell_command(
+                    shell_command, explain_using_gpt_4
+                )
+            print_explanation(explanation, no_newline=True)
         elif choice == "Revise query":
             edit_prompt = (
                 await questionary.text(
@@ -130,23 +182,19 @@ async def shell_whiz_ask(prompt):
             shell_command = await questionary.text(
                 "Edit command", default=shell_command, multiline=True
             ).unsafe_ask_async()
-        elif choice == "Run this command":
-            subprocess.run(shell_command, shell=True)
-            return
 
 
 async def run_ai_assistant(args):
     await sw_config()
 
     os.environ["SW_MODEL"] = args.model
-    os.environ["SW_EXPLAIN_USING_GPT_4"] = str(args.explain_using_gpt_4)
 
-    shell_command = " ".join(args.prompt).strip()
-    if shell_command == "":
+    prompt = " ".join(args.prompt).strip()
+    if prompt == "":
         rich.print(f"{SW_ERROR}: Please provide a valid prompt.")
         sys.exit(INV_CLI_ARGS_EXIT_CODE)
 
-    await shell_whiz_ask(shell_command)
+    await shell_whiz_ask(prompt, args)
 
 
 async def main():
