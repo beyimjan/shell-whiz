@@ -122,11 +122,12 @@ async def shell_whiz_ask_menu(shell_command, args):
                 args.explain_using_gpt_4 or choice == "Explain using GPT-4"
             )
 
-            print()
             with console.status(SW_EXPLAINING_MSG, spinner="dots"):
                 explanation = await get_explanation_of_shell_command(
                     shell_command, explain_using_gpt_4
                 )
+
+            print()
             print_explanation(explanation)
         elif choice == "Revise query":
             edit_prompt = ""
