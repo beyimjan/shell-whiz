@@ -102,4 +102,4 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 
 ## License
 
-Shell Whiz is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for more information.
+Shell Whiz is licensed under the GNU General Public License v3.0.
