@@ -204,6 +204,7 @@ async def run_ai_assistant(args):
     await sw_config()
 
     os.environ["SW_MODEL"] = args.model
+    os.environ["SW_PREFERENCES"] = args.preferences
 
     prompt = " ".join(args.prompt).strip()
     if prompt == "":

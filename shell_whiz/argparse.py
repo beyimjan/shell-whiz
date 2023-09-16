@@ -22,6 +22,13 @@ def create_argument_parser():
         "ask", help="Ask Shell Whiz for a shell command"
     )
     ask_parser.add_argument(
+        "-p",
+        "--preferences",
+        type=str,
+        default="I usually use Bash on Linux",
+        help="set your preferences (default: %(default)s)",
+    )
+    ask_parser.add_argument(
         "-m",
         "--model",
         type=str,
