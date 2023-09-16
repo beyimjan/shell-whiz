@@ -66,9 +66,10 @@ async def shell_whiz_edit(shell_command, prompt):
     return shell_command
 
 
-async def shell_whiz_check_danger(shell_command, safe_commmands):
-    if shell_command in safe_commmands:
-        return False, None
+async def shell_whiz_check_danger(shell_command, sc_safety_table):
+    for sc in sc_safety_table:
+        if shell_command == sc[0]:
+            return sc[1], sc[2]
 
     with console.status(
         "Shell Whiz is checking the command for danger...",
@@ -82,8 +83,9 @@ async def shell_whiz_check_danger(shell_command, safe_commmands):
             is_dangerous = False
             dangerous_consequences = None
 
-    if not is_dangerous:
-        safe_commmands.append(shell_command)
+    sc_safety_table.append(
+        (shell_command, is_dangerous, dangerous_consequences)
+    )
 
     return is_dangerous, dangerous_consequences
 
@@ -158,14 +160,13 @@ async def shell_whiz_ask(prompt, args):
         sys.exit(SW_ERROR_EXIT_CODE)
 
     edit_prompt = ""
-    safe_commmands = []
+    sc_safety_table = []
     while True:
         if edit_prompt != "":
             shell_command = await shell_whiz_edit(shell_command, edit_prompt)
 
-        print_command(shell_command)
-
         if not args.dont_explain:
+            print_command(shell_command)
             explanation_task = asyncio.create_task(
                 get_explanation_of_shell_command(
                     shell_command, args.explain_using_gpt_4
@@ -173,18 +174,17 @@ async def shell_whiz_ask(prompt, args):
             )
 
         is_dangerous, dangerous_consequences = await shell_whiz_check_danger(
-            shell_command, safe_commmands
+            shell_command, sc_safety_table
         )
+
+        if args.dont_explain:
+            print_command(shell_command)
 
         if is_dangerous:
             rich.print(
                 " [bold red]Warning[/]: [bold yellow]{0}[/]\n".format(
                     dangerous_consequences
                 )
-            )
-        elif args.dont_explain:
-            rich.print(
-                " :grinning_face_with_big_eyes: [bold green]Don't worry, this command is pretty safe.[/]\n"
             )
 
         if not args.dont_explain:
