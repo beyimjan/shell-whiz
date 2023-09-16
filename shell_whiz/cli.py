@@ -145,7 +145,9 @@ async def shell_whiz_ask_menu(shell_command, args):
             while edited_shell_command == "":
                 edited_shell_command = (
                     await questionary.text(
-                        "Edit command", default=shell_command, multiline=True
+                        "Edit command",
+                        default=shell_command,
+                        multiline="\n" in shell_command,
                     ).unsafe_ask_async()
                 ).strip()
             return edited_shell_command, ""
