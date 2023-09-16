@@ -23,7 +23,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 
 ## All features
 
-- **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`.
+- **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`, which will print the last modification time of the file.
 - **Command explanations:** It will try to explain, piece by piece, what the suggested command will do, so you can learn new things about your shell and the commands you use.
 - **Revisions:** If the suggested command is not exactly what you need, you are on a different platform, or you want to see other options, you can ask for a revision. It will suggest a different command that is similar to the previous one.
 
