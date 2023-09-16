@@ -217,6 +217,12 @@ async def run_ai_assistant(args):
 async def main():
     args = create_argument_parser().parse_args()
 
+    if not sys.stdin.isatty() or not sys.stdout.isatty():
+        rich.print(
+            f"{SW_ERROR}: Shell Whiz cannot run in non-interactive mode."
+        )
+        sys.exit(SW_ERROR_EXIT_CODE)
+
     if args.sw_command == "config":
         await sw_edit_config()
     elif args.sw_command == "ask":
