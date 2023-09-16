@@ -28,10 +28,6 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 - **Revisions:** If the suggested command is not exactly what you need, you are on a different platform, or you want to see other options, you can ask for a revision. It will suggest a different command that is similar to the previous one.
 - **Customization:** You can customize the behavior of Shell Whiz by using command line arguments. For example, you can set PowerShell as your shell, disable automatic explanations, or use the `gpt-4` model instead of the default `gpt-3.5-turbo` model.
 
-## Supported platforms
-
-Shell Whiz is designed to work on various platforms and shells, but it is best suited for Bash on Linux. However, it may sometimes suggest commands that are not compatible with your specific platform or terminal. If this happens, feel free to request a revision.
-
 ## Installation and setup
 
 To install Shell Whiz, run the following command:
@@ -89,6 +85,11 @@ The original author of the program usually uses `alias ??='sw ask -n --'` becaus
 <p align="center">
   <img
     src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_open_ports-20230916.png"
+  />
+</p>
+<p align="center">
+  <img
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/set_environment_variable-20230916.png"
   />
 </p>
 
