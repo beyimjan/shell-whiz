@@ -218,9 +218,13 @@ async def main():
     args = create_argument_parser().parse_args()
 
     if not sys.stdin.isatty() or not sys.stdout.isatty():
-        rich.print(
-            f"{SW_ERROR}: Shell Whiz cannot run in non-interactive mode."
-        )
+        try:
+            rich.print(
+                f"{SW_ERROR}: Shell Whiz cannot run in non-interactive mode."
+            )
+        except BrokenPipeError:
+            pass
+
         sys.exit(SW_ERROR_EXIT_CODE)
 
     if args.sw_command == "config":
