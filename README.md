@@ -26,6 +26,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 - **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`, which will print the last modification time of the file.
 - **Command explanations:** It will try to explain, piece by piece, what the suggested command will do, so you can learn new things about your shell and the commands you use.
 - **Revisions:** If the suggested command is not exactly what you need, you are on a different platform, or you want to see other options, you can ask for a revision. It will suggest a different command that is similar to the previous one.
+- **Customization:** You can customize the behavior of Shell Whiz by using command line arguments. For example, you can set PowerShell as your shell, disable automatic explanations, or use the `gpt-4` model instead of the default `gpt-3.5-turbo` model.
 
 ## Supported platforms
 
@@ -81,8 +82,15 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 - Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
 - Add `--explain-using-gpt-4` to use the `gpt-4` model for the explanatory part.
 - Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
+- Pass `-p "..."` or `--preferences "..."` to set preferences for generating commands. This is most useful for setting the shell, but can be used to set any other preferences as well. For example, `sw ask -p "I ussually use PowerShell"` will generate commands that work in PowerShell. By default, this parameter is set to `I ussually use Bash on Linux`.
 
 The original author of the program usually uses `alias ??='sw ask -n --'` because he has a good understanding of the command line, but if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu. You can choose the settings that work best for you.
+
+<p align="center">
+  <img
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples\list_open_ports-20230916.png?raw=true"
+  />
+</p>
 
 ## More examples
 
