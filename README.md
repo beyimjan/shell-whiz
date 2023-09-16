@@ -82,7 +82,7 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 - Add `--explain-using-gpt-4` to use the `gpt-4` model for the explanatory part.
 - Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
 
-The original author of the program usually uses `alias ??='sw ask -n --'--'` because he has a good understanding of the command line, but if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu. You can choose the settings that work best for you.
+The original author of the program usually uses `alias ??='sw ask -n --'` because he has a good understanding of the command line, but if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu. You can choose the settings that work best for you.
 
 ## More examples
 
