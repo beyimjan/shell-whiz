@@ -88,7 +88,7 @@ The original author of the program usually uses `alias ??='sw ask -n --'` becaus
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples\list_open_ports-20230916.png?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples\list_open_ports-20230916.png"
   />
 </p>
 
