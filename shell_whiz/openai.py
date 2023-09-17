@@ -11,7 +11,14 @@ from shell_whiz.exceptions import (
     ShellWhizTranslationError,
     ShellWhizWarningError,
 )
-from shell_whiz.jsonschemas import translation_json_schema
+from shell_whiz.jsonschemas import (
+    dangerous_command_json_schema,
+    translation_json_schema,
+)
+
+
+def get_my_command_line_preferences():
+    return f"These are my command line preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}"
 
 
 def translate_nl_to_shell_command_openai(prompt):
@@ -22,17 +29,14 @@ def translate_nl_to_shell_command_openai(prompt):
         messages=[
             {
                 "role": "user",
-                "content": f"These are my command line preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}\n\n{prompt}",
+                "content": f"{get_my_command_line_preferences()}\n\n{prompt}",
             }
         ],
         functions=[
             {
                 "name": "perform_task_in_command_line",
                 "description": "Perform a task in the command line",
-                "parameters": {
-                    "type": "object",
-                    "properties": translation_json_schema,
-                },
+                "parameters": translation_json_schema,
             }
         ],
         function_call={"name": "perform_task_in_command_line"},
@@ -63,35 +67,29 @@ def translate_nl_to_shell_command(prompt):
     return shell_command
 
 
-# https://platform.openai.com/playground/p/H3HMz4fgnQQUTT6PI17qDtzQ?model=gpt-3.5-turbo
 def recognize_dangerous_command_openai(shell_command):
-    return (
-        openai.ChatCompletion.create(
-            model=os.environ["SW_MODEL"],
-            temperature=0,
-            max_tokens=96,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f'I want you to act as a warning system for dangerous shell commands. I will provide you with the shell command and your job is to take it and reply back with a JSON object. If you deem the command dangerous, please set the "dangerous_to_run" key to "true". If you believe it won\'t pose any imminent danger, set "dangerous_to_run" key to "false". Optionally, you can also include the "dangerous_consequences" key followed by a brief explanation, no more than 12 words, which describes the potential side effects of running the command. This function should be very low sensitive, only mark a command dangerous when it has very serious consequences.\n\nCommand to execute: ####\n{shell_command}\n####',
-                }
-            ],
-        )
-        .choices[0]
-        .message["content"]
-    )
+    return openai.ChatCompletion.create(
+        model=os.environ["SW_MODEL"],
+        temperature=0,
+        max_tokens=96,
+        messages=[
+            {
+                "role": "user",
+                "content": f"{get_my_command_line_preferences()}\n\nI want to run this command: {DELIMITER}\n{shell_command}\n{DELIMITER}",
+            },
+        ],
+        functions=[
+            {
+                "name": "recognize_dangerous_command",
+                "description": "Recognize a dangerous shell command. This function should be very low sensitive, only mark a command dangerous when it has very serious consequences.",
+                "parameters": dangerous_command_json_schema,
+            }
+        ],
+        function_call={"name": "recognize_dangerous_command"},
+    ).choices[0]["message"]["function_call"]["arguments"]
 
 
 def recognize_dangerous_command(shell_command):
-    dangerous_command_json_schema = {
-        "type": "object",
-        "properties": {
-            "dangerous_to_run": {"type": "boolean"},
-            "dangerous_consequences": {"type": "string"},
-        },
-        "required": ["dangerous_to_run"],
-    }
-
     dangerous_command = recognize_dangerous_command_openai(shell_command)
 
     try:
