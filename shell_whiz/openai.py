@@ -11,38 +11,35 @@ from shell_whiz.exceptions import (
     ShellWhizTranslationError,
     ShellWhizWarningError,
 )
+from shell_whiz.jsonschemas import translation_json_schema
 
 
-# https://platform.openai.com/playground/p/FdYUdbAGL530Lfh5VesLlVD8?model=gpt-3.5-turbo
 def translate_nl_to_shell_command_openai(prompt):
-    return (
-        openai.ChatCompletion.create(
-            model=os.environ["SW_MODEL"],
-            temperature=0.25,
-            max_tokens=256,
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"I want you to act as an artificial intelligence assistant specifically for command-line inquiries. Whenever I pose a problem, your responsibility is to provide a ready-to-run shell command that could solve it. The response must be formatted in JSON where the key is shell_command. If the query falls outside of this designated scope, you should reply with an empty JSON object.\n\nQueries will be separated by {DELIMITER} characters.\n\n## PERSONALIZATION\nIn addition, I would like to set my default shell and add my preferences to your functions. This should reflect in your responses, taking into account my usually used commands and preferred shell environments.\n\n```\n{os.environ['SW_PREFERENCES']}\n```\n\n## END",
+    return openai.ChatCompletion.create(
+        model=os.environ["SW_MODEL"],
+        temperature=0.25,
+        max_tokens=256,
+        messages=[
+            {
+                "role": "user",
+                "content": f"These are my command line preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}\n\n{prompt}",
+            }
+        ],
+        functions=[
+            {
+                "name": "perform_task_in_command_line",
+                "description": "Perform a task in the command line",
+                "parameters": {
+                    "type": "object",
+                    "properties": translation_json_schema,
                 },
-                {
-                    "role": "user",
-                    "content": f"{DELIMITER}\n{prompt}\n{DELIMITER}",
-                },
-            ],
-        )
-        .choices[0]
-        .message["content"]
-    )
+            }
+        ],
+        function_call={"name": "perform_task_in_command_line"},
+    ).choices[0]["message"]["function_call"]["arguments"]
 
 
 def translate_nl_to_shell_command(prompt):
-    translation_json_schema = {
-        "type": "object",
-        "properties": {"shell_command": {"type": "string"}},
-        "required": ["shell_command"],
-    }
-
     translation = translate_nl_to_shell_command_openai(prompt)
 
     try:
@@ -56,9 +53,12 @@ def translate_nl_to_shell_command(prompt):
         raise ShellWhizTranslationError("Generated JSON is not valid.")
 
     shell_command = translation_json.get("shell_command", "").strip()
+    invalid_request = translation_json.get("invalid_request", False)
 
     if shell_command == "":
         raise ShellWhizTranslationError("Extracted shell command is empty.")
+    elif invalid_request:
+        raise ShellWhizTranslationError("Invalid request.")
 
     return shell_command
 
