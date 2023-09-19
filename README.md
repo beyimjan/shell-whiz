@@ -78,6 +78,7 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 - Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
 - Add `--explain-using-gpt-4` to use the `gpt-4` model for the explanatory part.
 - Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
+- Use `--dont-warn` to disable automatic warnings.
 - Pass `-p "..."` or `--preferences "..."` to set preferences for generating commands. This is most useful for setting the shell, but can be used to set any other preferences as well. For example, `sw ask -p "I ussually use PowerShell"` will generate commands that work in PowerShell. By default, this parameter is set to `I ussually use Bash on Linux`.
 
 The original author of the program usually uses `alias ??='sw ask -n --'` because he has a good understanding of the command line, but if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu. You can choose the settings that work best for you.

@@ -174,14 +174,16 @@ async def shell_whiz_ask(prompt, args):
                 )
             )
 
-        is_dangerous, dangerous_consequences = await shell_whiz_check_danger(
-            shell_command, sc_safety_table
-        )
+        if not args.dont_warn:
+            (
+                is_dangerous,
+                dangerous_consequences,
+            ) = await shell_whiz_check_danger(shell_command, sc_safety_table)
 
         if args.dont_explain:
             print_command(shell_command)
 
-        if is_dangerous:
+        if not args.dont_warn and is_dangerous:
             rich.print(
                 " [bold red]Warning[/]: [bold yellow]{0}[/]\n".format(
                     dangerous_consequences
