@@ -12,7 +12,6 @@ translation_json_schema = {
     },
 }
 
-
 dangerous_command_json_schema = {
     "type": "object",
     "properties": {
