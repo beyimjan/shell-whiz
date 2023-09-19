@@ -161,7 +161,7 @@ def edit_shell_command_openai(shell_command, prompt):
             messages=[
                 {
                     "role": "user",
-                    "content": f"Shell command to edit: ####\n{shell_command}\n####\n\nUser prompt to edit this shell command: ####\n{prompt}\n####\n\nEdit the command according to the user's prompt and generate a JSON object with one key \"edited_shell_command\". If you can't edit the command as requested, output an empty JSON object.\n\nOnly generate JSON to make your output machine readable.",
+                    "content": f"Shell command to edit: {DELIMITER}\n{shell_command}\n{DELIMITER}\n\nUser prompt to edit this shell command: {DELIMITER}\n{prompt}\n{DELIMITER}\n\nEdit the command according to the user's prompt and generate a JSON object with one key \"edited_shell_command\". If you can't edit the command as requested, output an empty JSON object.\n\nOnly generate JSON to make your output machine readable.",
                 }
             ],
             temperature=0.2,
