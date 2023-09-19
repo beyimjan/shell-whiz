@@ -100,7 +100,7 @@ async def shell_whiz_ask_menu_choice(args):
 
     if args.dont_explain:
         choices.insert(1, "Explain this command")
-        if args.explain_using_gpt_4:
+        if not args.explain_using_gpt_4:
             choices.insert(2, "Explain using GPT-4")
     elif not args.explain_using_gpt_4:
         choices.insert(1, "Explain using GPT-4")
@@ -122,13 +122,9 @@ async def shell_whiz_ask_menu(shell_command, args):
             subprocess.run(shell_command, shell=True)
             sys.exit()
         elif choice.startswith("Explain"):
-            explain_using_gpt_4 = (
-                args.explain_using_gpt_4 or choice == "Explain using GPT-4"
-            )
-
             with console.status(SW_EXPLAINING_MSG, spinner="dots"):
                 explanation = await get_explanation_of_shell_command(
-                    shell_command, explain_using_gpt_4
+                    shell_command, args.explain_using_gpt_4
                 )
 
             print()
