@@ -118,32 +118,34 @@ def recognize_dangerous_command(shell_command):
     return is_dangerous, dangerous_consequences
 
 
-# https://platform.openai.com/playground/p/SXqnxM1MPDvywzFUlAjvYNlm?model=gpt-3.5-turbo
 def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
-    if explain_using_gpt_4:
-        model = "gpt-4"
-    else:
-        model = os.environ["SW_MODEL"]
+    prompt = f'Break down each part of the command and explain it in a list format. Each line should follow the format of \'command piece\' followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists all files and directories in the current directory.\n  * `-l` displays files in a long listing format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` outputs the content of the file.\n* `| grep "foo"` searches for the string "foo" in the output of the cat command.\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear and concise (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\nShell command: {DELIMITER}\n{shell_command}\n{DELIMITER}'
 
-    return (
-        openai.ChatCompletion.create(
-            model=model,
-            temperature=0.1,
-            max_tokens=512,
-            messages=[
-                {
-                    "role": "system",
-                    "content": 'Break down each part of the command and explain it in a list format. Use nested bullets for arguments and increase the level of nesting for clarity. Each line should follow the format of \'command piece\' followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists all files and directories in the current directory.\n  * `-l` displays files in a long listing format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` outputs the content of the file.\n* `| grep "foo"` searches for the string "foo" in the output of the cat command.\n\n* Don\'t repeat arguments in the text.\n* Never explain basic command line concepts like pipes, variables, etc.\n* Increase nesting levels when explaining arguments.\n* Place code segments in backticks.\n* Keep explanations clear and concise (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.',
-                },
-                {
-                    "role": "user",
-                    "content": f"{DELIMITER}\n{shell_command}\n{DELIMITER}",
-                },
-            ],
+    temperature = 0.1
+    max_tokens = 512
+
+    if explain_using_gpt_4:
+        return (
+            openai.ChatCompletion.create(
+                model="gpt-4",
+                temperature=temperature,
+                max_tokens=max_tokens,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            .choices[0]
+            .message["content"]
         )
-        .choices[0]
-        .message["content"]
-    )
+    else:
+        return (
+            openai.Completion.create(
+                model="gpt-3.5-turbo-instruct",
+                temperature=temperature,
+                max_tokens=max_tokens,
+                prompt=prompt,
+            )
+            .choices[0]
+            .text.strip()
+        )
 
 
 async def get_explanation_of_shell_command(shell_command, explain_using_gpt_4):
@@ -152,7 +154,6 @@ async def get_explanation_of_shell_command(shell_command, explain_using_gpt_4):
     )
 
 
-# https://platform.openai.com/playground/p/9GjFtlveQhpN1SBciahtNAQf?model=gpt-3.5-turbo
 def edit_shell_command_openai(shell_command, prompt):
     return (
         openai.ChatCompletion.create(
