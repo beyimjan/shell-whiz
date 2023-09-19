@@ -100,8 +100,10 @@ async def shell_whiz_ask_menu_choice(args):
 
     if args.dont_explain:
         choices.insert(1, "Explain this command")
-        if os.environ["SW_MODEL"] != "gpt-4" and not args.explain_using_gpt_4:
+        if args.explain_using_gpt_4:
             choices.insert(2, "Explain using GPT-4")
+    elif not args.explain_using_gpt_4:
+        choices.insert(1, "Explain using GPT-4")
 
     choice = await questionary.select(
         "Select an action", choices
@@ -205,6 +207,9 @@ async def run_ai_assistant(args):
 
     os.environ["SW_MODEL"] = args.model
     os.environ["SW_PREFERENCES"] = args.preferences
+
+    if args.model == "gpt-4":
+        args.explain_using_gpt_4 = True
 
     prompt = " ".join(args.prompt).strip()
     if prompt == "":
