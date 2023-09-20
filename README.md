@@ -95,6 +95,11 @@ You can choose the settings that work best for you.
     src="https://github.com/beimzhan/shell-whiz/raw/main/examples/set_environment_variable-20230916.png"
   />
 </p>
+<p align="center">
+  <img
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/closed_issues_on_beimzhan_shell_whiz-20230920.png"
+  />
+</p>
 
 ## More examples
 
