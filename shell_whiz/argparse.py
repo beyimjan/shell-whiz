@@ -53,6 +53,12 @@ def create_argument_parser():
         help="don't warn about dangerous commands",
     )
     ask_parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="don't show the menu, end immediately",
+    )
+    ask_parser.add_argument(
         "prompt", nargs="+", type=str, help="Prompt for Shell Whiz"
     )
 

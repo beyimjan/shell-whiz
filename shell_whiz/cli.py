@@ -196,6 +196,9 @@ async def shell_whiz_ask(prompt, args):
 
             print_explanation(explanation)
 
+        if args.quiet:
+            break
+
         shell_command, edit_prompt = await shell_whiz_ask_menu(
             shell_command, args
         )

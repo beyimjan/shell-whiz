@@ -80,6 +80,7 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 - Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
 - Use `--dont-warn` to disable automatic warnings.
 - Pass `-p "..."` or `--preferences "..."` to set preferences for generating commands. This is most useful for setting the shell, but can be used to set any other preferences as well. For example, `sw ask -p "I ussually use PowerShell"` will generate commands that work in PowerShell. By default, this parameter is set to `I ussually use Bash on Linux`.
+- Add `-q` or `--quiet` to not show the menu and end immediately.
 
 The original author of the program usually uses `alias ??='sw ask --dont-warn -n --'` because he has a good understanding of the command line and knows about dangerous commands. However, if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu.
 
