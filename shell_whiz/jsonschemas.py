@@ -7,7 +7,7 @@ translation_json_schema = {
         },
         "invalid_request": {
             "type": "boolean",
-            "description": "Set to true if you cannot perform the task in the command line for any reason",
+            "description": "Set to true if it is not possible to perform the task in the command line",
         },
     },
 }
