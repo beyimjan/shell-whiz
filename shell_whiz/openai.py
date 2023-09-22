@@ -57,12 +57,9 @@ def translate_nl_to_shell_command(prompt):
         raise ShellWhizTranslationError("Generated JSON is not valid.")
 
     shell_command = translation_json.get("shell_command", "").strip()
-    invalid_request = translation_json.get("invalid_request", False)
 
     if shell_command == "":
         raise ShellWhizTranslationError("Extracted shell command is empty.")
-    elif invalid_request:
-        raise ShellWhizTranslationError("Invalid request.")
 
     return shell_command
 

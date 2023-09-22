@@ -3,13 +3,10 @@ translation_json_schema = {
     "properties": {
         "shell_command": {
             "type": "string",
-            "description": "Shell command to perform the task",
-        },
-        "invalid_request": {
-            "type": "boolean",
-            "description": "Set to true if it is not possible to perform the task in the command line",
-        },
+            "description": "Shell command to perform the task, leave blank if it is not possible to perform the task in the command line",
+        }
     },
+    "required": ["shell_command"],
 }
 
 dangerous_command_json_schema = {
