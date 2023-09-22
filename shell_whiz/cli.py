@@ -40,7 +40,9 @@ def print_explanation(explanation):
     if explanation.startswith("*"):
         console.print(Markdown(explanation))
     else:
-        print("\n Sorry, I don't know how to explain this command.")
+        rich.print(
+            f"\n {SW_ERROR}: Sorry, I don't know how to explain this command."
+        )
 
     print()
 
@@ -61,7 +63,9 @@ async def shell_whiz_edit(shell_command, prompt):
         with console.status(SW_THINKING_MSG, spinner="dots"):
             shell_command = await edit_shell_command(shell_command, prompt)
     except ShellWhizEditError:
-        pass
+        rich.print(
+            f"\n {SW_ERROR}: Sorry, I couldn't edit the command. I left it unchanged."
+        )
 
     return shell_command
 
@@ -157,7 +161,7 @@ async def shell_whiz_ask(prompt, args):
         with console.status(SW_THINKING_MSG, spinner="dots"):
             shell_command = translate_nl_to_shell_command(prompt)
     except ShellWhizTranslationError:
-        rich.print(f"{SW_ERROR}: Shell Whiz doesn't know how to do this.")
+        rich.print(f"{SW_ERROR}: Sorry, I don't know how to do this.")
         sys.exit(SW_ERROR_EXIT_CODE)
 
     edit_prompt = ""
