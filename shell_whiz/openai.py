@@ -13,8 +13,8 @@ from shell_whiz.exceptions import (
 )
 from shell_whiz.jsonschemas import (
     dangerous_command_json_schema,
-    translation_json_schema,
     edited_shell_command_json_schema,
+    translation_json_schema,
 )
 
 
@@ -139,6 +139,7 @@ def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
                 model="gpt-3.5-turbo-instruct",
                 temperature=temperature,
                 max_tokens=max_tokens,
+                stop=["Shell"],
                 prompt=prompt,
             )
             .choices[0]
