@@ -20,3 +20,14 @@ dangerous_command_json_schema = {
     },
     "required": ["dangerous_to_run"],
 }
+
+edited_shell_command_json_schema = {
+    "type": "object",
+    "properties": {
+        "edited_shell_command": {
+            "type": "string",
+            "description": "Edited shell command, leave blank if it is not possible to edit the shell command",
+        }
+    },
+    "required": ["edited_shell_command"],
+}
