@@ -17,8 +17,8 @@ from shell_whiz.jsonschemas import (
 )
 
 
-def get_my_command_line_preferences():
-    return f"These are my command line preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}"
+def get_my_preferences():
+    return f"These are my preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}"
 
 
 def translate_nl_to_shell_command_openai(prompt):
@@ -29,7 +29,7 @@ def translate_nl_to_shell_command_openai(prompt):
         messages=[
             {
                 "role": "user",
-                "content": f"{get_my_command_line_preferences()}\n\n{prompt}",
+                "content": f"{get_my_preferences()}\n\n{prompt}",
             }
         ],
         functions=[
@@ -75,7 +75,7 @@ def recognize_dangerous_command_openai(shell_command):
         messages=[
             {
                 "role": "user",
-                "content": f"{get_my_command_line_preferences()}\n\nI want to run this command: {DELIMITER}\n{shell_command}\n{DELIMITER}",
+                "content": f"{get_my_preferences()}\n\nI want to run this command: {DELIMITER}\n{shell_command}\n{DELIMITER}",
             },
         ],
         functions=[
@@ -119,7 +119,7 @@ def recognize_dangerous_command(shell_command):
 
 
 def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
-    prompt = f'Break down each part of the command and explain it in a list format. Each line should follow the format of \'command piece\' followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists all files and directories in the current directory.\n  * `-l` displays files in a long listing format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` outputs the content of the file.\n* `| grep "foo"` searches for the string "foo" in the output of the cat command.\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\nShell command: {DELIMITER}\n{shell_command}\n{DELIMITER}'
+    prompt = f'Break down each part of the command and explain it in a list format. Each line should follow the format of \'command piece\' followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists all files and directories in the current directory.\n  * `-l` displays files in a long listing format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` outputs the content of the file.\n* `| grep "foo"` searches for the string "foo" in the output of the cat command.\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{get_my_preferences()}\n\nShell command: {DELIMITER}\n{shell_command}\n{DELIMITER}'
 
     temperature = 0.1
     max_tokens = 512
