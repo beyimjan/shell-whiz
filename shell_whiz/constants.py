@@ -1,4 +1,4 @@
-SW_DESCRIPTION = "Shell Whiz: AI assistant right in your terminal"
+SW_DESCRIPTION = "Shell Whiz: AI assistant for command line"
 
 SW_ERROR = "[bold yellow]Error[/]"
 
