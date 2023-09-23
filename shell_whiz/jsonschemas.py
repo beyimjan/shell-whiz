@@ -1,4 +1,4 @@
-translation_json_schema = {
+translation_jsonschema = {
     "type": "object",
     "properties": {
         "shell_command": {
@@ -9,7 +9,7 @@ translation_json_schema = {
     "required": ["shell_command"],
 }
 
-dangerous_command_json_schema = {
+dangerous_command_jsonschema = {
     "type": "object",
     "properties": {
         "dangerous_to_run": {"type": "boolean"},
@@ -21,7 +21,7 @@ dangerous_command_json_schema = {
     "required": ["dangerous_to_run"],
 }
 
-edited_shell_command_json_schema = {
+edited_shell_command_jsonschema = {
     "type": "object",
     "properties": {
         "edited_shell_command": {

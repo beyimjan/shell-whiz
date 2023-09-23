@@ -12,9 +12,9 @@ from shell_whiz.exceptions import (
     ShellWhizWarningError,
 )
 from shell_whiz.jsonschemas import (
-    dangerous_command_json_schema,
-    edited_shell_command_json_schema,
-    translation_json_schema,
+    dangerous_command_jsonschema,
+    edited_shell_command_jsonschema,
+    translation_jsonschema,
 )
 
 
@@ -37,7 +37,7 @@ def translate_nl_to_shell_command_openai(prompt):
             {
                 "name": "perform_task_in_command_line",
                 "description": "Perform a task in the command line",
-                "parameters": translation_json_schema,
+                "parameters": translation_jsonschema,
             }
         ],
         function_call={"name": "perform_task_in_command_line"},
@@ -53,7 +53,7 @@ def translate_nl_to_shell_command(prompt):
         raise ShellWhizTranslationError("Could not extract JSON.")
 
     try:
-        validate(instance=translation_json, schema=translation_json_schema)
+        validate(instance=translation_json, schema=translation_jsonschema)
     except jsonschema.ValidationError:
         raise ShellWhizTranslationError("Generated JSON is not valid.")
 
@@ -80,7 +80,7 @@ def recognize_dangerous_command_openai(shell_command):
             {
                 "name": "recognize_dangerous_command",
                 "description": "Recognize a dangerous shell command. This function should be very low sensitive, only mark a command dangerous when it has very serious consequences.",
-                "parameters": dangerous_command_json_schema,
+                "parameters": dangerous_command_jsonschema,
             }
         ],
         function_call={"name": "recognize_dangerous_command"},
@@ -98,7 +98,7 @@ def recognize_dangerous_command(shell_command):
     try:
         validate(
             instance=dangerous_command_json,
-            schema=dangerous_command_json_schema,
+            schema=dangerous_command_jsonschema,
         )
     except jsonschema.ValidationError:
         raise ShellWhizWarningError("Generated JSON is not valid.")
@@ -168,7 +168,7 @@ def edit_shell_command_openai(shell_command, prompt):
             {
                 "name": "edit_shell_command",
                 "description": "Edit a shell command, according to the prompt",
-                "parameters": edited_shell_command_json_schema,
+                "parameters": edited_shell_command_jsonschema,
             }
         ],
         function_call={"name": "edit_shell_command"},
@@ -186,7 +186,7 @@ async def edit_shell_command(shell_command, prompt):
     try:
         validate(
             instance=edited_shell_command_json,
-            schema=edited_shell_command_json_schema,
+            schema=edited_shell_command_jsonschema,
         )
     except jsonschema.ValidationError:
         raise ShellWhizEditError("Generated JSON is not valid.")
