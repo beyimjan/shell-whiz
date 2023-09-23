@@ -60,7 +60,7 @@ pip install --upgrade shell-whiz
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20230915.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20230924.gif?raw=true"
   />
 </p>
 
@@ -103,17 +103,17 @@ You can choose the settings that work best for you.
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_open_ports-20230916.png"
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_open_ports-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/set_environment_variable-20230916.png"
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/set_environment_variable-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/closed_issues_on_beimzhan_shell_whiz-20230920.png"
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/closed_issues_in_beimzhan_shell_whiz-20230924.png"
   />
 </p>
 
@@ -121,17 +121,17 @@ You can choose the settings that work best for you.
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/create_a_4_GB_file_with_random_data-20230915.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/create_a_4_GB_file_with_random_data-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/list_processes_sorted_by_memory_usage-20230915.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_processes_sorted_by_memory_usage-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/most_frequently_modified_files_in_the_repository-20230915.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/most_frequently_modified_files_in_the_repository-20230924.png"
   />
 </p>
 
