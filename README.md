@@ -103,11 +103,6 @@ You can choose the settings that work best for you.
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_open_ports-20230924.png"
-  />
-</p>
-<p align="center">
-  <img
     src="https://github.com/beimzhan/shell-whiz/raw/main/examples/set_environment_variable-20230924.png"
   />
 </p>
@@ -119,6 +114,11 @@ You can choose the settings that work best for you.
 
 ## More examples
 
+<p align="center">
+  <img
+    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_open_ports-20230924.png"
+  />
+</p>
 <p align="center">
   <img
     src="https://github.com/beimzhan/shell-whiz/raw/main/examples/create_a_4_GB_file_with_random_data-20230924.png"
