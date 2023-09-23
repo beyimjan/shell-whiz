@@ -28,7 +28,7 @@ def create_argument_parser():
         "-p",
         "--preferences",
         type=str,
-        default="I usually use Bash on Linux",
+        default="I use Bash on Linux",
         help="set your preferences (default: %(default)s)",
     )
     ask_parser.add_argument(
