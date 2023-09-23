@@ -67,6 +67,9 @@ def sw_read_config():
 
 
 async def sw_config():
+    if "OPENAI_API_KEY" in os.environ:
+        return
+
     config = sw_read_config()
     if "openai_api_key" not in config:
         config = await sw_edit_config()
