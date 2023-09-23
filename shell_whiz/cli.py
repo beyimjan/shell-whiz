@@ -135,13 +135,11 @@ async def shell_whiz_ask_menu(shell_command, args):
             print()
             print_explanation(explanation)
         elif choice == "Revise query":
-            edit_prompt = ""
-            while edit_prompt == "":
-                edit_prompt = (
-                    await questionary.text(
-                        message="Enter your revision"
-                    ).unsafe_ask_async()
-                ).strip()
+            edit_prompt = (
+                await questionary.text(
+                    message="Enter your revision"
+                ).unsafe_ask_async()
+            ).strip()
             return shell_command, edit_prompt
         elif choice == "Edit manually":
             edited_shell_command = ""
