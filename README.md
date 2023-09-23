@@ -75,6 +75,7 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 ## Tips
 
 - If you want to pass an argument that starts with a hyphen, you can use `--` to separate the command from the arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
+- You can specify a shell executable by passing the `-s` or `--shell` argument.
 - Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
 - Add `--explain-using-gpt-4` to use the `gpt-4` model for the explanatory part.
 - Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.

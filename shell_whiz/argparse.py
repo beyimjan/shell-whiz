@@ -22,6 +22,9 @@ def create_argument_parser():
         "ask", help="Ask Shell Whiz for a shell command"
     )
     ask_parser.add_argument(
+        "-s", "--shell", type=str, help="set the shell executable"
+    )
+    ask_parser.add_argument(
         "-p",
         "--preferences",
         type=str,

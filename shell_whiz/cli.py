@@ -121,7 +121,9 @@ async def shell_whiz_ask_menu(shell_command, args):
         if choice == "Exit":
             sys.exit()
         elif choice == "Run this command":
-            subprocess.run(shell_command, shell=True)
+            subprocess.run(
+                shell_command, executable=args.shell or None, shell=True
+            )
             sys.exit()
         elif choice.startswith("Explain"):
             with console.status(SW_EXPLAINING_MSG, spinner="dots"):
