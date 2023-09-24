@@ -51,6 +51,13 @@ async def sw_edit_config():
     except IOError:
         rich.print(f"{SW_ERROR}: Couldn't write to file {sw_config_file}")
 
+    try:
+        os.chmod(sw_config_file, 0o600)
+    except PermissionError:
+        rich.print(
+            f"{SW_ERROR}: Couldn't change permissions of file {sw_config_file}"
+        )
+
     return sw_config
 
 

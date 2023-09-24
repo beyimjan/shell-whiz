@@ -263,7 +263,7 @@ def run():
         sys.exit(OPENAI_ERROR_EXIT_CODE)
     except openai.error.InvalidRequestError as e:
         rich.print(
-            f"{SW_ERROR}: Your request was malformed or missing some required parameters, such as a token or an input. {e}"
+            f"{SW_ERROR}: Your request was malformed or missing some required parameters, such as a token or an input."
         )
         sys.exit(OPENAI_ERROR_EXIT_CODE)
     except openai.error.AuthenticationError:
