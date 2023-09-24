@@ -261,7 +261,7 @@ def run():
             f"{SW_ERROR}: OpenAI API request failed to connect. Please check your internet connection and try again."
         )
         sys.exit(OPENAI_ERROR_EXIT_CODE)
-    except openai.error.InvalidRequestError as e:
+    except openai.error.InvalidRequestError:
         rich.print(
             f"{SW_ERROR}: Your request was malformed or missing some required parameters, such as a token or an input."
         )
