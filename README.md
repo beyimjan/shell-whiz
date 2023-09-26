@@ -91,7 +91,6 @@ whiz-shell () {
   fi
 }
 
-# Define additional aliases here
 alias '??'='whiz-shell'
 ```
 
@@ -113,7 +112,6 @@ whiz-shell () {
   fi
 }
 
-# Define additional aliases here
 alias '??'='whiz-shell'
 ```
 
