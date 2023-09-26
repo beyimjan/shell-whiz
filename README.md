@@ -76,12 +76,12 @@ You can also create a function instead of an alias. This will allow you to save 
 ?? () {
   TMPFILE=$(mktemp)
   trap 'rm -f $TMPFILE' EXIT
-  if sw ask "$@" -o "$TMPFILE"; then
+  if sw ask -o "$TMPFILE" "$@"; then
     if [ -e "$TMPFILE" ]; then
       SW_CMD=$(cat "$TMPFILE")
-      eval "$SW_CMD"
+      history -s $(history 1 | cut -d' ' -f4-)
       history -s "$SW_CMD" # Change history to print in zsh
-    fi
+      eval "$SW_CMD"
     else
       echo "Sorry, something went wrong."
     fi
@@ -89,6 +89,9 @@ You can also create a function instead of an alias. This will allow you to save 
     return 1
   fi
 }
+
+# Define additional aliases here
+alias ??='??'
 ```
 
 PowerShell users can create a function in their [PowerShell profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles).
