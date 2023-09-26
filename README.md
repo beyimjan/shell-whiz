@@ -73,7 +73,8 @@ alias ??='sw ask'
 You can also create a function instead of an alias. This will allow you to save executed commands in history.
 
 ```bash
-?? () {
+# ~/.bashrc
+whiz-shell () {
   TMPFILE=$(mktemp)
   trap 'rm -f $TMPFILE' EXIT
   if sw ask -o "$TMPFILE" "$@"; then
@@ -91,7 +92,29 @@ You can also create a function instead of an alias. This will allow you to save 
 }
 
 # Define additional aliases here
-alias ??='??'
+alias '??'='whiz-shell'
+```
+
+```zsh
+# ~/.zshrc
+whiz-shell () {
+  TMPFILE=$(mktemp)
+  trap 'rm -f $TMPFILE' EXIT
+  if sw ask -o "$TMPFILE" "$@"; then
+    if [ -e "$TMPFILE" ]; then
+      SW_CMD=$(cat "$TMPFILE")
+      print -s "$SW_CMD"
+      eval "$SW_CMD"
+    else
+      echo "Sorry, something went wrong."
+    fi
+  else
+    return 1
+  fi
+}
+
+# Define additional aliases here
+alias '??'='whiz-shell'
 ```
 
 PowerShell users can create a function in their [PowerShell profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles).
