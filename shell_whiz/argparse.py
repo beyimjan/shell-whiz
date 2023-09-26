@@ -62,6 +62,9 @@ def create_argument_parser():
         help="don't show the menu, end immediately",
     )
     ask_parser.add_argument(
+        "-o", "--output", type=str, help="output file to write the command to"
+    )
+    ask_parser.add_argument(
         "prompt", nargs="+", type=str, help="Prompt for Shell Whiz"
     )
 

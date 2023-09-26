@@ -70,6 +70,27 @@ You can run Shell Whiz directly using `sw ask`, but I recommend creating an alia
 alias ??='sw ask'
 ```
 
+You can also create a function instead of an alias. This will allow you to save executed commands in history.
+
+```bash
+?? () {
+  TMPFILE=$(mktemp)
+  trap 'rm -f $TMPFILE' EXIT
+  if sw ask "$@" -o "$TMPFILE"; then
+    if [ -e "$TMPFILE" ]; then
+      SW_CMD=$(cat "$TMPFILE")
+      eval "$SW_CMD"
+      history -s "$SW_CMD" # Change history to print in zsh
+    fi
+    else
+      echo "Sorry, something went wrong."
+    fi
+  else
+    return 1
+  fi
+}
+```
+
 PowerShell users can create a function in their [PowerShell profile](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles).
 
 ```powershell
