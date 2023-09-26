@@ -116,7 +116,7 @@ async def shell_whiz_ask_menu(shell_command, args):
         elif choice == "Run this command":
             if args.output:
                 try:
-                    with open(args.output, "w") as f:
+                    with open(args.output, "w", newline="\n") as f:
                         f.write(shell_command)
                 except IOError:
                     sys.exit(1)
