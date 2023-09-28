@@ -146,6 +146,8 @@ The original author of the program usually uses `alias ??='sw ask --dont-warn -n
 
 You can choose the settings that work best for you.
 
+Highly recommend using [IntelliShell](https://github.com/lasantosr/intelli-shell) (a bookmark store for commands) along with Shell Whiz.
+
 <p align="center">
   <img
     src="https://github.com/beimzhan/shell-whiz/raw/main/examples/set_environment_variable-20230924.png"
