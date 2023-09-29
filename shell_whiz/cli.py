@@ -48,7 +48,7 @@ def print_explanation(
                 live.update(Markdown(explanation))
     except ShellWhizExplanationError:
         rich.print(
-            f"\n {SW_ERROR}: Sorry, I don't know how to explain this command."
+            f" {SW_ERROR}: Sorry, I don't know how to explain this command."
         )
 
     print()
