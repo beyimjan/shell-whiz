@@ -121,7 +121,7 @@ async def shell_whiz_ask_menu_choice(args):
     return choice
 
 
-async def shell_whiz_ask_menu(shell_command, args):
+async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
     while True:
         choice = await shell_whiz_ask_menu_choice(args)
 
@@ -135,6 +135,13 @@ async def shell_whiz_ask_menu(shell_command, args):
                 except IOError:
                     sys.exit(1)
             else:
+                if (
+                    is_dangerous
+                    and not await questionary.confirm(
+                        "Are you sure you want to run this command?"
+                    ).unsafe_ask_async()
+                ):
+                    sys.exit(1)
                 subprocess.run(
                     shell_command, executable=args.shell or None, shell=True
                 )
@@ -187,7 +194,9 @@ async def shell_whiz_ask(prompt, args):
                 shell_command, args.explain_using_gpt_4
             )
 
-        if not args.dont_warn:
+        if args.dont_warn:
+            is_dangerous = False
+        else:
             (
                 is_dangerous,
                 dangerous_consequences,
@@ -210,7 +219,7 @@ async def shell_whiz_ask(prompt, args):
             break
 
         shell_command, edit_prompt = await shell_whiz_ask_menu(
-            shell_command, args
+            args, shell_command, is_dangerous
         )
 
 
