@@ -6,33 +6,47 @@ import sys
 import openai
 import questionary
 import rich
+from rich.live import Live
 from rich.markdown import Markdown
 
 from shell_whiz.argparse import create_argument_parser
 from shell_whiz.config import sw_config, sw_edit_config
 from shell_whiz.console import console
-from shell_whiz.constants import SW_ERROR, SW_EXPLAINING_MSG, SW_THINKING_MSG
+from shell_whiz.constants import SW_ERROR, SW_THINKING_MSG
 from shell_whiz.exceptions import (
     ShellWhizEditError,
+    ShellWhizExplanationError,
     ShellWhizTranslationError,
     ShellWhizWarningError,
 )
 from shell_whiz.openai import (
     edit_shell_command,
     get_explanation_of_shell_command,
+    get_explanation_of_shell_command_openai,
     recognize_dangerous_command,
     translate_nl_to_shell_command,
 )
 
 
-def print_explanation(explanation):
+def print_explanation(
+    explain_using_gpt_4, shell_command=None, stream=None, no_newline=True
+):
+    if not no_newline:
+        print()
+
     rich.print(
         " ================== [bold green]Explanation[/] =================="
     )
 
-    if explanation.startswith("*"):
-        console.print(Markdown(explanation))
-    else:
+    try:
+        with Live("", refresh_per_second=10) as live:
+            explanation = ""
+            for chunk in get_explanation_of_shell_command(
+                explain_using_gpt_4, shell_command, stream
+            ):
+                explanation += chunk
+                live.update(Markdown(explanation))
+    except ShellWhizExplanationError:
         rich.print(
             f"\n {SW_ERROR}: Sorry, I don't know how to explain this command."
         )
@@ -126,13 +140,11 @@ async def shell_whiz_ask_menu(shell_command, args):
                 )
             sys.exit()
         elif choice.startswith("Explain"):
-            with console.status(SW_EXPLAINING_MSG, spinner="dots"):
-                explanation = await get_explanation_of_shell_command(
-                    shell_command,
-                    args.explain_using_gpt_4 or choice == "Explain using GPT-4",
-                )
-            print()
-            print_explanation(explanation)
+            print_explanation(
+                args.explain_using_gpt_4 or choice == "Explain using GPT-4",
+                shell_command=shell_command,
+                no_newline=False,
+            )
         elif choice == "Revise query":
             edit_prompt = (
                 await questionary.text(
@@ -170,10 +182,8 @@ async def shell_whiz_ask(prompt, args):
 
         if not args.dont_explain:
             print_command(shell_command)
-            explanation_task = asyncio.create_task(
-                get_explanation_of_shell_command(
-                    shell_command, args.explain_using_gpt_4
-                )
+            stream = get_explanation_of_shell_command_openai(
+                shell_command, args.explain_using_gpt_4
             )
 
         if not args.dont_warn:
@@ -193,10 +203,7 @@ async def shell_whiz_ask(prompt, args):
             )
 
         if not args.dont_explain:
-            with console.status(SW_EXPLAINING_MSG, spinner="dots"):
-                explanation = await explanation_task
-
-            print_explanation(explanation)
+            print_explanation(args.explain_using_gpt_4, stream=stream)
 
         if args.quiet:
             break

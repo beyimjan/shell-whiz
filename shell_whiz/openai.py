@@ -8,6 +8,7 @@ from jsonschema import validate
 from shell_whiz.constants import DELIMITER
 from shell_whiz.exceptions import (
     ShellWhizEditError,
+    ShellWhizExplanationError,
     ShellWhizTranslationError,
     ShellWhizWarningError,
 )
@@ -123,34 +124,57 @@ def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
     max_tokens = 512
 
     if explain_using_gpt_4:
-        return (
-            openai.ChatCompletion.create(
-                model="gpt-4",
-                temperature=temperature,
-                max_tokens=max_tokens,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            .choices[0]
-            .message["content"]
+        return openai.ChatCompletion.create(
+            model="gpt-4",
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=True,
+            messages=[{"role": "user", "content": prompt}],
         )
     else:
-        return (
-            openai.Completion.create(
-                model="gpt-3.5-turbo-instruct",
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stop=["Shell"],
-                prompt=prompt,
-            )
-            .choices[0]
-            .text.strip()
+        return openai.Completion.create(
+            model="gpt-3.5-turbo-instruct",
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stop=["Shell"],
+            stream=True,
+            prompt=prompt,
         )
 
 
-async def get_explanation_of_shell_command(shell_command, explain_using_gpt_4):
-    return get_explanation_of_shell_command_openai(
-        shell_command, explain_using_gpt_4
-    )
+def get_explanation_of_shell_command(
+    explain_using_gpt_4, shell_command=None, stream=None
+):
+    if stream is None:
+        response = get_explanation_of_shell_command_openai(
+            shell_command, explain_using_gpt_4
+        )
+    else:
+        response = stream
+
+    is_first_chunk = True
+    skip_initial_spaces = True
+    for chunk in response:
+        if explain_using_gpt_4:
+            chunk_message = chunk.choices[0].delta.get("content")
+            if chunk_message is None:
+                break
+        else:
+            chunk_message = chunk.choices[0].text
+
+        if skip_initial_spaces:
+            chunk_message = chunk_message.lstrip()
+            if chunk_message:
+                skip_initial_spaces = False
+            else:
+                continue
+
+        if is_first_chunk:
+            if not chunk_message.startswith("*"):
+                raise ShellWhizExplanationError("Explanation is not valid.")
+            is_first_chunk = False
+
+        yield chunk_message
 
 
 def edit_shell_command_openai(shell_command, prompt):
