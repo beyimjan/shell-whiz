@@ -126,7 +126,7 @@ async def shell_whiz_ask_menu(shell_command, args):
         choice = await shell_whiz_ask_menu_choice(args)
 
         if choice == "Exit":
-            sys.exit()
+            sys.exit(1)
         elif choice == "Run this command":
             if args.output:
                 try:
@@ -138,6 +138,7 @@ async def shell_whiz_ask_menu(shell_command, args):
                 subprocess.run(
                     shell_command, executable=args.shell or None, shell=True
                 )
+            # End successfully only if the command has been executed
             sys.exit()
         elif choice.startswith("Explain"):
             print_explanation(
@@ -299,4 +300,4 @@ def run():
         sys.exit(1)
     except KeyboardInterrupt:
         print("\nExiting...")
-        sys.exit()
+        sys.exit(1)
