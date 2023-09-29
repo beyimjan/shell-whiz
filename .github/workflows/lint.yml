@@ -3,8 +3,7 @@ name: Lint Python code
 on:
   push:
     branches:
-      - main
-      - develop
+      - '**'
     paths:
       - pyproject.toml
       - .flake8
