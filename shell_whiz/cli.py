@@ -159,18 +159,21 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
                     message="Enter your revision"
                 ).unsafe_ask_async()
             ).strip()
-            return shell_command, edit_prompt
+            if edit_prompt != "":
+                return shell_command, edit_prompt
         elif choice == "Edit manually":
-            edited_shell_command = ""
-            while edited_shell_command == "":
-                edited_shell_command = (
-                    await questionary.text(
-                        "Edit command",
-                        default=shell_command,
-                        multiline="\n" in shell_command,
-                    ).unsafe_ask_async()
-                ).strip()
-            return edited_shell_command, ""
+            edited_shell_command = (
+                await questionary.text(
+                    "Edit command",
+                    default=shell_command,
+                    multiline="\n" in shell_command,
+                ).unsafe_ask_async()
+            ).strip()
+            if (
+                edited_shell_command != ""
+                and edited_shell_command != shell_command
+            ):
+                return edited_shell_command, ""
 
 
 async def shell_whiz_ask(prompt, args):
