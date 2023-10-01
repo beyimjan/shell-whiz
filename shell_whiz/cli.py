@@ -77,7 +77,7 @@ async def shell_whiz_edit(shell_command, prompt):
     return shell_command
 
 
-async def shell_whiz_check_danger(shell_command, safety_cache):
+def shell_whiz_check_danger(shell_command, safety_cache):
     for command, is_dangerous, dangerous_consequences in safety_cache:
         if command == shell_command:
             return is_dangerous, dangerous_consequences
@@ -185,7 +185,6 @@ async def shell_whiz_ask(prompt, args):
         sys.exit(1)
 
     edit_prompt = ""
-
     safety_cache = []
     while True:
         if edit_prompt != "":
@@ -200,10 +199,9 @@ async def shell_whiz_ask(prompt, args):
         if args.dont_warn:
             is_dangerous = False
         else:
-            (
-                is_dangerous,
-                dangerous_consequences,
-            ) = await shell_whiz_check_danger(shell_command, safety_cache)
+            is_dangerous, dangerous_consequences = shell_whiz_check_danger(
+                shell_command, safety_cache
+            )
 
         if args.dont_explain:
             print_command(shell_command)
