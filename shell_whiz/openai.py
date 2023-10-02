@@ -124,9 +124,7 @@ def recognize_dangerous_command(shell_command):
     return True, dangerous_consequences
 
 
-async def get_explanation_of_shell_command_openai(
-    shell_command, explain_using_gpt_4
-):
+def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
     prompt = f'Split the command into parts and explain it in **list** format. Each line should follow the format "command part" followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists directory contents.\n  * `-l` displays in long format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` reads the content of `file`.\n* `| grep "foo"` filters lines containing "foo".\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{get_my_preferences()}\n\nShell command: {DELIMITER}\n{shell_command}\n{DELIMITER}'
 
     temperature = 0.1
@@ -149,6 +147,14 @@ async def get_explanation_of_shell_command_openai(
             stream=True,
             prompt=prompt,
         )
+
+
+async def get_explanation_of_shell_command_openai_async(
+    shell_command, explain_using_gpt_4
+):
+    return get_explanation_of_shell_command_openai(
+        shell_command, explain_using_gpt_4
+    )
 
 
 def get_explanation_of_shell_command(

@@ -22,7 +22,7 @@ from shell_whiz.exceptions import (
 from shell_whiz.openai import (
     edit_shell_command,
     get_explanation_of_shell_command,
-    get_explanation_of_shell_command_openai,
+    get_explanation_of_shell_command_openai_async,
     recognize_dangerous_command,
     translate_nl_to_shell_command,
 )
@@ -176,7 +176,7 @@ async def shell_whiz_ask(prompt, args):
         if not args.dont_explain:
             print_command(shell_command)
             stream_task = asyncio.create_task(
-                get_explanation_of_shell_command_openai(
+                get_explanation_of_shell_command_openai_async(
                     shell_command, args.explain_using_gpt_4
                 )
             )
