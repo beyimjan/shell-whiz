@@ -58,7 +58,7 @@ def translate_nl_to_shell_command(prompt):
     except jsonschema.ValidationError:
         raise ShellWhizTranslationError("Generated JSON is not valid.")
 
-    shell_command = translation_json.get("shell_command", "").strip()
+    shell_command = translation_json["shell_command"].strip()
 
     if shell_command == "":
         raise ShellWhizTranslationError("Extracted shell command is empty.")
@@ -104,7 +104,7 @@ def recognize_dangerous_command(shell_command):
     except jsonschema.ValidationError:
         raise ShellWhizWarningError("Generated JSON is not valid.")
 
-    is_dangerous = dangerous_command_json.get("dangerous_to_run", False)
+    is_dangerous = dangerous_command_json["dangerous_to_run"]
     dangerous_consequences = dangerous_command_json.get(
         "dangerous_consequences", ""
     ).strip()
@@ -222,9 +222,9 @@ async def edit_shell_command(shell_command, prompt):
     except jsonschema.ValidationError:
         raise ShellWhizEditError("Generated JSON is not valid.")
 
-    edited_shell_command = edited_shell_command_json.get(
-        "edited_shell_command", ""
-    ).strip()
+    edited_shell_command = edited_shell_command_json[
+        "edited_shell_command"
+    ].strip()
     if edited_shell_command == "":
         raise ShellWhizEditError("Edited shell command is empty.")
 
