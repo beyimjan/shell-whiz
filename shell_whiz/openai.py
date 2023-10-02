@@ -109,12 +109,19 @@ def recognize_dangerous_command(shell_command):
         "dangerous_consequences", ""
     ).strip()
 
-    if is_dangerous and dangerous_consequences == "":
+    if not is_dangerous:
+        return False, ""
+
+    if dangerous_consequences == "":
         raise ShellWhizWarningError(
             "Extracted dangerous consequences are empty."
         )
+    elif "\n" in dangerous_consequences:
+        raise ShellWhizWarningError(
+            "Extracted dangerous consequences contain newlines."
+        )
 
-    return is_dangerous, dangerous_consequences
+    return True, dangerous_consequences
 
 
 def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
