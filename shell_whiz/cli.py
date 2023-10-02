@@ -39,13 +39,13 @@ def print_explanation(
     )
 
     try:
-        with Live("", refresh_per_second=10) as live:
+        with Live("", auto_refresh=False) as live:
             explanation = ""
             for chunk in get_explanation_of_shell_command(
                 explain_using_gpt_4, shell_command, stream
             ):
                 explanation += chunk
-                live.update(Markdown(explanation))
+                live.update(Markdown(explanation), refresh=True)
     except ShellWhizExplanationError:
         rich.print(
             f" {SW_ERROR}: Sorry, I don't know how to explain this command."
@@ -58,11 +58,7 @@ def print_command(shell_command):
     rich.print(
         "\n ==================== [bold green]Command[/] ====================\n"
     )
-
-    for line in shell_command.splitlines():
-        print(f" {line}")
-
-    print()
+    print(" " + " ".join(shell_command.splitlines(keepends=True)) + "\n")
 
 
 async def shell_whiz_edit(shell_command, prompt):
@@ -179,8 +175,10 @@ async def shell_whiz_ask(prompt, args):
 
         if not args.dont_explain:
             print_command(shell_command)
-            stream = get_explanation_of_shell_command_openai(
-                shell_command, args.explain_using_gpt_4
+            stream_task = asyncio.create_task(
+                get_explanation_of_shell_command_openai(
+                    shell_command, args.explain_using_gpt_4
+                )
             )
 
         if args.dont_warn:
@@ -201,6 +199,7 @@ async def shell_whiz_ask(prompt, args):
             )
 
         if not args.dont_explain:
+            stream = await stream_task
             print_explanation(args.explain_using_gpt_4, stream=stream)
 
         if args.quiet:
