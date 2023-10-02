@@ -6,7 +6,7 @@ profile = "black"
 
 [tool.poetry]
 name = "shell-whiz"
-version = "1.8.5"
+version = "1.8.6"
 description = "AI assistant for command line"
 license = "GPL-3.0-only"
 authors = ["Tamerlan Bimzhanov <bimzhanovt.net@gmail.com>"]

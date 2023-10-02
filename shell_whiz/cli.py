@@ -28,8 +28,8 @@ from shell_whiz.openai import (
 )
 
 
-def print_explanation(
-    explain_using_gpt_4, shell_command=None, stream=None, no_newline=True
+async def print_explanation(
+    explain_using_gpt_4, shell_command=None, stream_task=None, no_newline=True
 ):
     if not no_newline:
         print()
@@ -42,7 +42,9 @@ def print_explanation(
         with Live("", auto_refresh=False) as live:
             explanation = ""
             for chunk in get_explanation_of_shell_command(
-                explain_using_gpt_4, shell_command, stream
+                explain_using_gpt_4,
+                shell_command,
+                await stream_task if stream_task else None,
             ):
                 explanation += chunk
                 live.update(Markdown(explanation), refresh=True)
@@ -132,7 +134,7 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
             # End successfully only if the command has been executed
             sys.exit()
         elif choice.startswith("Explain"):
-            print_explanation(
+            await print_explanation(
                 args.explain_using_gpt_4 or choice == "Explain using GPT-4",
                 shell_command=shell_command,
                 no_newline=False,
@@ -199,8 +201,9 @@ async def shell_whiz_ask(prompt, args):
             )
 
         if not args.dont_explain:
-            stream = await stream_task
-            print_explanation(args.explain_using_gpt_4, stream=stream)
+            await print_explanation(
+                args.explain_using_gpt_4, stream_task=stream_task
+            )
 
         if args.quiet:
             break
