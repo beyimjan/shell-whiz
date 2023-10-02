@@ -77,26 +77,14 @@ async def shell_whiz_edit(shell_command, prompt):
     return shell_command
 
 
-def shell_whiz_check_danger(shell_command, safety_cache):
-    for command, is_dangerous, dangerous_consequences in safety_cache:
-        if command == shell_command:
-            return is_dangerous, dangerous_consequences
-
+def shell_whiz_check_danger(shell_command):
     with console.status(
-        "Shell Whiz is checking the command for danger...",
-        spinner="dots",
+        "Shell Whiz is checking the command for danger...", spinner="dots"
     ):
         try:
-            is_dangerous, dangerous_consequences = recognize_dangerous_command(
-                shell_command
-            )
+            return recognize_dangerous_command(shell_command)
         except ShellWhizWarningError:
-            is_dangerous = False
-            dangerous_consequences = None
-
-    safety_cache.append((shell_command, is_dangerous, dangerous_consequences))
-
-    return is_dangerous, dangerous_consequences
+            return False, ""
 
 
 async def shell_whiz_ask_menu_choice(args):
@@ -185,7 +173,6 @@ async def shell_whiz_ask(prompt, args):
         sys.exit(1)
 
     edit_prompt = ""
-    safety_cache = []
     while True:
         if edit_prompt != "":
             shell_command = await shell_whiz_edit(shell_command, edit_prompt)
@@ -200,7 +187,7 @@ async def shell_whiz_ask(prompt, args):
             is_dangerous = False
         else:
             is_dangerous, dangerous_consequences = shell_whiz_check_danger(
-                shell_command, safety_cache
+                shell_command
             )
 
         if args.dont_explain:
