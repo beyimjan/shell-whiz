@@ -60,7 +60,7 @@ pip install --upgrade shell-whiz
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/sync_time_with_ntp_and_adjust_hardware_clock-20230929.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20231003.gif?raw=true"
   />
 </p>
 
