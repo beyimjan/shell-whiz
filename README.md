@@ -1,8 +1,4 @@
 <p align="center">
-  <img src="https://github.com/beimzhan/shell-whiz/raw/main/images/social-preview-20230724.png" />
-</p>
-
-<p align="center">
   <img src="https://img.shields.io/pypi/v/shell-whiz" alt="PyPI" />
   <img src="https://img.shields.io/pypi/dm/shell-whiz" alt="PyPI - Downloads" />
   <img
