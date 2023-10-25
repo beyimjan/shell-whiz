@@ -19,7 +19,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20231003.gif?raw=true"
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20231026.gif?raw=true"
   />
 </p>
 
