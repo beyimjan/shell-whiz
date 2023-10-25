@@ -21,6 +21,12 @@
 
 Shell Whiz is an AI assistant for the command line. It will help you find the right command for your task.
 
+<p align="center">
+  <img
+    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20231003.gif?raw=true"
+  />
+</p>
+
 ## All features
 
 - **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`, which will print the last modification time of the file.
@@ -57,12 +63,6 @@ pip install --upgrade shell-whiz
 ```
 
 ## Usage
-
-<p align="center">
-  <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20231003.gif?raw=true"
-  />
-</p>
 
 You can run Shell Whiz directly using `sw ask`, but I recommend creating an alias for it. For example, you can add the following line to the bottom of your `~/.bashrc` file:
 
