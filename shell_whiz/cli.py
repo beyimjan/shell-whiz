@@ -217,6 +217,7 @@ async def run_ai_assistant(args):
     await sw_config()
 
     os.environ["SW_MODEL"] = args.model
+    os.environ["SW_EXPLAIN_USING"] = args.explain_using
     os.environ["SW_PREFERENCES"] = args.preferences
 
     if args.model == "gpt-4":

@@ -130,23 +130,13 @@ def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
     temperature = 0.1
     max_tokens = 512
 
-    if explain_using_gpt_4:
-        return openai.ChatCompletion.create(
-            model="gpt-4",
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stream=True,
-            messages=[{"role": "user", "content": prompt}],
-        )
-    else:
-        return openai.Completion.create(
-            model="gpt-3.5-turbo-instruct",
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stop=["Shell"],
-            stream=True,
-            prompt=prompt,
-        )
+    return openai.ChatCompletion.create(
+        model=os.environ["SW_EXPLAIN_USING"],
+        temperature=temperature,
+        max_tokens=max_tokens,
+        stream=True,
+        messages=[{"role": "user", "content": prompt}],
+    )
 
 
 async def get_explanation_of_shell_command_openai_async(
@@ -160,6 +150,9 @@ async def get_explanation_of_shell_command_openai_async(
 def get_explanation_of_shell_command(
     explain_using_gpt_4, shell_command=None, stream=None
 ):
+    # Streaming explanation won't work without this deprecated option
+    explain_using_gpt_4 = True  # TODO: remove this later
+
     if stream is None:
         response = get_explanation_of_shell_command_openai(
             shell_command, explain_using_gpt_4

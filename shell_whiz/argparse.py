@@ -1,7 +1,7 @@
 import argparse
 from importlib.metadata import version
 
-from shell_whiz.constants import SW_DESCRIPTION
+from shell_whiz.constants import SW_DESCRIPTION, DEFAULT_MODEL
 
 
 def create_argument_parser():
@@ -35,14 +35,19 @@ def create_argument_parser():
         "-m",
         "--model",
         type=str,
-        choices=["gpt-3.5-turbo", "gpt-4"],
-        default="gpt-3.5-turbo",
+        default=DEFAULT_MODEL,
         help="select the model to use",
     )
     ask_parser.add_argument(
-        "--explain-using-gpt-4",
+        "--explain-using-gpt-4",  # TODO: remove this later
         action="store_true",
         help="use GPT-4 to explain",
+    )
+    ask_parser.add_argument(
+        "--explain-using",
+        type=str,
+        default=DEFAULT_MODEL,
+        help="select the model to explain",
     )
     ask_parser.add_argument(
         "-n",
