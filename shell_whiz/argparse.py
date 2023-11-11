@@ -1,7 +1,7 @@
 import argparse
 from importlib.metadata import version
 
-from shell_whiz.constants import SW_DESCRIPTION, DEFAULT_MODEL
+from shell_whiz.constants import DEFAULT_MODEL, SW_DESCRIPTION
 
 
 def create_argument_parser():
