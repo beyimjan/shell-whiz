@@ -1,9 +1,4 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "postCreateCommand": [
-    "pipx install poetry==1.5.1",
-    "poetry install",
-    "npm install -g aicommits"
-  ],
+  "postCreateCommand": "pipx install poetry==1.7.0 && poetry install && npm install -g aicommits",
   "postStartCommand": "aicommits config set generate=5 model=gpt-3.5-turbo-1106"
 }
