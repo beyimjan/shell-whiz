@@ -124,14 +124,16 @@ def recognize_dangerous_command(shell_command):
     return True, dangerous_consequences
 
 
-def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
+def get_explanation_of_shell_command_openai(shell_command, explain_using=None):
     prompt = f'Split the command into parts and explain it in **list** format. Each line should follow the format "command part" followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists directory contents.\n  * `-l` displays in long format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` reads the content of `file`.\n* `| grep "foo"` filters lines containing "foo".\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{get_my_preferences()}\n\nShell command: {DELIMITER}\n{shell_command}\n{DELIMITER}'
 
     temperature = 0.1
     max_tokens = 512
 
     return openai.ChatCompletion.create(
-        model=os.environ["SW_EXPLAIN_USING"],
+        model=os.environ["SW_EXPLAIN_USING"]
+        if explain_using is None
+        else explain_using,
         temperature=temperature,
         max_tokens=max_tokens,
         stream=True,
@@ -140,35 +142,25 @@ def get_explanation_of_shell_command_openai(shell_command, explain_using_gpt_4):
 
 
 async def get_explanation_of_shell_command_openai_async(
-    shell_command, explain_using_gpt_4
+    shell_command, explain_using=None
 ):
-    return get_explanation_of_shell_command_openai(
-        shell_command, explain_using_gpt_4
-    )
+    return get_explanation_of_shell_command_openai(shell_command)
 
 
 def get_explanation_of_shell_command(
-    explain_using_gpt_4, shell_command=None, stream=None
+    explain_using=None, shell_command=None, stream=None
 ):
-    # Streaming explanation won't work without this deprecated option
-    explain_using_gpt_4 = True  # TODO: remove this later
-
     if stream is None:
-        response = get_explanation_of_shell_command_openai(
-            shell_command, explain_using_gpt_4
-        )
+        response = get_explanation_of_shell_command_openai(shell_command)
     else:
         response = stream
 
     is_first_chunk = True
     skip_initial_spaces = True
     for chunk in response:
-        if explain_using_gpt_4:
-            chunk_message = chunk.choices[0].delta.get("content")
-            if chunk_message is None:
-                break
-        else:
-            chunk_message = chunk.choices[0].text
+        chunk_message = chunk.choices[0].delta.get("content")
+        if chunk_message is None:
+            break
 
         if skip_initial_spaces:
             chunk_message = chunk_message.lstrip()

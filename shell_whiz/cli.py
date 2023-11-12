@@ -29,7 +29,7 @@ from shell_whiz.openai import (
 
 
 async def print_explanation(
-    explain_using_gpt_4, shell_command=None, stream_task=None, no_newline=True
+    explain_using=None, shell_command=None, stream_task=None, no_newline=True
 ):
     if not no_newline:
         print()
@@ -42,9 +42,9 @@ async def print_explanation(
         with Live("", auto_refresh=False) as live:
             explanation = ""
             for chunk in get_explanation_of_shell_command(
-                explain_using_gpt_4,
-                shell_command,
-                await stream_task if stream_task else None,
+                explain_using=explain_using,
+                shell_command=shell_command,
+                stream=await stream_task if stream_task else None,
             ):
                 explanation += chunk
                 live.update(Markdown(explanation), refresh=True)
@@ -95,9 +95,9 @@ async def shell_whiz_ask_menu_choice(args):
 
     if args.dont_explain:
         choices.insert(1, "Explain this command")
-        if not args.explain_using_gpt_4:
+        if not os.environ["SW_EXPLAIN_USING"].startswith("gpt-4"):
             choices.insert(2, "Explain using GPT-4")
-    elif not args.explain_using_gpt_4:
+    elif not os.environ["SW_EXPLAIN_USING"].startswith("gpt-4"):
         choices.insert(1, "Explain using GPT-4")
 
     choice = await questionary.select(
@@ -133,9 +133,13 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
                 )
             # End successfully only if the command has been executed
             sys.exit()
-        elif choice.startswith("Explain"):
+        elif choice.startswith("Explain this command"):
             await print_explanation(
-                args.explain_using_gpt_4 or choice == "Explain using GPT-4",
+                shell_command=shell_command, no_newline=False
+            )
+        elif choice == "Explain using GPT-4":
+            await print_explanation(
+                explain_using="gpt-4-1106-preview",
                 shell_command=shell_command,
                 no_newline=False,
             )
@@ -178,9 +182,7 @@ async def shell_whiz_ask(prompt, args):
         if not args.dont_explain:
             print_command(shell_command)
             stream_task = asyncio.create_task(
-                get_explanation_of_shell_command_openai_async(
-                    shell_command, args.explain_using_gpt_4
-                )
+                get_explanation_of_shell_command_openai_async(shell_command)
             )
 
         if args.dont_warn:
@@ -201,9 +203,7 @@ async def shell_whiz_ask(prompt, args):
             )
 
         if not args.dont_explain:
-            await print_explanation(
-                args.explain_using_gpt_4, stream_task=stream_task
-            )
+            await print_explanation(stream_task=stream_task)
 
         if args.quiet:
             break
@@ -221,9 +221,6 @@ async def run_ai_assistant(args):
         args.explain_using if args.explain_using else args.model
     )
     os.environ["SW_PREFERENCES"] = args.preferences
-
-    if args.model == "gpt-4":
-        args.explain_using_gpt_4 = True
 
     prompt = " ".join(args.prompt).strip()
     if prompt == "":
