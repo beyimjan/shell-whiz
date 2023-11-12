@@ -5,14 +5,6 @@
     src="https://img.shields.io/github/stars/beimzhan/shell-whiz"
     alt="GitHub stars"
   />
-  <img
-    src="https://img.shields.io/github/commit-activity/m/beimzhan/shell-whiz"
-    alt="GitHub commit activity"
-  />
-  <img
-    src="https://img.shields.io/github/license/beimzhan/shell-whiz"
-    alt="GitHub license"
-  />
 </p>
 
 Shell Whiz is an AI assistant for the command line. It will help you find the right command for your task.
