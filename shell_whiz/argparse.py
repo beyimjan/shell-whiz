@@ -39,11 +39,11 @@ def create_argument_parser():
         help="select the model to use",
     )
     ask_parser.add_argument(
-        "--explain-using-gpt-4",  # TODO: remove this later
+        "--explain-using-gpt-4",  # TODO: remove this later & update docs
         action="store_true",
         help="use GPT-4 to explain",
     )
-    ask_parser.add_argument(
+    ask_parser.add_argument(  # TODO: add this to docs
         "--explain-using", type=str, help="select the model to explain"
     )
     ask_parser.add_argument(
