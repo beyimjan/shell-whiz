@@ -44,10 +44,7 @@ def create_argument_parser():
         help="use GPT-4 to explain",
     )
     ask_parser.add_argument(
-        "--explain-using",
-        type=str,
-        default=DEFAULT_MODEL,
-        help="select the model to explain",
+        "--explain-using", type=str, help="select the model to explain"
     )
     ask_parser.add_argument(
         "-n",
