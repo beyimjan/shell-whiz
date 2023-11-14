@@ -17,8 +17,8 @@ from shell_whiz.llm_jsonschemas import (
 )
 
 
-async def translate_nl_to_shell_command(prompt):
-    translation = await openai.translate_nl_to_shell_command(prompt)
+async def suggest_shell_command(prompt):
+    translation = await openai.suggest_shell_command(prompt)
 
     try:
         translation_json = json.loads(translation)

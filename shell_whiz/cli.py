@@ -23,7 +23,7 @@ from shell_whiz.llm_client import (
     get_explanation_of_shell_command_as_stream,
     get_explanation_of_shell_command_by_chunks,
     recognize_dangerous_command,
-    translate_nl_to_shell_command,
+    suggest_shell_command,
 )
 from shell_whiz.rich_console import console
 
@@ -188,7 +188,7 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
 async def shell_whiz_ask(prompt, args):
     try:
         with console.status(SW_THINKING_MSG, spinner="dots"):
-            shell_command = await translate_nl_to_shell_command(prompt)
+            shell_command = await suggest_shell_command(prompt)
     except TranslationError:
         rich.print(f"{SW_ERROR}: Sorry, I don't know how to do this.")
         sys.exit(1)

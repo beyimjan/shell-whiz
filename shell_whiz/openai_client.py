@@ -16,7 +16,7 @@ def get_user_preferences():
     return f"These are my preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}"
 
 
-async def translate_nl_to_shell_command(prompt):
+async def suggest_shell_command(prompt):
     response = await client.chat.completions.create(
         model=os.environ["SW_MODEL"],
         temperature=0.25,
