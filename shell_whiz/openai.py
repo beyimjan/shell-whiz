@@ -2,8 +2,8 @@ import json
 import os
 
 import jsonschema
-import openai
 from jsonschema import validate
+from openai import AsyncOpenAI
 
 from shell_whiz.constants import DELIMITER
 from shell_whiz.exceptions import (
@@ -18,13 +18,15 @@ from shell_whiz.jsonschemas import (
     translation_jsonschema,
 )
 
+client = AsyncOpenAI()
+
 
 def get_my_preferences():
     return f"These are my preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}"
 
 
-def translate_nl_to_shell_command_openai(prompt):
-    return openai.ChatCompletion.create(
+async def translate_nl_to_shell_command_openai(prompt):
+    response = await client.chat.completions.create(
         model=os.environ["SW_MODEL"],
         temperature=0.25,
         max_tokens=256,
@@ -42,11 +44,12 @@ def translate_nl_to_shell_command_openai(prompt):
             }
         ],
         function_call={"name": "perform_task_in_command_line"},
-    ).choices[0]["message"]["function_call"]["arguments"]
+    )
+    return response.choices[0].message.function_call.arguments
 
 
-def translate_nl_to_shell_command(prompt):
-    translation = translate_nl_to_shell_command_openai(prompt)
+async def translate_nl_to_shell_command(prompt):
+    translation = await translate_nl_to_shell_command_openai(prompt)
 
     try:
         translation_json = json.loads(translation)
@@ -66,8 +69,8 @@ def translate_nl_to_shell_command(prompt):
     return shell_command
 
 
-def recognize_dangerous_command_openai(shell_command):
-    return openai.ChatCompletion.create(
+async def recognize_dangerous_command_openai(shell_command):
+    response = await client.chat.completions.create(
         model=os.environ["SW_MODEL"],
         temperature=0,
         max_tokens=96,
@@ -85,11 +88,12 @@ def recognize_dangerous_command_openai(shell_command):
             }
         ],
         function_call={"name": "recognize_dangerous_command"},
-    ).choices[0]["message"]["function_call"]["arguments"]
+    )
+    return response.choices[0].message.function_call.arguments
 
 
-def recognize_dangerous_command(shell_command):
-    dangerous_command = recognize_dangerous_command_openai(shell_command)
+async def recognize_dangerous_command(shell_command):
+    dangerous_command = await recognize_dangerous_command_openai(shell_command)
 
     try:
         dangerous_command_json = json.loads(dangerous_command)
@@ -124,13 +128,15 @@ def recognize_dangerous_command(shell_command):
     return True, dangerous_consequences
 
 
-def get_explanation_of_shell_command_openai(shell_command, explain_using=None):
+async def get_explanation_of_shell_command_openai(
+    shell_command, explain_using=None
+):
     prompt = f'Split the command into parts and explain it in **list** format. Each line should follow the format "command part" followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists directory contents.\n  * `-l` displays in long format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` reads the content of `file`.\n* `| grep "foo"` filters lines containing "foo".\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{get_my_preferences()}\n\nShell command: {DELIMITER}\n{shell_command}\n{DELIMITER}'
 
     temperature = 0.1
     max_tokens = 512
 
-    return openai.ChatCompletion.create(
+    return await client.chat.completions.create(
         model=os.environ["SW_EXPLAIN_USING"]
         if explain_using is None
         else explain_using,
@@ -141,24 +147,20 @@ def get_explanation_of_shell_command_openai(shell_command, explain_using=None):
     )
 
 
-async def get_explanation_of_shell_command_openai_async(
-    shell_command, explain_using=None
-):
-    return get_explanation_of_shell_command_openai(shell_command)
-
-
-def get_explanation_of_shell_command(
+async def get_explanation_of_shell_command(
     explain_using=None, shell_command=None, stream=None
 ):
     if stream is None:
-        response = get_explanation_of_shell_command_openai(shell_command)
+        response = await get_explanation_of_shell_command_openai(
+            shell_command, explain_using=explain_using
+        )
     else:
         response = stream
 
     is_first_chunk = True
     skip_initial_spaces = True
-    for chunk in response:
-        chunk_message = chunk.choices[0].delta.get("content")
+    async for chunk in response:
+        chunk_message = chunk.choices[0].delta.content
         if chunk_message is None:
             break
 
@@ -177,8 +179,8 @@ def get_explanation_of_shell_command(
         yield chunk_message
 
 
-def edit_shell_command_openai(shell_command, prompt):
-    return openai.ChatCompletion.create(
+async def edit_shell_command_openai(shell_command, prompt):
+    response = await client.chat.completions.create(
         model=os.environ["SW_MODEL"],
         temperature=0.2,
         max_tokens=256,
@@ -196,11 +198,14 @@ def edit_shell_command_openai(shell_command, prompt):
             }
         ],
         function_call={"name": "edit_shell_command"},
-    ).choices[0]["message"]["function_call"]["arguments"]
+    )
+    return response.choices[0].message.function_call.arguments
 
 
 async def edit_shell_command(shell_command, prompt):
-    edited_shell_command = edit_shell_command_openai(shell_command, prompt)
+    edited_shell_command = await edit_shell_command_openai(
+        shell_command, prompt
+    )
 
     try:
         edited_shell_command_json = json.loads(edited_shell_command)

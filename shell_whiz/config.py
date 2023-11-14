@@ -2,11 +2,11 @@ import json
 import os
 from json import JSONDecodeError
 
-import openai
 import questionary
 import rich
 
 from shell_whiz.constants import SW_ERROR
+from shell_whiz.openai import client
 
 
 def sw_get_config_paths():
@@ -81,4 +81,4 @@ async def sw_config():
     if "openai_api_key" not in config:
         config = await sw_edit_config()
 
-    openai.api_key = config["openai_api_key"]
+    client.api_key = config["openai_api_key"]
