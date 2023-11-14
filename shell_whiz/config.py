@@ -48,7 +48,7 @@ async def edit_config():
         os.chmod(config_file, 0o600)
     except OSError:
         rich.print(
-            f"{ERROR_PREFIX_RICH}: Failed to change file permissions for {config_file}"
+            f"{ERROR_PREFIX_RICH}: Failed to change permissions for {config_file}"
         )
 
     return config
