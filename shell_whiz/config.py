@@ -6,7 +6,7 @@ import questionary
 import rich
 
 from shell_whiz.constants import SW_ERROR
-from shell_whiz.openai import client
+from shell_whiz.openai_client import client
 
 
 def sw_get_config_paths():

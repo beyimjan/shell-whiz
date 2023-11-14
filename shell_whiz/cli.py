@@ -11,7 +11,6 @@ from rich.markdown import Markdown
 
 from shell_whiz.argparse import create_argument_parser
 from shell_whiz.config import sw_config, sw_edit_config
-from shell_whiz.console import console
 from shell_whiz.constants import SW_ERROR, SW_THINKING_MSG
 from shell_whiz.exceptions import (
     EditingError,
@@ -19,19 +18,20 @@ from shell_whiz.exceptions import (
     TranslationError,
     WarningError,
 )
-from shell_whiz.openai import (
+from shell_whiz.llm_client import (
     edit_shell_command,
-    get_explanation_of_shell_command,
-    get_explanation_of_shell_command_openai,
+    get_explanation_of_shell_command_as_stream,
+    get_explanation_of_shell_command_by_chunks,
     recognize_dangerous_command,
     translate_nl_to_shell_command,
 )
+from shell_whiz.rich_console import console
 
 
 async def print_explanation(
-    explain_using=None, shell_command=None, stream_task=None, no_newline=True
+    explain_using=None, shell_command=None, stream=None, insert_newline=False
 ):
-    if not no_newline:
+    if insert_newline:
         print()
 
     rich.print(
@@ -41,10 +41,10 @@ async def print_explanation(
     try:
         with Live("", auto_refresh=False) as live:
             explanation = ""
-            async for chunk in get_explanation_of_shell_command(
-                explain_using=explain_using,
+            async for chunk in get_explanation_of_shell_command_by_chunks(
                 shell_command=shell_command,
-                stream=await stream_task if stream_task else None,
+                explain_using=explain_using,
+                stream=stream,
             ):
                 explanation += chunk
                 live.update(Markdown(explanation), refresh=True)
@@ -88,17 +88,24 @@ async def shell_whiz_check_danger(shell_command):
 async def shell_whiz_ask_menu_choice(args):
     choices = [
         "Run this command",
+        "Explain this command",
+        "Explain using GPT 3.5 Turbo [1106]",
+        "Explain using GPT-4",
+        "Explain using GPT-4 Turbo [BETA]",
         "Revise query",
         "Edit manually",
         "Exit",
     ]
 
-    if args.dont_explain:
-        choices.insert(1, "Explain this command")
-        if not os.environ["SW_EXPLAIN_USING"].startswith("gpt-4"):
-            choices.insert(2, "Explain using GPT-4")
-    elif not os.environ["SW_EXPLAIN_USING"].startswith("gpt-4"):
-        choices.insert(1, "Explain using GPT-4")
+    if not args.dont_explain:
+        choices.remove("Explain this command")
+
+    if os.environ["SW_EXPLAIN_USING"] == "gpt-3.5-turbo-1106":
+        choices.remove("Explain using GPT 3.5 Turbo [1106]")
+    elif os.environ["SW_EXPLAIN_USING"] == "gpt-4-1106-preview":
+        choices.remove("Explain using GPT-4 Turbo [BETA]")
+    elif os.environ["SW_EXPLAIN_USING"] == "gpt-4":
+        choices.remove("Explain using GPT-4")
 
     choice = await questionary.select(
         "Select an action", choices
@@ -135,13 +142,25 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
             sys.exit()
         elif choice.startswith("Explain this command"):
             await print_explanation(
-                shell_command=shell_command, no_newline=False
+                shell_command=shell_command, insert_newline=True
+            )
+        elif choice == "Explain using GPT 3.5 Turbo [1106]":
+            await print_explanation(
+                explain_using="gpt-3.5-turbo-1106",
+                shell_command=shell_command,
+                insert_newline=True,
             )
         elif choice == "Explain using GPT-4":
             await print_explanation(
                 explain_using="gpt-4",
                 shell_command=shell_command,
-                no_newline=False,
+                insert_newline=True,
+            )
+        elif choice == "Explain using GPT-4 Turbo [BETA]":
+            await print_explanation(
+                explain_using="gpt-4-1106-preview",
+                shell_command=shell_command,
+                insert_newline=True,
             )
         elif choice == "Revise query":
             edit_prompt = (
@@ -182,7 +201,7 @@ async def shell_whiz_ask(prompt, args):
         if not args.dont_explain:
             print_command(shell_command)
             stream_task = asyncio.create_task(
-                get_explanation_of_shell_command_openai(shell_command)
+                get_explanation_of_shell_command_as_stream(shell_command)
             )
 
         if args.dont_warn:
@@ -204,7 +223,8 @@ async def shell_whiz_ask(prompt, args):
             )
 
         if not args.dont_explain:
-            await print_explanation(stream_task=stream_task)
+            stream = await stream_task
+            await print_explanation(stream=stream)
 
         if args.quiet:
             break
