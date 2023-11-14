@@ -1,7 +1,6 @@
 import json
 
 import jsonschema
-from jsonschema import validate
 
 import shell_whiz.openai_client as openai
 from shell_whiz.exceptions import (
@@ -17,8 +16,10 @@ from shell_whiz.llm_jsonschemas import (
 )
 
 
-async def suggest_shell_command(prompt):
-    translation = await openai.suggest_shell_command(prompt)
+async def suggest_shell_command(prompt, preferences, model):
+    translation = await openai.suggest_shell_command(
+        prompt=prompt, preferences=preferences, model=model
+    )
 
     try:
         translation_json = json.loads(translation)
@@ -26,7 +27,9 @@ async def suggest_shell_command(prompt):
         raise TranslationError("Could not extract JSON.")
 
     try:
-        validate(instance=translation_json, schema=translation_jsonschema)
+        jsonschema.validate(
+            instance=translation_json, schema=translation_jsonschema
+        )
     except jsonschema.ValidationError:
         raise TranslationError("Generated JSON is not valid.")
 
@@ -38,8 +41,10 @@ async def suggest_shell_command(prompt):
     return shell_command
 
 
-async def recognize_dangerous_command(shell_command):
-    dangerous_command = await openai.recognize_dangerous_command(shell_command)
+async def recognize_dangerous_command(shell_command, preferences, model):
+    dangerous_command = await openai.recognize_dangerous_command(
+        shell_command=shell_command, preferences=preferences, model=model
+    )
 
     try:
         dangerous_command_json = json.loads(dangerous_command)
@@ -47,7 +52,7 @@ async def recognize_dangerous_command(shell_command):
         raise WarningError("Could not extract JSON.")
 
     try:
-        validate(
+        jsonschema.validate(
             instance=dangerous_command_json,
             schema=dangerous_command_jsonschema,
         )
@@ -61,30 +66,35 @@ async def recognize_dangerous_command(shell_command):
 
     if not is_dangerous:
         return False, ""
-
-    if dangerous_consequences == "":
+    elif dangerous_consequences == "":
         raise WarningError("Extracted dangerous consequences are empty.")
     elif "\n" in dangerous_consequences:
         raise WarningError("Extracted dangerous consequences contain newlines.")
+    else:
+        return True, dangerous_consequences
 
-    return True, dangerous_consequences
 
-
-async def get_explanation_of_shell_command_as_stream(
-    shell_command, explain_using=None
+async def get_explanation_of_shell_command(
+    shell_command, preferences, model, stream=False
 ):
-    return await openai.get_explanation_of_shell_command_as_stream(
-        shell_command, explain_using=explain_using
+    return await openai.get_explanation_of_shell_command(
+        shell_command=shell_command,
+        preferences=preferences,
+        model=model,
+        stream=stream,
     )
 
 
 async def get_explanation_of_shell_command_by_chunks(
-    shell_command=None, explain_using=None, stream=None
+    shell_command=None, preferences=None, model=None, stream=None
 ):
     is_first_chunk = True
     skip_initial_spaces = True
     async for chunk in openai.get_explanation_of_shell_command_by_chunks(
-        shell_command=shell_command, explain_using=explain_using, stream=stream
+        shell_command=shell_command,
+        preferences=preferences,
+        model=model,
+        stream=stream,
     ):
         if chunk is None:
             break
@@ -104,8 +114,10 @@ async def get_explanation_of_shell_command_by_chunks(
         yield chunk
 
 
-async def edit_shell_command(shell_command, prompt):
-    edited_shell_command = await edit_shell_command(shell_command, prompt)
+async def edit_shell_command(shell_command, prompt, model):
+    edited_shell_command = await openai.edit_shell_command(
+        shell_command=shell_command, prompt=prompt, model=model
+    )
 
     try:
         edited_shell_command_json = json.loads(edited_shell_command)
@@ -113,7 +125,7 @@ async def edit_shell_command(shell_command, prompt):
         raise EditingError("Could not extract JSON.")
 
     try:
-        validate(
+        jsonschema.validate(
             instance=edited_shell_command_json,
             schema=edited_shell_command_jsonschema,
         )

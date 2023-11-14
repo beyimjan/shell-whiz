@@ -9,7 +9,7 @@ name = "shell-whiz"
 version = "1.9.1"
 description = "AI assistant for command line"
 license = "GPL-3.0-only"
-authors = ["Tamerlan Bimzhanov <bimzhanovt.net@gmail.com>"]
+authors = ["Tamerlan Bimzhanov <ttemirbolatuly@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/beimzhan/shell-whiz"
 packages = [{include = "shell_whiz"}]

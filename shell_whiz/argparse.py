@@ -14,7 +14,7 @@ def create_argument_parser():
         version=f"{SW_DESCRIPTION}. Version {version('shell-whiz')}.",
     )
 
-    subparsers = parser.add_subparsers(dest="sw_command", required=True)
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("config", help="Configure Shell Whiz")
 

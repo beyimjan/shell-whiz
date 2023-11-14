@@ -1,5 +1,4 @@
 import asyncio
-import os
 import subprocess
 import sys
 
@@ -21,7 +20,7 @@ from shell_whiz.exceptions import (
 )
 from shell_whiz.llm_client import (
     edit_shell_command,
-    get_explanation_of_shell_command_as_stream,
+    get_explanation_of_shell_command,
     get_explanation_of_shell_command_by_chunks,
     recognize_dangerous_command,
     suggest_shell_command,
@@ -30,8 +29,31 @@ from shell_whiz.llm_client import (
 console = Console()
 
 
+def print_command(shell_command):
+    rich.print(
+        "\n ==================== [bold green]Command[/] ====================\n"
+    )
+    print(" " + " ".join(shell_command.splitlines(keepends=True)) + "\n")
+
+
+async def check_danger(shell_command, preferences, model):
+    with console.status(
+        "Shell Whiz is checking the command for danger...", spinner="dots"
+    ):
+        try:
+            return await recognize_dangerous_command(
+                shell_command, preferences, model
+            )
+        except WarningError:
+            return False, ""
+
+
 async def print_explanation(
-    explain_using=None, shell_command=None, stream=None, insert_newline=False
+    shell_command=None,
+    preferences=None,
+    explain_using=None,
+    stream=None,
+    insert_newline=False,
 ):
     if insert_newline:
         print()
@@ -45,7 +67,8 @@ async def print_explanation(
             explanation = ""
             async for chunk in get_explanation_of_shell_command_by_chunks(
                 shell_command=shell_command,
-                explain_using=explain_using,
+                preferences=preferences,
+                model=explain_using,
                 stream=stream,
             ):
                 explanation += chunk
@@ -58,17 +81,12 @@ async def print_explanation(
     print()
 
 
-def print_command(shell_command):
-    rich.print(
-        "\n ==================== [bold green]Command[/] ====================\n"
-    )
-    print(" " + " ".join(shell_command.splitlines(keepends=True)) + "\n")
-
-
-async def shell_whiz_edit(shell_command, prompt):
+async def edit_shell_command_cli(shell_command, prompt, model):
     try:
         with console.status(THINKING_MSG, spinner="dots"):
-            shell_command = await edit_shell_command(shell_command, prompt)
+            shell_command = await edit_shell_command(
+                shell_command, prompt, model
+            )
     except EditingError:
         rich.print(
             f"\n {ERROR_PREFIX_RICH}: Sorry, I couldn't edit the command. I left it unchanged."
@@ -77,17 +95,7 @@ async def shell_whiz_edit(shell_command, prompt):
     return shell_command
 
 
-async def shell_whiz_check_danger(shell_command):
-    with console.status(
-        "Shell Whiz is checking the command for danger...", spinner="dots"
-    ):
-        try:
-            return await recognize_dangerous_command(shell_command)
-        except WarningError:
-            return False, ""
-
-
-def shell_whiz_ask_menu_choices(args):
+def get_filtered_choices(dont_explain, explain_using):
     choices = [
         "Run this command",
         "Explain this command",
@@ -99,67 +107,81 @@ def shell_whiz_ask_menu_choices(args):
         "Exit",
     ]
 
-    if not args.dont_explain:
+    if not dont_explain:
         choices.remove("Explain this command")
 
-    if os.environ["SW_EXPLAIN_USING"] == "gpt-3.5-turbo-1106":
+    if explain_using == "gpt-3.5-turbo-1106":
         choices.remove("Explain using GPT 3.5 Turbo [1106]")
-    elif os.environ["SW_EXPLAIN_USING"] == "gpt-4-1106-preview":
+    elif explain_using == "gpt-4-1106-preview":
         choices.remove("Explain using GPT-4 Turbo [BETA]")
-    elif os.environ["SW_EXPLAIN_USING"] == "gpt-4":
+    elif explain_using == "gpt-4":
         choices.remove("Explain using GPT-4")
 
     return choices
 
 
-async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
+async def perform_selected_action(
+    shell_command,
+    is_dangerous,
+    preferences,
+    explain_using,
+    shell,
+    dont_explain,
+    output_file,
+):
     while True:
         choice = await questionary.select(
-            "Select an action", shell_whiz_ask_menu_choices(args)
+            "Select an action",
+            get_filtered_choices(dont_explain, explain_using),
         ).unsafe_ask_async()
 
         if choice == "Exit":
             sys.exit(1)
         elif choice == "Run this command":
-            if args.output:
+            if output_file:
                 try:
-                    with open(args.output, "w", newline="\n") as f:
+                    with open(output_file, "w", newline="\n") as f:
                         f.write(shell_command)
-                except IOError:
+                except OSError:
                     sys.exit(1)
             else:
-                if (
+                cancel_run = (
                     is_dangerous
                     and not await questionary.confirm(
                         "Are you sure you want to run this command?"
                     ).unsafe_ask_async()
-                ):
-                    sys.exit(1)
-                subprocess.run(
-                    shell_command, executable=args.shell or None, shell=True
                 )
+                if cancel_run:
+                    sys.exit(1)
+                subprocess.run(shell_command, executable=shell, shell=True)
             # End successfully only if the command has been executed
             sys.exit()
-        elif choice.startswith("Explain this command"):
+        elif choice == "Explain this command":
             await print_explanation(
-                shell_command=shell_command, insert_newline=True
+                shell_command=shell_command,
+                preferences=preferences,
+                explain_using=explain_using,
+                insert_newline=True,
             )
         elif choice == "Explain using GPT 3.5 Turbo [1106]":
             await print_explanation(
-                explain_using="gpt-3.5-turbo-1106",
                 shell_command=shell_command,
+                preferences=preferences,
+                explain_using="gpt-3.5-turbo-1106",
                 insert_newline=True,
             )
         elif choice == "Explain using GPT-4 Turbo [BETA]":
             await print_explanation(
-                explain_using="gpt-4-1106-preview",
                 shell_command=shell_command,
+                preferences=preferences,
+                explain_using="gpt-4-1106-preview",
                 insert_newline=True,
             )
         elif choice == "Explain using GPT-4":
             await print_explanation(
-                explain_using="gpt-4",
                 shell_command=shell_command,
+                preferences=preferences,
+                explain_using="gpt-4",
                 insert_newline=True,
             )
         elif choice == "Revise query":
@@ -185,10 +207,24 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
                 return edited_shell_command, ""
 
 
-async def shell_whiz_ask(prompt, args):
+async def run_ai_assistant(
+    prompt,
+    preferences,
+    model,
+    explain_using,
+    dont_explain,
+    dont_warn,
+    quiet,
+    shell,
+    output_file,
+):
+    await configure()
+
     try:
         with console.status(THINKING_MSG, spinner="dots"):
-            shell_command = await suggest_shell_command(prompt)
+            shell_command = await suggest_shell_command(
+                prompt=prompt, preferences=preferences, model=model
+            )
     except TranslationError:
         rich.print(f"{ERROR_PREFIX_RICH}: Sorry, I don't know how to do this.")
         sys.exit(1)
@@ -196,62 +232,61 @@ async def shell_whiz_ask(prompt, args):
     edit_prompt = ""
     while True:
         if edit_prompt != "":
-            shell_command = await shell_whiz_edit(shell_command, edit_prompt)
-
-        if not args.dont_explain:
-            print_command(shell_command)
-            stream_task = asyncio.create_task(
-                get_explanation_of_shell_command_as_stream(shell_command)
+            shell_command = await edit_shell_command_cli(
+                shell_command=shell_command, prompt=edit_prompt, model=model
             )
 
-        if args.dont_warn:
+        if not dont_explain:
+            print_command(shell_command)
+            stream_task = asyncio.create_task(
+                get_explanation_of_shell_command(
+                    shell_command=shell_command,
+                    preferences=preferences,
+                    model=explain_using,
+                    stream=True,
+                )
+            )
+
+        if dont_warn:
             is_dangerous = False
         else:
             (
                 is_dangerous,
                 dangerous_consequences,
-            ) = await shell_whiz_check_danger(shell_command)
+            ) = await check_danger(
+                shell_command=shell_command,
+                preferences=preferences,
+                model=model,
+            )
 
-        if args.dont_explain:
+        if dont_explain:
             print_command(shell_command)
 
-        if not args.dont_warn and is_dangerous:
+        if not dont_warn and is_dangerous:
             rich.print(
                 " [bold red]Warning[/]: [bold yellow]{0}[/]\n".format(
                     dangerous_consequences
                 )
             )
 
-        if not args.dont_explain:
-            stream = await stream_task
-            await print_explanation(stream=stream)
+        if not dont_explain:
+            await print_explanation(stream=await stream_task)
 
-        if args.quiet:
+        if quiet:
             break
 
-        shell_command, edit_prompt = await shell_whiz_ask_menu(
-            args, shell_command, is_dangerous
+        shell_command, edit_prompt = await perform_selected_action(
+            shell_command=shell_command,
+            is_dangerous=is_dangerous,
+            preferences=preferences,
+            explain_using=explain_using,
+            shell=shell,
+            dont_explain=dont_explain,
+            output_file=output_file,
         )
 
 
-async def run_ai_assistant(args):
-    await configure()
-
-    os.environ["SW_MODEL"] = args.model
-    os.environ["SW_EXPLAIN_USING"] = (
-        args.explain_using if args.explain_using else args.model
-    )
-    os.environ["SW_PREFERENCES"] = args.preferences
-
-    prompt = " ".join(args.prompt).strip()
-    if prompt == "":
-        rich.print(f"{ERROR_PREFIX_RICH}: Please provide a valid prompt.")
-        sys.exit(1)
-
-    await shell_whiz_ask(prompt, args)
-
-
-async def main():
+async def parse_arguments():
     args = create_argument_parser().parse_args()
 
     if not sys.stdin.isatty() or not sys.stdout.isatty():
@@ -264,15 +299,33 @@ async def main():
 
         sys.exit(1)
 
-    if args.sw_command == "config":
+    if args.command == "config":
         await edit_config()
-    elif args.sw_command == "ask":
-        await run_ai_assistant(args)
+    elif args.command == "ask":
+        prompt = " ".join(args.prompt).strip()
+        if prompt == "":
+            rich.print(f"{ERROR_PREFIX_RICH}: Please provide a valid prompt.")
+            sys.exit(1)
+
+        await run_ai_assistant(
+            prompt=prompt,
+            preferences=args.preferences,
+            model=args.model,
+            explain_using=args.explain_using or args.model,
+            dont_explain=args.dont_explain,
+            dont_warn=args.dont_warn,
+            quiet=args.quiet,
+            shell=args.shell,
+            output_file=args.output,
+        )
 
 
 def run():
     try:
-        asyncio.run(main())
+        asyncio.run(parse_arguments())
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(1)
     except openai.BadRequestError:
         rich.print(
             f"{ERROR_PREFIX_RICH}: Your request was malformed or missing some required parameters, such as a token or an input."
@@ -317,7 +370,4 @@ def run():
         rich.print(
             f"{ERROR_PREFIX_RICH}: An unknown error occurred while connecting to the OpenAI API. Please retry your request after a brief wait."
         )
-        sys.exit(1)
-    except KeyboardInterrupt:
-        print("\nExiting...")
         sys.exit(1)

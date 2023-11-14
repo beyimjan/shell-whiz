@@ -58,7 +58,8 @@ def read_config():
     _, config_file = get_config_paths()
 
     try:
-        config = json.load(config_file)
+        with open(config_file) as f:
+            config = json.load(f)
     except (OSError, json.JSONDecodeError):
         return {}
     else:

@@ -1,5 +1,3 @@
-import os
-
 from openai import AsyncOpenAI
 
 from shell_whiz.llm_jsonschemas import (
@@ -9,22 +7,20 @@ from shell_whiz.llm_jsonschemas import (
 )
 
 
-def get_user_preferences():
-    return (
-        f"These are my preferences: ####\n{os.environ['SW_PREFERENCES']}\n####"
-    )
+def format_preferences(preferences):
+    return f"These are my preferences: ####\n{preferences}\n####"
 
 
-async def suggest_shell_command(prompt):
+async def suggest_shell_command(prompt, preferences, model):
     client = AsyncOpenAI()
     response = await client.chat.completions.create(
-        model=os.environ["SW_MODEL"],
+        model=model,
         temperature=0.25,
         max_tokens=256,
         messages=[
             {
                 "role": "user",
-                "content": f"{get_user_preferences()}\n\n{prompt}",
+                "content": f"{format_preferences(preferences)}\n\n{prompt}",
             }
         ],
         functions=[
@@ -39,16 +35,16 @@ async def suggest_shell_command(prompt):
     return response.choices[0].message.function_call.arguments
 
 
-async def recognize_dangerous_command(shell_command):
+async def recognize_dangerous_command(shell_command, preferences, model):
     client = AsyncOpenAI()
     response = await client.chat.completions.create(
-        model=os.environ["SW_MODEL"],
+        model=model,
         temperature=0,
         max_tokens=96,
         messages=[
             {
                 "role": "user",
-                "content": f"{get_user_preferences()}\n\nI want to run this command: ####\n{shell_command}\n####",
+                "content": f"{format_preferences(preferences)}\n\nI want to run this command: ####\n{shell_command}\n####",
             },
         ],
         functions=[
@@ -63,40 +59,43 @@ async def recognize_dangerous_command(shell_command):
     return response.choices[0].message.function_call.arguments
 
 
-async def get_explanation_of_shell_command_as_stream(
-    shell_command, explain_using=None
+async def get_explanation_of_shell_command(
+    shell_command, preferences, model, stream
 ):
-    prompt = f'Split the command into parts and explain it in **list** format. Each line should follow the format "command part" followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists directory contents.\n  * `-l` displays in long format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` reads the content of `file`.\n* `| grep "foo"` filters lines containing "foo".\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{get_user_preferences()}\n\nShell command: ####\n{shell_command}\n####'
+    prompt = f'Split the command into parts and explain it in **list** format. Each line should follow the format "command part" followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists directory contents.\n  * `-l` displays in long format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` reads the content of `file`.\n* `| grep "foo"` filters lines containing "foo".\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{format_preferences(preferences)}\n\nShell command: ####\n{shell_command}\n####'
 
     temperature = 0.1
     max_tokens = 512
 
     client = AsyncOpenAI()
     return await client.chat.completions.create(
-        model=explain_using or os.environ["SW_EXPLAIN_USING"],
+        model=model,
         temperature=temperature,
         max_tokens=max_tokens,
-        stream=True,
+        stream=stream,
         messages=[{"role": "user", "content": prompt}],
     )
 
 
 async def get_explanation_of_shell_command_by_chunks(
-    shell_command=None, explain_using=None, stream=None
+    shell_command=None, preferences=None, model=None, stream=None
 ):
     if stream is None:
-        stream = await get_explanation_of_shell_command_as_stream(
-            shell_command, explain_using=explain_using
+        stream = await get_explanation_of_shell_command(
+            shell_command=shell_command,
+            preferences=preferences,
+            model=model,
+            stream=True,
         )
 
     async for chunk in stream:
         yield chunk.choices[0].delta.content
 
 
-async def edit_shell_command(shell_command, prompt):
+async def edit_shell_command(shell_command, prompt, model):
     client = AsyncOpenAI()
     response = await client.chat.completions.create(
-        model=os.environ["SW_MODEL"],
+        model=model,
         temperature=0.2,
         max_tokens=256,
         messages=[
