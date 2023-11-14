@@ -3,11 +3,11 @@ name: Lint Python code
 on:
   push:
     branches:
-      - '**'
+      - "**"
     paths:
       - pyproject.toml
       - .flake8
-      - 'shell_whiz/**.py'
+      - "shell_whiz/**.py"
 
 jobs:
   lint:
