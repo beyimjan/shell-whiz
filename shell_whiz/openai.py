@@ -7,10 +7,10 @@ from openai import AsyncOpenAI
 
 from shell_whiz.constants import DELIMITER
 from shell_whiz.exceptions import (
-    ShellWhizEditError,
-    ShellWhizExplanationError,
-    ShellWhizTranslationError,
-    ShellWhizWarningError,
+    EditingError,
+    ExplanationError,
+    TranslationError,
+    WarningError,
 )
 from shell_whiz.jsonschemas import (
     dangerous_command_jsonschema,
@@ -54,17 +54,17 @@ async def translate_nl_to_shell_command(prompt):
     try:
         translation_json = json.loads(translation)
     except json.JSONDecodeError:
-        raise ShellWhizTranslationError("Could not extract JSON.")
+        raise TranslationError("Could not extract JSON.")
 
     try:
         validate(instance=translation_json, schema=translation_jsonschema)
     except jsonschema.ValidationError:
-        raise ShellWhizTranslationError("Generated JSON is not valid.")
+        raise TranslationError("Generated JSON is not valid.")
 
     shell_command = translation_json["shell_command"].strip()
 
     if shell_command == "":
-        raise ShellWhizTranslationError("Extracted shell command is empty.")
+        raise TranslationError("Extracted shell command is empty.")
 
     return shell_command
 
@@ -98,7 +98,7 @@ async def recognize_dangerous_command(shell_command):
     try:
         dangerous_command_json = json.loads(dangerous_command)
     except json.JSONDecodeError:
-        raise ShellWhizWarningError("Could not extract JSON.")
+        raise WarningError("Could not extract JSON.")
 
     try:
         validate(
@@ -106,7 +106,7 @@ async def recognize_dangerous_command(shell_command):
             schema=dangerous_command_jsonschema,
         )
     except jsonschema.ValidationError:
-        raise ShellWhizWarningError("Generated JSON is not valid.")
+        raise WarningError("Generated JSON is not valid.")
 
     is_dangerous = dangerous_command_json["dangerous_to_run"]
     dangerous_consequences = dangerous_command_json.get(
@@ -117,13 +117,9 @@ async def recognize_dangerous_command(shell_command):
         return False, ""
 
     if dangerous_consequences == "":
-        raise ShellWhizWarningError(
-            "Extracted dangerous consequences are empty."
-        )
+        raise WarningError("Extracted dangerous consequences are empty.")
     elif "\n" in dangerous_consequences:
-        raise ShellWhizWarningError(
-            "Extracted dangerous consequences contain newlines."
-        )
+        raise WarningError("Extracted dangerous consequences contain newlines.")
 
     return True, dangerous_consequences
 
@@ -173,7 +169,7 @@ async def get_explanation_of_shell_command(
 
         if is_first_chunk:
             if not chunk_message.startswith("*"):
-                raise ShellWhizExplanationError("Explanation is not valid.")
+                raise ExplanationError("Explanation is not valid.")
             is_first_chunk = False
 
         yield chunk_message
@@ -210,7 +206,7 @@ async def edit_shell_command(shell_command, prompt):
     try:
         edited_shell_command_json = json.loads(edited_shell_command)
     except json.JSONDecodeError:
-        raise ShellWhizEditError("Could not extract JSON.")
+        raise EditingError("Could not extract JSON.")
 
     try:
         validate(
@@ -218,12 +214,12 @@ async def edit_shell_command(shell_command, prompt):
             schema=edited_shell_command_jsonschema,
         )
     except jsonschema.ValidationError:
-        raise ShellWhizEditError("Generated JSON is not valid.")
+        raise EditingError("Generated JSON is not valid.")
 
     edited_shell_command = edited_shell_command_json[
         "edited_shell_command"
     ].strip()
     if edited_shell_command == "":
-        raise ShellWhizEditError("Edited shell command is empty.")
+        raise EditingError("Edited shell command is empty.")
 
     return edited_shell_command

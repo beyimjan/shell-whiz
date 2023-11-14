@@ -1,14 +1,18 @@
-class ShellWhizTranslationError(Exception):
+class ShellWhizError(Exception):
     pass
 
 
-class ShellWhizWarningError(Exception):
+class TranslationError(ShellWhizError):
     pass
 
 
-class ShellWhizExplanationError(Exception):
+class WarningError(ShellWhizError):
     pass
 
 
-class ShellWhizEditError(Exception):
+class ExplanationError(ShellWhizError):
+    pass
+
+
+class EditingError(ShellWhizError):
     pass

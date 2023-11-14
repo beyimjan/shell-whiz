@@ -14,10 +14,10 @@ from shell_whiz.config import sw_config, sw_edit_config
 from shell_whiz.console import console
 from shell_whiz.constants import SW_ERROR, SW_THINKING_MSG
 from shell_whiz.exceptions import (
-    ShellWhizEditError,
-    ShellWhizExplanationError,
-    ShellWhizTranslationError,
-    ShellWhizWarningError,
+    EditingError,
+    ExplanationError,
+    TranslationError,
+    WarningError,
 )
 from shell_whiz.openai import (
     edit_shell_command,
@@ -48,7 +48,7 @@ async def print_explanation(
             ):
                 explanation += chunk
                 live.update(Markdown(explanation), refresh=True)
-    except ShellWhizExplanationError:
+    except ExplanationError:
         rich.print(
             f" {SW_ERROR}: Sorry, I don't know how to explain this command."
         )
@@ -67,7 +67,7 @@ async def shell_whiz_edit(shell_command, prompt):
     try:
         with console.status(SW_THINKING_MSG, spinner="dots"):
             shell_command = await edit_shell_command(shell_command, prompt)
-    except ShellWhizEditError:
+    except EditingError:
         rich.print(
             f"\n {SW_ERROR}: Sorry, I couldn't edit the command. I left it unchanged."
         )
@@ -81,7 +81,7 @@ async def shell_whiz_check_danger(shell_command):
     ):
         try:
             return await recognize_dangerous_command(shell_command)
-        except ShellWhizWarningError:
+        except WarningError:
             return False, ""
 
 
@@ -170,7 +170,7 @@ async def shell_whiz_ask(prompt, args):
     try:
         with console.status(SW_THINKING_MSG, spinner="dots"):
             shell_command = await translate_nl_to_shell_command(prompt)
-    except ShellWhizTranslationError:
+    except TranslationError:
         rich.print(f"{SW_ERROR}: Sorry, I don't know how to do this.")
         sys.exit(1)
 
