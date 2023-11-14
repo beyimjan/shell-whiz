@@ -9,14 +9,13 @@ from shell_whiz.llm_jsonschemas import (
     translation_jsonschema,
 )
 
-client = AsyncOpenAI()
-
 
 def get_user_preferences():
     return f"These are my preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}"
 
 
 async def suggest_shell_command(prompt):
+    client = AsyncOpenAI()
     response = await client.chat.completions.create(
         model=os.environ["SW_MODEL"],
         temperature=0.25,
@@ -40,6 +39,7 @@ async def suggest_shell_command(prompt):
 
 
 async def recognize_dangerous_command(shell_command):
+    client = AsyncOpenAI()
     response = await client.chat.completions.create(
         model=os.environ["SW_MODEL"],
         temperature=0,
@@ -70,6 +70,7 @@ async def get_explanation_of_shell_command_as_stream(
     temperature = 0.1
     max_tokens = 512
 
+    client = AsyncOpenAI()
     return await client.chat.completions.create(
         model=explain_using or os.environ["SW_EXPLAIN_USING"],
         temperature=temperature,
@@ -92,6 +93,7 @@ async def get_explanation_of_shell_command_by_chunks(
 
 
 async def edit_shell_command(shell_command, prompt):
+    client = AsyncOpenAI()
     response = await client.chat.completions.create(
         model=os.environ["SW_MODEL"],
         temperature=0.2,

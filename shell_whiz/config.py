@@ -6,7 +6,6 @@ import questionary
 import rich
 
 from shell_whiz.constants import SW_ERROR
-from shell_whiz.openai_client import client
 
 
 def sw_get_config_paths():
@@ -32,9 +31,10 @@ async def sw_get_user_config():
     openai_api_key = await questionary.text(
         "OpenAI API key",
         default=os.environ.get("OPENAI_API_KEY", ""),
+        validate=lambda text: len(text) > 0,
     ).unsafe_ask_async()
 
-    return {"openai_api_key": openai_api_key}
+    return {"OPENAI_API_KEY": openai_api_key}
 
 
 async def sw_edit_config():
@@ -74,11 +74,8 @@ def sw_read_config():
 
 
 async def sw_config():
-    if "OPENAI_API_KEY" in os.environ:
-        return
-
     config = sw_read_config()
-    if "openai_api_key" not in config:
+    if "OPENAI_API_KEY" not in config:
         config = await sw_edit_config()
 
-    client.api_key = config["openai_api_key"]
+    os.environ["OPENAI_API_KEY"] = config["OPENAI_API_KEY"]

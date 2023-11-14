@@ -6,6 +6,7 @@ import sys
 import openai
 import questionary
 import rich
+from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
 
@@ -25,7 +26,8 @@ from shell_whiz.llm_client import (
     recognize_dangerous_command,
     suggest_shell_command,
 )
-from shell_whiz.rich_console import console
+
+console = Console()
 
 
 async def print_explanation(
