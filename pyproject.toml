@@ -16,7 +16,7 @@ packages = [{include = "shell_whiz"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9 <4"
-openai = "^0.27.8"
+openai = "^1.2.4"
 jsonschema = "^4.19.0"
 rich = "^13.5.2"
 questionary = "^2.0.0"
