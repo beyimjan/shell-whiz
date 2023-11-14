@@ -20,7 +20,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 - **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`, which will print the last modification time of the file.
 - **Command explanations:** It will try to explain, piece by piece, what the suggested command will do, so you can learn new things about your shell and the commands you use.
 - **Revisions:** If the suggested command is not quite what you want, you can ask for a revision. Another way to use this feature is to start with a simple query and iteratively create a complex command by defining the details.
-- **Customization:** You can customize the behavior of Shell Whiz by using command line arguments. For example, you can set PowerShell as your shell, disable automatic explanations, or use the `gpt-4` model instead of the default `gpt-3.5-turbo` model.
+- **Customization:** You can tweak the behavior of Shell Whiz using command line arguments. For example, you can set PowerShell as your shell, disable automatic explanations, or use any [Chat Completions](https://platform.openai.com/docs/api-reference/chat) model instead of the default `gpt-3.5-turbo` model.
 
 ## Installation and setup
 
@@ -124,7 +124,7 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 - If you want to pass an argument that starts with a hyphen, you can use `--` to separate the command from the arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
 - You can specify a shell executable by passing the `-s` or `--shell` argument.
 - Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
-- Add `--explain-using-gpt-4` to use the `gpt-4` model for the explanatory part.
+- Add `--explain-using gpt-4` to use the `gpt-4` model for the explanatory part.
 - Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
 - Use `--dont-warn` to disable automatic warnings.
 - Pass `-p "..."` or `--preferences "..."` to set preferences for generating commands. This is most useful for setting the shell, but can be used to set any other preferences as well, even the language in which the assistant responds. By default, this parameter is set to `I use Bash on Linux`.
