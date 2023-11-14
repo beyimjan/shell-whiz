@@ -30,7 +30,7 @@ To install Shell Whiz, run the following command:
 pip install shell-whiz
 ```
 
-This will add the `sw` command to your PATH.
+This will add the `sw` command to your `PATH`.
 
 To use Shell Whiz, you need an API key from OpenAI. You can obtain this key by visiting https://platform.openai.com/account/api-keys. Once you have the key, you can configure Shell Whiz by running the following command:
 
