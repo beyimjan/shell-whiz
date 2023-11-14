@@ -11,8 +11,8 @@ from rich.live import Live
 from rich.markdown import Markdown
 
 from shell_whiz.argparse import create_argument_parser
-from shell_whiz.config import sw_config, sw_edit_config
-from shell_whiz.constants import SW_ERROR, SW_THINKING_MSG
+from shell_whiz.config import configure, edit_config
+from shell_whiz.constants import ERROR_PREFIX_RICH, THINKING_MSG
 from shell_whiz.exceptions import (
     EditingError,
     ExplanationError,
@@ -52,7 +52,7 @@ async def print_explanation(
                 live.update(Markdown(explanation), refresh=True)
     except ExplanationError:
         rich.print(
-            f" {SW_ERROR}: Sorry, I don't know how to explain this command."
+            f" {ERROR_PREFIX_RICH}: Sorry, I don't know how to explain this command."
         )
 
     print()
@@ -67,11 +67,11 @@ def print_command(shell_command):
 
 async def shell_whiz_edit(shell_command, prompt):
     try:
-        with console.status(SW_THINKING_MSG, spinner="dots"):
+        with console.status(THINKING_MSG, spinner="dots"):
             shell_command = await edit_shell_command(shell_command, prompt)
     except EditingError:
         rich.print(
-            f"\n {SW_ERROR}: Sorry, I couldn't edit the command. I left it unchanged."
+            f"\n {ERROR_PREFIX_RICH}: Sorry, I couldn't edit the command. I left it unchanged."
         )
 
     return shell_command
@@ -187,10 +187,10 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
 
 async def shell_whiz_ask(prompt, args):
     try:
-        with console.status(SW_THINKING_MSG, spinner="dots"):
+        with console.status(THINKING_MSG, spinner="dots"):
             shell_command = await suggest_shell_command(prompt)
     except TranslationError:
-        rich.print(f"{SW_ERROR}: Sorry, I don't know how to do this.")
+        rich.print(f"{ERROR_PREFIX_RICH}: Sorry, I don't know how to do this.")
         sys.exit(1)
 
     edit_prompt = ""
@@ -235,7 +235,7 @@ async def shell_whiz_ask(prompt, args):
 
 
 async def run_ai_assistant(args):
-    await sw_config()
+    await configure()
 
     os.environ["SW_MODEL"] = args.model
     os.environ["SW_EXPLAIN_USING"] = (
@@ -245,7 +245,7 @@ async def run_ai_assistant(args):
 
     prompt = " ".join(args.prompt).strip()
     if prompt == "":
-        rich.print(f"{SW_ERROR}: Please provide a valid prompt.")
+        rich.print(f"{ERROR_PREFIX_RICH}: Please provide a valid prompt.")
         sys.exit(1)
 
     await shell_whiz_ask(prompt, args)
@@ -257,7 +257,7 @@ async def main():
     if not sys.stdin.isatty() or not sys.stdout.isatty():
         try:
             rich.print(
-                f"{SW_ERROR}: Shell Whiz cannot run in non-interactive mode."
+                f"{ERROR_PREFIX_RICH}: Shell Whiz cannot run in non-interactive mode."
             )
         except BrokenPipeError:
             pass
@@ -265,7 +265,7 @@ async def main():
         sys.exit(1)
 
     if args.sw_command == "config":
-        await sw_edit_config()
+        await edit_config()
     elif args.sw_command == "ask":
         await run_ai_assistant(args)
 
@@ -275,47 +275,47 @@ def run():
         asyncio.run(main())
     except openai.BadRequestError:
         rich.print(
-            f"{SW_ERROR}: Your request was malformed or missing some required parameters, such as a token or an input."
+            f"{ERROR_PREFIX_RICH}: Your request was malformed or missing some required parameters, such as a token or an input."
         )
         sys.exit(1)
     except openai.AuthenticationError:
         rich.print(
-            f"{SW_ERROR}: You are not authorized to access the OpenAI API. You may have entered the wrong API key. Your API key is invalid, expired or revoked. Please run [bold green]sw config[/] to set up the API key. Visit https://platform.openai.com/account/api-keys to get your API key."
+            f"{ERROR_PREFIX_RICH}: You are not authorized to access the OpenAI API. You may have entered the wrong API key. Your API key is invalid, expired or revoked. Please run [bold green]sw config[/] to set up the API key. Visit https://platform.openai.com/account/api-keys to get your API key."
         )
         sys.exit(1)
     except openai.PermissionDeniedError:
         rich.print(
-            f"{SW_ERROR}: Your API key or token does not have the required scope or role to perform the requested action. Make sure your API key has the appropriate permissions for the action or model accessed."
+            f"{ERROR_PREFIX_RICH}: Your API key or token does not have the required scope or role to perform the requested action. Make sure your API key has the appropriate permissions for the action or model accessed."
         )
         sys.exit(1)
     except openai.RateLimitError:
         rich.print(
-            f"{SW_ERROR}: OpenAI API request exceeded rate limit. If you are on a free plan, please upgrade to a paid plan for a better experience with Shell Whiz. Visit https://platform.openai.com/account/billing/limits for more information."
+            f"{ERROR_PREFIX_RICH}: OpenAI API request exceeded rate limit. If you are on a free plan, please upgrade to a paid plan for a better experience with Shell Whiz. Visit https://platform.openai.com/account/billing/limits for more information."
         )
         sys.exit(1)
     except openai.APITimeoutError:
         rich.print(
-            f"{SW_ERROR}: OpenAI API request timed out. Please retry your request after a brief wait."
+            f"{ERROR_PREFIX_RICH}: OpenAI API request timed out. Please retry your request after a brief wait."
         )
         sys.exit(1)
     except openai.APIConnectionError:
         rich.print(
-            f"{SW_ERROR}: OpenAI API request failed to connect. Please check your internet connection and try again."
+            f"{ERROR_PREFIX_RICH}: OpenAI API request failed to connect. Please check your internet connection and try again."
         )
         sys.exit(1)
     except openai.InternalServerError:
         rich.print(
-            f"{SW_ERROR}: OpenAI API request failed due to a temporary server-side issue. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information."
+            f"{ERROR_PREFIX_RICH}: OpenAI API request failed due to a temporary server-side issue. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information."
         )
         sys.exit(1)
     except openai.APIStatusError:
         rich.print(
-            f"{SW_ERROR}: An error occurred while connecting to the OpenAI API. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information."
+            f"{ERROR_PREFIX_RICH}: An error occurred while connecting to the OpenAI API. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information."
         )
         sys.exit(1)
     except openai.APIError:
         rich.print(
-            f"{SW_ERROR}: An unknown error occurred while connecting to the OpenAI API. Please retry your request after a brief wait."
+            f"{ERROR_PREFIX_RICH}: An unknown error occurred while connecting to the OpenAI API. Please retry your request after a brief wait."
         )
         sys.exit(1)
     except KeyboardInterrupt:

@@ -2,7 +2,6 @@ import os
 
 from openai import AsyncOpenAI
 
-from shell_whiz.constants import DELIMITER
 from shell_whiz.llm_jsonschemas import (
     dangerous_command_jsonschema,
     edited_shell_command_jsonschema,
@@ -11,7 +10,9 @@ from shell_whiz.llm_jsonschemas import (
 
 
 def get_user_preferences():
-    return f"These are my preferences: {DELIMITER}\n{os.environ['SW_PREFERENCES']}\n{DELIMITER}"
+    return (
+        f"These are my preferences: ####\n{os.environ['SW_PREFERENCES']}\n####"
+    )
 
 
 async def suggest_shell_command(prompt):
@@ -47,7 +48,7 @@ async def recognize_dangerous_command(shell_command):
         messages=[
             {
                 "role": "user",
-                "content": f"{get_user_preferences()}\n\nI want to run this command: {DELIMITER}\n{shell_command}\n{DELIMITER}",
+                "content": f"{get_user_preferences()}\n\nI want to run this command: ####\n{shell_command}\n####",
             },
         ],
         functions=[
@@ -65,7 +66,7 @@ async def recognize_dangerous_command(shell_command):
 async def get_explanation_of_shell_command_as_stream(
     shell_command, explain_using=None
 ):
-    prompt = f'Split the command into parts and explain it in **list** format. Each line should follow the format "command part" followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists directory contents.\n  * `-l` displays in long format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` reads the content of `file`.\n* `| grep "foo"` filters lines containing "foo".\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{get_user_preferences()}\n\nShell command: {DELIMITER}\n{shell_command}\n{DELIMITER}'
+    prompt = f'Split the command into parts and explain it in **list** format. Each line should follow the format "command part" followed by an explanation.\n\nFor example, if the command is `ls -l`, you would explain it as:\n* `ls` lists directory contents.\n  * `-l` displays in long format.\n\nFor `cat file | grep "foo"`, the explanation would be:\n* `cat file` reads the content of `file`.\n* `| grep "foo"` filters lines containing "foo".\n\n* Never explain basic command line concepts like pipes, variables, etc.\n* Keep explanations clear, simple, concise and elegant (under 7 words per line).\n* Use two spaces to indent for each nesting level in your list.\n\nIf you can\'t provide an explanation for a specific shell command or it\'s not a shell command, you should reply with an empty JSON object.\n\n{get_user_preferences()}\n\nShell command: ####\n{shell_command}\n####'
 
     temperature = 0.1
     max_tokens = 512
@@ -101,7 +102,7 @@ async def edit_shell_command(shell_command, prompt):
         messages=[
             {
                 "role": "user",
-                "content": f"{shell_command}\n\nPrompt: {DELIMITER}\n{prompt}\n{DELIMITER}",
+                "content": f"{shell_command}\n\nPrompt: ####\n{prompt}\n####",
             },
         ],
         functions=[

@@ -1,7 +1,7 @@
 import argparse
 from importlib.metadata import version
 
-from shell_whiz.constants import DEFAULT_MODEL, SW_DESCRIPTION
+from shell_whiz.constants import SW_DESCRIPTION
 
 
 def create_argument_parser():
@@ -35,7 +35,7 @@ def create_argument_parser():
         "-m",
         "--model",
         type=str,
-        default=DEFAULT_MODEL,
+        default="gpt-3.5-turbo",
         help="select the model to use",
     )
     ask_parser.add_argument(
