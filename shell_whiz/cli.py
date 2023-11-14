@@ -85,13 +85,13 @@ async def shell_whiz_check_danger(shell_command):
             return False, ""
 
 
-async def shell_whiz_ask_menu_choice(args):
+def shell_whiz_ask_menu_choices(args):
     choices = [
         "Run this command",
         "Explain this command",
         "Explain using GPT 3.5 Turbo [1106]",
-        "Explain using GPT-4",
         "Explain using GPT-4 Turbo [BETA]",
+        "Explain using GPT-4",
         "Revise query",
         "Edit manually",
         "Exit",
@@ -107,16 +107,14 @@ async def shell_whiz_ask_menu_choice(args):
     elif os.environ["SW_EXPLAIN_USING"] == "gpt-4":
         choices.remove("Explain using GPT-4")
 
-    choice = await questionary.select(
-        "Select an action", choices
-    ).unsafe_ask_async()
-
-    return choice
+    return choices
 
 
 async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
     while True:
-        choice = await shell_whiz_ask_menu_choice(args)
+        choice = await questionary.select(
+            "Select an action", shell_whiz_ask_menu_choices(args)
+        ).unsafe_ask_async()
 
         if choice == "Exit":
             sys.exit(1)
@@ -150,15 +148,15 @@ async def shell_whiz_ask_menu(args, shell_command, is_dangerous):
                 shell_command=shell_command,
                 insert_newline=True,
             )
-        elif choice == "Explain using GPT-4":
-            await print_explanation(
-                explain_using="gpt-4",
-                shell_command=shell_command,
-                insert_newline=True,
-            )
         elif choice == "Explain using GPT-4 Turbo [BETA]":
             await print_explanation(
                 explain_using="gpt-4-1106-preview",
+                shell_command=shell_command,
+                insert_newline=True,
+            )
+        elif choice == "Explain using GPT-4":
+            await print_explanation(
+                explain_using="gpt-4",
                 shell_command=shell_command,
                 insert_newline=True,
             )
