@@ -36,10 +36,12 @@ def create_argument_parser():
         "--model",
         type=str,
         default="gpt-3.5-turbo-1106",
-        help="select the model to use",
+        help="select the model to use (default: %(default)s)",
     )
     ask_parser.add_argument(
-        "--explain-using", type=str, help="select the model to explain"
+        "--explain-using",
+        type=str,
+        help="select the model to explain (defaults to --model)",
     )
     ask_parser.add_argument(
         "-n",
