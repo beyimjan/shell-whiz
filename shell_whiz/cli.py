@@ -42,7 +42,9 @@ async def check_danger(shell_command, preferences, model):
     ):
         try:
             return await recognize_dangerous_command(
-                shell_command, preferences, model
+                shell_command=shell_command,
+                preferences=preferences,
+                model=model,
             )
         except WarningError:
             return False, ""
@@ -85,7 +87,7 @@ async def edit_shell_command_cli(shell_command, prompt, model):
     try:
         with console.status(THINKING_MSG, spinner="dots"):
             shell_command = await edit_shell_command(
-                shell_command, prompt, model
+                shell_command=shell_command, prompt=prompt, model=model
             )
     except EditingError:
         rich.print(
@@ -132,7 +134,9 @@ async def perform_selected_action(
     while True:
         choice = await questionary.select(
             "Select an action",
-            get_filtered_choices(dont_explain, explain_using),
+            choices=get_filtered_choices(
+                dont_explain=dont_explain, explain_using=explain_using
+            ),
         ).unsafe_ask_async()
 
         if choice == "Exit":
@@ -143,6 +147,9 @@ async def perform_selected_action(
                     with open(output_file, "w", newline="\n") as f:
                         f.write(shell_command)
                 except OSError:
+                    rich.print(
+                        f"{ERROR_PREFIX_RICH}: Couldn't write to output file."
+                    )
                     sys.exit(1)
             else:
                 cancel_run = (
@@ -186,9 +193,7 @@ async def perform_selected_action(
             )
         elif choice == "Revise query":
             edit_prompt = (
-                await questionary.text(
-                    message="Enter your revision"
-                ).unsafe_ask_async()
+                await questionary.text("Enter your revision").unsafe_ask_async()
             ).strip()
             if edit_prompt != "":
                 return shell_command, edit_prompt
@@ -250,10 +255,7 @@ async def run_ai_assistant(
         if dont_warn:
             is_dangerous = False
         else:
-            (
-                is_dangerous,
-                dangerous_consequences,
-            ) = await check_danger(
+            is_dangerous, dangerous_consequences = await check_danger(
                 shell_command=shell_command,
                 preferences=preferences,
                 model=model,

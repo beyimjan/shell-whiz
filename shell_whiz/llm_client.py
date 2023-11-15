@@ -75,7 +75,7 @@ async def recognize_dangerous_command(shell_command, preferences, model):
 
 
 async def get_explanation_of_shell_command(
-    shell_command, preferences, model, stream=False
+    shell_command, preferences, model, stream
 ):
     return await openai.get_explanation_of_shell_command(
         shell_command=shell_command,
