@@ -121,14 +121,14 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 
 ## Tips
 
-- If you want to pass an argument that starts with a hyphen, you can use `--` to separate the command from the arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
-- You can specify a shell executable by passing the `-s` or `--shell` argument.
-- Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
-- Add `--explain-using gpt-4` to use the `gpt-4` model for the explanatory part.
-- Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
-- Use `--dont-warn` to disable automatic warnings.
-- Pass `-p "..."` or `--preferences "..."` to set preferences for generating commands. This is most useful for setting the shell, but can be used to set any other preferences as well, even the language in which the assistant responds. By default, this parameter is set to `I use Bash on Linux`.
-- Add `-q` or `--quiet` to not show the menu and end immediately.
+- To pass an argument beginning with a hyphen, use the `--` delimiter. This separates the command and its arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
+- Specify a shell executable using `-s` or `--shell`.
+- To select the `gpt-4` model, include `-m gpt-4` or `--model gpt-4`.
+- To use the GPT-4 model for explanations, append `--explain-using gpt-4`.
+- To disable automatic explanations, include `-n` or `--dont-explain`. Manual explanations can still be requested via the menu.
+- Use `--dont-warn` to turn off automatic warnings.
+- Set specific preferences by adding `-p "..."` or `--preferences "..."`. This setting is versatile, useful for choosing a shell environment or other preferences, including the language for assistant responses. The default is `I use Bash on Linux`.
+- Add `-q` or `--quiet` to hide the menu and finish right away.
 
 The original author of the program usually uses `alias ??='sw ask --dont-warn -n --'` because he has a good understanding of the command line and knows about dangerous commands. However, if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu.
 
