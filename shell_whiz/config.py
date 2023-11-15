@@ -35,14 +35,24 @@ async def edit_config_cli():
 
 
 async def edit_config():
-    config_dir, config_file = get_config_paths()
     config = await edit_config_cli()
 
+    config_dir, config_file = get_config_paths()
+
     try:
-        os.makedirs(config_dir)
-        json.dump(config, config_file)
+        os.makedirs(config_dir, exist_ok=True)
+    except OSError:
+        rich.print(
+            f"{ERROR_PREFIX_RICH}: Couldn't create directory {config_dir}"
+        )
+        return config
+
+    try:
+        with open(config_file, "w") as f:
+            json.dump(config, f)
     except OSError:
         rich.print(f"{ERROR_PREFIX_RICH}: Couldn't write to file {config_file}")
+        return config
 
     try:
         os.chmod(config_file, 0o600)
