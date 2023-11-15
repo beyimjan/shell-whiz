@@ -17,7 +17,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 
 ## All features
 
-- **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`, which will print the last modification time of the file.
+- **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, `?? what is the timestamp of file.txt` will suggest `stat -c %y file.txt`, which will print the last modification time of the file.
 - **Command explanations:** It will try to explain, piece by piece, what the suggested command will do, so you can learn new things about your shell and the commands you use.
 - **Revisions:** If the suggested command is not quite what you want, you can ask for a revision. Another way to use this feature is to start with a simple query and iteratively create a complex command by defining the details.
 - **Customization:** You can tweak the behavior of Shell Whiz using command line arguments. For example, you can set PowerShell as your shell, disable automatic explanations, or use any [Chat Completions](https://platform.openai.com/docs/api-reference/chat) model instead of the default `gpt-3.5-turbo-1106` model.
@@ -32,7 +32,7 @@ pip install shell-whiz
 
 This will add the `sw` command to your `PATH`.
 
-To use Shell Whiz, you need an API key from OpenAI. You can obtain this key by visiting https://platform.openai.com/account/api-keys. Once you have the key, you can configure Shell Whiz by running the following command:
+To use Shell Whiz, you need an API key from OpenAI. Obtain this key by visiting https://platform.openai.com/account/api-keys. Once you have the key, configure Shell Whiz by running the following command:
 
 ```bash
 sw config
@@ -117,7 +117,7 @@ function ?? {
 }
 ```
 
-To track API usage and costs, you can check the [OpenAI API Usage](https://platform.openai.com/account/usage) page.
+To track API usage and costs, periodically visit the [OpenAI API Usage](https://platform.openai.com/account/usage) page.
 
 ## Tips
 
@@ -132,7 +132,7 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 
 The original author of the program usually uses `alias ??='sw ask --dont-warn -n --'` because he has a good understanding of the command line and knows about dangerous commands. However, if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu.
 
-You can choose the settings that work best for you.
+You should choose the settings that work best for you.
 
 Highly recommend using [IntelliShell](https://github.com/lasantosr/intelli-shell) (a bookmark store for commands) along with Shell Whiz.
 
