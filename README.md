@@ -5,14 +5,6 @@
     src="https://img.shields.io/github/stars/beimzhan/shell-whiz"
     alt="GitHub stars"
   />
-  <img
-    src="https://img.shields.io/github/commit-activity/m/beimzhan/shell-whiz"
-    alt="GitHub commit activity"
-  />
-  <img
-    src="https://img.shields.io/github/license/beimzhan/shell-whiz"
-    alt="GitHub license"
-  />
 </p>
 
 Shell Whiz is an AI assistant for the command line. It will help you find the right command for your task.
@@ -28,7 +20,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 - **Command suggestions:** It suggests shell commands based on your input. For example, if you want to know the timestamp of a file, you can run `?? what is the timestamp of file.txt` and it will suggest `stat -c %y file.txt`, which will print the last modification time of the file.
 - **Command explanations:** It will try to explain, piece by piece, what the suggested command will do, so you can learn new things about your shell and the commands you use.
 - **Revisions:** If the suggested command is not quite what you want, you can ask for a revision. Another way to use this feature is to start with a simple query and iteratively create a complex command by defining the details.
-- **Customization:** You can customize the behavior of Shell Whiz by using command line arguments. For example, you can set PowerShell as your shell, disable automatic explanations, or use the `gpt-4` model instead of the default `gpt-3.5-turbo` model.
+- **Customization:** You can tweak the behavior of Shell Whiz using command line arguments. For example, you can set PowerShell as your shell, disable automatic explanations, or use any [Chat Completions](https://platform.openai.com/docs/api-reference/chat) model instead of the default `gpt-3.5-turbo-1106` model.
 
 ## Installation and setup
 
@@ -38,7 +30,7 @@ To install Shell Whiz, run the following command:
 pip install shell-whiz
 ```
 
-This will add the `sw` command to your PATH.
+This will add the `sw` command to your `PATH`.
 
 To use Shell Whiz, you need an API key from OpenAI. You can obtain this key by visiting https://platform.openai.com/account/api-keys. Once you have the key, you can configure Shell Whiz by running the following command:
 
@@ -129,14 +121,14 @@ To track API usage and costs, you can check the [OpenAI API Usage](https://platf
 
 ## Tips
 
-- If you want to pass an argument that starts with a hyphen, you can use `--` to separate the command from the arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
-- You can specify a shell executable by passing the `-s` or `--shell` argument.
-- Add `-m gpt-4` or `--model gpt-4` to use the `gpt-4` model instead of the standard `gpt-3.5-turbo` model. However, this will cost more and may take longer.
-- Add `--explain-using-gpt-4` to use the `gpt-4` model for the explanatory part.
-- Use `-n` or `--dont-explain` to disable automatic explanations. You can still request an explanation through the menu when a command is suggested.
-- Use `--dont-warn` to disable automatic warnings.
-- Pass `-p "..."` or `--preferences "..."` to set preferences for generating commands. This is most useful for setting the shell, but can be used to set any other preferences as well, even the language in which the assistant responds. By default, this parameter is set to `I use Bash on Linux`.
-- Add `-q` or `--quiet` to not show the menu and end immediately.
+- To pass an argument beginning with a hyphen, use the `--` delimiter. This separates the command and its arguments. For example, `sw ask -- emulate ARM kernel on versatilepb architecture -cpu cortex-a8`.
+- Specify a shell executable using `-s` or `--shell`.
+- To select the `gpt-4` model, include `-m gpt-4` or `--model gpt-4`.
+- To use the GPT-4 model for explanations, append `--explain-using gpt-4`.
+- To disable automatic explanations, include `-n` or `--dont-explain`. Manual explanations can still be requested via the menu.
+- Use `--dont-warn` to turn off automatic warnings.
+- Set specific preferences by adding `-p "..."` or `--preferences "..."`. This setting is versatile, useful for choosing a shell environment or other preferences, including the language for assistant responses. The default is `I use Bash on Linux`.
+- Add `-q` or `--quiet` to hide the menu and finish right away.
 
 The original author of the program usually uses `alias ??='sw ask --dont-warn -n --'` because he has a good understanding of the command line and knows about dangerous commands. However, if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu.
 

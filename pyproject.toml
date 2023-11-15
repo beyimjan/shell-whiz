@@ -6,17 +6,17 @@ profile = "black"
 
 [tool.poetry]
 name = "shell-whiz"
-version = "1.9.1"
+version = "2.0.0"
 description = "AI assistant for command line"
 license = "GPL-3.0-only"
-authors = ["Tamerlan Bimzhanov <bimzhanovt.net@gmail.com>"]
+authors = ["Tamerlan Bimzhanov <ttemirbolatuly@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/beimzhan/shell-whiz"
 packages = [{include = "shell_whiz"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9 <4"
-openai = "^0.27.8"
+openai = "^1.2.4"
 jsonschema = "^4.19.0"
 rich = "^13.5.2"
 questionary = "^2.0.0"
@@ -25,9 +25,9 @@ questionary = "^2.0.0"
 sw = "shell_whiz.cli:run"
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "5.0.4"
-black = "23.3.0"
-isort = {version = "5.11.5", extras = ["colors"]}
+flake8 = "^5.0.4"
+black = "^23.3.0"
+isort = {version = "^5.11.5", extras = ["colors"]}
 
 [build-system]
 requires = ["poetry-core"]

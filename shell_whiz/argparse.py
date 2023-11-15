@@ -14,7 +14,7 @@ def create_argument_parser():
         version=f"{SW_DESCRIPTION}. Version {version('shell-whiz')}.",
     )
 
-    subparsers = parser.add_subparsers(dest="sw_command", required=True)
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("config", help="Configure Shell Whiz")
 
@@ -35,14 +35,11 @@ def create_argument_parser():
         "-m",
         "--model",
         type=str,
-        choices=["gpt-3.5-turbo", "gpt-4"],
-        default="gpt-3.5-turbo",
+        default="gpt-3.5-turbo-1106",
         help="select the model to use",
     )
     ask_parser.add_argument(
-        "--explain-using-gpt-4",
-        action="store_true",
-        help="use GPT-4 to explain",
+        "--explain-using", type=str, help="select the model to explain"
     )
     ask_parser.add_argument(
         "-n",
