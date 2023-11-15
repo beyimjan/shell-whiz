@@ -101,7 +101,6 @@ def get_filtered_choices(dont_explain, explain_using):
     choices = [
         "Run this command",
         "Explain this command",
-        "Explain using GPT 3.5 Turbo [1106]",
         "Explain using GPT-4 Turbo [BETA]",
         "Explain using GPT-4",
         "Revise query",
@@ -112,9 +111,7 @@ def get_filtered_choices(dont_explain, explain_using):
     if not dont_explain:
         choices.remove("Explain this command")
 
-    if explain_using == "gpt-3.5-turbo-1106":
-        choices.remove("Explain using GPT 3.5 Turbo [1106]")
-    elif explain_using == "gpt-4-1106-preview":
+    if explain_using == "gpt-4-1106-preview":
         choices.remove("Explain using GPT-4 Turbo [BETA]")
     elif explain_using == "gpt-4":
         choices.remove("Explain using GPT-4")
@@ -168,13 +165,6 @@ async def perform_selected_action(
                 shell_command=shell_command,
                 preferences=preferences,
                 explain_using=explain_using,
-                insert_newline=True,
-            )
-        elif choice == "Explain using GPT 3.5 Turbo [1106]":
-            await print_explanation(
-                shell_command=shell_command,
-                preferences=preferences,
-                explain_using="gpt-3.5-turbo-1106",
                 insert_newline=True,
             )
         elif choice == "Explain using GPT-4 Turbo [BETA]":
