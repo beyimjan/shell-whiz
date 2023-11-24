@@ -130,7 +130,7 @@ To track API usage and costs, periodically visit the [OpenAI API Usage](https://
 - Set specific preferences by adding `-p "..."` or `--preferences "..."`. This setting is versatile, useful for choosing a shell environment or other preferences, including the language for assistant responses. The default is `I use Bash on Linux`.
 - Add `-q` or `--quiet` to hide the menu and finish right away.
 
-The original author of the program usually uses `alias ??='sw ask --dont-warn -n --'` because he has a good understanding of the command line and knows about dangerous commands. However, if he doesn't understand the generated command he chooses to explain it using GPT-4 via the menu.
+I prefer using `alias ??='sw ask --dont-warn -n --'`, but when I encounter a command that I don't fully understand, I choose to explain it using GPT-4 manually.
 
 You should choose the settings that work best for you.
 
