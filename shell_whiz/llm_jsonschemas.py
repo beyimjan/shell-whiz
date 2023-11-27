@@ -3,7 +3,7 @@ translation_jsonschema = {
     "properties": {
         "shell_command": {
             "type": "string",
-            "description": "Shell command to perform the task, leave blank if it is not possible to perform the task in the command line",
+            "description": "Shell command to perform the task. You just get things done, rather than trying to explain. Leave blank if it is not possible to perform the task in the command line.",
         }
     },
     "required": ["shell_command"],
@@ -15,7 +15,7 @@ dangerous_command_jsonschema = {
         "dangerous_to_run": {"type": "boolean"},
         "dangerous_consequences": {
             "type": "string",
-            "description": "Brief explanation of the potential side effects of running the command. No more than 12 words.",
+            "description": "Brief explanation of the potential side effects of running the command. Less than 12 words.",
         },
     },
     "required": ["dangerous_to_run"],
