@@ -53,8 +53,7 @@ async def recognize_dangerous_command(shell_command, preferences, model):
 
     try:
         jsonschema.validate(
-            instance=dangerous_command_json,
-            schema=dangerous_command_jsonschema,
+            instance=dangerous_command_json, schema=dangerous_command_jsonschema
         )
     except jsonschema.ValidationError:
         raise WarningError("Generated JSON is not valid.")
