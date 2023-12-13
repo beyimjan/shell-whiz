@@ -35,7 +35,7 @@ def create_argument_parser():
         "-m",
         "--model",
         type=str,
-        default="gpt-3.5-turbo-1106",
+        default="gpt-3.5-turbo",
         help="select the model to use (default: %(default)s)",
     )
     ask_parser.add_argument(
