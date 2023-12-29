@@ -6,12 +6,12 @@ profile = "black"
 
 [tool.poetry]
 name = "shell-whiz"
-version = "2.1.0"
+version = "2.1.1"
 description = "AI assistant for command line"
 license = "GPL-3.0-only"
-authors = ["Tamerlan Bimzhanov <ttemirbolatuly@gmail.com>"]
+authors = ["Tamerlan Beyimjan <beyimjan@gmail.com>"]
 readme = "README.md"
-repository = "https://github.com/beimzhan/shell-whiz"
+repository = "https://github.com/beyimjan/shell-whiz"
 packages = [{include = "shell_whiz"}]
 
 [tool.poetry.dependencies]

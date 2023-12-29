@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/pypi/v/shell-whiz" alt="PyPI" />
   <img src="https://img.shields.io/pypi/dm/shell-whiz" alt="PyPI - Downloads" />
   <img
-    src="https://img.shields.io/github/stars/beimzhan/shell-whiz"
+    src="https://img.shields.io/github/stars/beyimjan/shell-whiz"
     alt="GitHub stars"
   />
 </p>
@@ -11,7 +11,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20231026.gif?raw=true"
+    src="https://github.com/beyimjan/shell-whiz/blob/main/examples/files_modified_in_the_last_7_days-20231026.gif?raw=true"
   />
 </p>
 
@@ -138,12 +138,12 @@ Highly recommend using [IntelliShell](https://github.com/lasantosr/intelli-shell
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/set_environment_variable-20230924.png"
+    src="https://github.com/beyimjan/shell-whiz/raw/main/examples/set_environment_variable-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/closed_issues_in_beimzhan_shell_whiz-20230924.png"
+    src="https://github.com/beyimjan/shell-whiz/raw/main/examples/closed_issues_in_beimzhan_shell_whiz-20230924.png"
   />
 </p>
 
@@ -151,22 +151,22 @@ Highly recommend using [IntelliShell](https://github.com/lasantosr/intelli-shell
 
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_open_ports-20230924.png"
+    src="https://github.com/beyimjan/shell-whiz/raw/main/examples/list_open_ports-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/create_a_4_GB_file_with_random_data-20230924.png"
+    src="https://github.com/beyimjan/shell-whiz/raw/main/examples/create_a_4_GB_file_with_random_data-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/list_processes_sorted_by_memory_usage-20230924.png"
+    src="https://github.com/beyimjan/shell-whiz/raw/main/examples/list_processes_sorted_by_memory_usage-20230924.png"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beimzhan/shell-whiz/raw/main/examples/most_frequently_modified_files_in_the_repository-20230924.png"
+    src="https://github.com/beyimjan/shell-whiz/raw/main/examples/most_frequently_modified_files_in_the_repository-20230924.png"
   />
 </p>
 
