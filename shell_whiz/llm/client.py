@@ -124,13 +124,13 @@ class ClientLLM:
         self, s: str, schema: Dict[str, Any], error: Any
     ) -> Dict[str, Any]:
         try:
-            response_json = json.loads(s)
+            res = json.loads(s)
         except json.JSONDecodeError:
             raise error("Could not extract JSON.")
 
         try:
-            jsonschema.validate(instance=response_json, schema=schema)
+            jsonschema.validate(instance=res, schema=schema)
         except jsonschema.ValidationError:
             raise error("Generated JSON is not valid.")
 
-        return response_json
+        return res

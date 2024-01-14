@@ -49,6 +49,7 @@ class ClientOpenAI(ProviderLLM):
         self.__client = AsyncOpenAI(api_key=api_key)
         self.__model = model
         self.__explain_using = explain_using or model
+
         self.__preferences = (
             f"These are my preferences: ####\n{preferences}\n####"
         )
