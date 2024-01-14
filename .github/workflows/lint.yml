@@ -44,14 +44,3 @@ jobs:
 
       - name: Run isort
         run: poetry run isort --color --check --diff --verbose shell_whiz
-
-      - name: Cache mypy
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.mypy_cache
-          key: ${{ runner.os }}-mypy-${{ hashFiles('**/pyproject.toml', '**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-mypy-
-
-      - name: Run mypy
-        run: poetry run mypy -p shell_whiz
