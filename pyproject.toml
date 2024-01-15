@@ -14,7 +14,6 @@ license = "GPL-3.0-only"
 authors = ["Tamerlan Beyimjan <beyimjan@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/beyimjan/shell-whiz"
-packages = [{include = "shell_whiz"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9 <4"
@@ -25,14 +24,14 @@ questionary = "^2.0.1"
 rich = "^13.7.0"
 types-jsonschema = "^4.20.0.20240105"
 
-[tool.poetry.scripts]
-sw = "shell_whiz.cli:run"
-
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.0.0"
 black = "^23.12.1"
 isort = {extras = ["colors"], version = "^5.13.2"}
 mypy = "^1.8.0"
+
+[tool.poetry.scripts]
+sw = "shell_whiz.cli:run"
 
 [build-system]
 requires = ["poetry-core"]
