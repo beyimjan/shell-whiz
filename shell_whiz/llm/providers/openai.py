@@ -5,7 +5,7 @@ from openai import AsyncOpenAI
 from .api import ProviderLLM
 
 
-class ClientOpenAI(ProviderLLM):
+class ProviderOpenAI(ProviderLLM):
     # These JSON schemas are part of the prompts
     __translation_jsonschema: dict[str, Any] = {
         "type": "object",

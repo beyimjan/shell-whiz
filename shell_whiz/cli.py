@@ -84,7 +84,7 @@ def ask(
 @cli.command()
 def config():
     """Configure Shell Whiz"""
-    asyncio.run(ConfigCLI()())
+    asyncio.run(ConfigCLI().edit())
 
 
 def run():

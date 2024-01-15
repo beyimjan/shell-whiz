@@ -48,46 +48,38 @@ class Config:
             os.makedirs(self.__config_dir, exist_ok=True)
         except os.error:
             raise WritingError(
-                "Couldn't create directory {self.__config_dir}."
+                f"Couldn't create directory {self.__config_dir}."
             )
 
         try:
             with open(self.__config_file, "w") as f:
                 json.dump(config, f)
         except os.error:
-            raise WritingError("Couldn't write to file {self.__config_file}.")
+            raise WritingError(f"Couldn't write to file {self.__config_file}.")
 
         try:
             os.chmod(self.__config_file, 0o600)
         except os.error:
             raise WritingError(
-                "Failed to change permissions for {self.__config_file}."
+                f"Failed to change permissions for {self.__config_file}."
             )
 
     async def read(self) -> dict[str, Any]:
-        config_json = self.__read_json()
-        config = self.__validate_json(config_json)
-        return config
-
-    def __read_json(self) -> Any:
         try:
             with open(self.__config_file) as f:
                 config = json.load(f)
         except os.error:
-            raise ReadingError("Couldn't read file {self.__config_file}.")
+            raise ReadingError(f"Couldn't read file {self.__config_file}.")
         except json.JSONDecodeError:
             raise ReadingError(
-                "Couldn't parse JSON from {self.__config_file}."
+                f"Couldn't parse JSON from {self.__config_file}."
             )
-        else:
-            return config
 
-    def __validate_json(self, config: Any) -> dict[str, Any]:
         try:
             jsonschema.validate(config, self.__jsonschema)
         except jsonschema.ValidationError:
             raise ReadingError(
-                "JSON schema validation failed for {self.__config_file}."
+                f"JSON schema validation failed for {self.__config_file}."
             )
         else:
             return config

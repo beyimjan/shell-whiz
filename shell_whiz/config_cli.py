@@ -18,9 +18,8 @@ class ConfigCLI:
             await self.__model.write(config)
         except WritingError as e:
             pretty_log_error(e)
+        finally:
             return config
-
-        return config
 
     async def __edit_cli(self):
         rich.print(
@@ -37,6 +36,5 @@ class ConfigCLI:
     async def get(self):
         try:
             return await self.__model.read()
-        except ReadingError as e:
-            pretty_log_error(e)
+        except ReadingError:
             return await self.edit()

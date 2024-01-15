@@ -10,7 +10,7 @@ from rich.live import Live
 from rich.markdown import Markdown
 
 from .config_cli import ConfigCLI
-from .llm import ClientLLM, ClientOpenAI
+from .llm import ClientLLM, ProviderOpenAI
 from .llm.errors import (
     EditingError,
     ExplanationError,
@@ -52,7 +52,7 @@ class AskCLI:
         config = await ConfigCLI().get()
 
         self.__llm = ClientLLM(
-            ClientOpenAI(
+            ProviderOpenAI(
                 config["OPENAI_API_KEY"],
                 self.__model,
                 self.__preferences,

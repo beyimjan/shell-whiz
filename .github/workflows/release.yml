@@ -10,7 +10,6 @@ jobs:
     uses: ./.github/workflows/lint.yml
 
   release-to-pypi:
-    name: Release to PyPI
     runs-on: ubuntu-latest
     needs: lint
     steps:

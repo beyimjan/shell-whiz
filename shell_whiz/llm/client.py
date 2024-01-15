@@ -77,8 +77,8 @@ class ClientLLM:
     async def get_explanation_of_shell_command(
         self,
         shell_command: str,
-        explain_using: Optional[str] = None,
         stream: bool = True,
+        explain_using: Optional[str] = None,
     ) -> Any:
         return await self.__api.get_explanation_of_shell_command(
             shell_command, stream, explain_using=explain_using
@@ -87,7 +87,7 @@ class ClientLLM:
     async def get_explanation_of_shell_command_by_chunks(
         self, stream=Any
     ) -> Any:
-        """Note: Validation is incomplete, so results may not be consistent"""
+        """Note: Validation is incomplete, so results may not be consistent."""
 
         is_first_chunk = True
         skip_initial_spaces = True

@@ -18,10 +18,10 @@ repository = "https://github.com/beyimjan/shell-whiz"
 [tool.poetry.dependencies]
 python = ">=3.9 <4"
 click = "^8.1.7"
-jsonschema = "^4.20.0"
-openai = "^1.7.2"
-questionary = "^2.0.1"
 rich = "^13.7.0"
+questionary = "^2.0.1"
+openai = "^1.7.2"
+jsonschema = "^4.20.0"
 types-jsonschema = "^4.20.0.20240105"
 
 [tool.poetry.group.dev.dependencies]
