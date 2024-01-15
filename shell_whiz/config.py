@@ -21,14 +21,26 @@ class Config:
     }
 
     def __init__(self) -> None:
-        self.__config_dir = os.path.join(
-            (
-                os.environ.get("XDG_CONFIG_HOME")
-                or os.environ.get("APPDATA")
-                or os.path.join(os.environ.get("HOME", os.getcwd()), ".config")
-            ),
-            "shell-whiz",
-        )
+        os_name = os.name
+
+        home = os.environ.get("HOME")
+        xdg_config_home = os.environ.get("XDG_CONFIG_HOME")
+
+        appdata = os.environ.get("APPDATA")
+
+        self.__config_dir = ""
+        if os_name == "posix":
+            if xdg_config_home:
+                self.__config_dir = xdg_config_home
+            elif home:
+                self.__config_dir = os.path.join(home, ".config")
+        elif os_name == "nt" and appdata:
+            self.__config_dir = appdata
+
+        if not self.__config_dir:
+            self.__config_dir = os.path.join(os.getcwd(), ".config")
+
+        self.__config_dir = os.path.join(self.__config_dir, "shell-whiz")
         self.__config_file = os.path.join(self.__config_dir, "config.json")
 
     async def write(self, config: Dict[str, Any]) -> None:
