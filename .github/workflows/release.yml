@@ -25,15 +25,6 @@ jobs:
       - name: Setup Poetry
         run: pip install poetry==${{ vars.POETRY_VERSION}}
 
-      - name: Cache Poetry
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ vars.PYTHON_VERSION }}
-          cache: poetry
-
-      - name: Install dependencies
-        run: poetry install --only dev
-
       - name: Load PyPI token
         run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
 
