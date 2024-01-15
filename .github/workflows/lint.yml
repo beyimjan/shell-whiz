@@ -1,36 +1,34 @@
-name: Lint Python code
+name: Lint
 
 on:
+  workflow_call:
   push:
     branches:
       - "**"
     paths:
+      - "shell_whiz/**/*.py"
       - pyproject.toml
       - .flake8
-      - "shell_whiz/**.py"
+      - poetry.lock
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml', '**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install Poetry
-        run: pip install poetry==1.7.0
+      - uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: ${{ vars.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Setup Poetry
+        run: pip install poetry==${{ vars.POETRY_VERSION}}
+
+      - name: Cache Poetry
+        uses: actions/setup-python@v5
+        with:
           cache: poetry
 
       - name: Install dependencies
