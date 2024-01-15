@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict
+from typing import Any
 
 import jsonschema
 
@@ -14,7 +14,7 @@ class ReadingError(Exception):
 
 
 class Config:
-    __jsonschema: Dict[str, Any] = {
+    __jsonschema: dict[str, Any] = {
         "type": "object",
         "properties": {"OPENAI_API_KEY": {"type": "string"}},
         "required": ["OPENAI_API_KEY"],
@@ -43,10 +43,10 @@ class Config:
         self.__config_dir = os.path.join(self.__config_dir, "shell-whiz")
         self.__config_file = os.path.join(self.__config_dir, "config.json")
 
-    async def write(self, config: Dict[str, Any]) -> None:
+    async def write(self, config: dict[str, Any]) -> None:
         try:
             os.makedirs(self.__config_dir, exist_ok=True)
-        except OSError:
+        except os.error:
             raise WritingError(
                 "Couldn't create directory {self.__config_dir}."
             )
@@ -54,17 +54,17 @@ class Config:
         try:
             with open(self.__config_file, "w") as f:
                 json.dump(config, f)
-        except OSError:
+        except os.error:
             raise WritingError("Couldn't write to file {self.__config_file}.")
 
         try:
             os.chmod(self.__config_file, 0o600)
-        except OSError:
+        except os.error:
             raise WritingError(
                 "Failed to change permissions for {self.__config_file}."
             )
 
-    async def read(self) -> Dict[str, Any]:
+    async def read(self) -> dict[str, Any]:
         config_json = self.__read_json()
         config = self.__validate_json(config_json)
         return config
@@ -73,7 +73,7 @@ class Config:
         try:
             with open(self.__config_file) as f:
                 config = json.load(f)
-        except OSError:
+        except os.error:
             raise ReadingError("Couldn't read file {self.__config_file}.")
         except json.JSONDecodeError:
             raise ReadingError(
@@ -82,7 +82,7 @@ class Config:
         else:
             return config
 
-    def __validate_json(self, config: Any) -> Dict[str, Any]:
+    def __validate_json(self, config: Any) -> dict[str, Any]:
         try:
             jsonschema.validate(config, self.__jsonschema)
         except jsonschema.ValidationError:

@@ -1,4 +1,5 @@
 import asyncio
+import os
 import subprocess
 import sys
 
@@ -126,7 +127,7 @@ class AskCLI:
                     try:
                         with open(self.__output_file, "w", newline="\n") as f:
                             f.write(shell_command)
-                    except OSError:
+                    except os.error:
                         rich.print("Couldn't write to output file.")
                         sys.exit(1)
                 else:

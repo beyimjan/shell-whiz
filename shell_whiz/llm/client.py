@@ -1,10 +1,11 @@
 import json
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import jsonschema
 
 from .errors import (
     EditingError,
+    ErrorLLM,
     ExplanationError,
     TranslationError,
     WarningError,
@@ -14,12 +15,12 @@ from .providers.api import ProviderLLM
 
 class ClientLLM:
     # These JSON schemas are only used to validate LLM responses
-    __translation_jsonschema: Dict[str, Any] = {
+    __translation_jsonschema: dict[str, Any] = {
         "type": "object",
         "properties": {"shell_command": {"type": "string"}},
         "required": ["shell_command"],
     }
-    __dangerous_command_jsonschema: Dict[str, Any] = {
+    __dangerous_command_jsonschema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "dangerous_to_run": {"type": "boolean"},
@@ -27,7 +28,7 @@ class ClientLLM:
         },
         "required": ["dangerous_to_run"],
     }
-    __edited_shell_command_jsonschema: Dict[str, Any] = {
+    __edited_shell_command_jsonschema: dict[str, Any] = {
         "type": "object",
         "properties": {"edited_shell_command": {"type": "string"}},
         "required": ["edited_shell_command"],
@@ -50,7 +51,7 @@ class ClientLLM:
 
     async def recognize_dangerous_command(
         self, shell_command: str
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         dangerous_command_json = self.__validate_json(
             await self.__api.recognize_dangerous_command(shell_command),
             self.__dangerous_command_jsonschema,
@@ -123,8 +124,8 @@ class ClientLLM:
         return edited_shell_command
 
     def __validate_json(
-        self, s: str, schema: Dict[str, Any], error: Any
-    ) -> Dict[str, Any]:
+        self, s: str, schema: dict[str, Any], error: type[ErrorLLM]
+    ) -> dict[str, Any]:
         try:
             res = json.loads(s)
         except json.JSONDecodeError:

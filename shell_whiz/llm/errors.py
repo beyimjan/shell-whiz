@@ -1,14 +1,18 @@
-class TranslationError(Exception):
+class ErrorLLM(Exception):
     pass
 
 
-class WarningError(Exception):
+class TranslationError(ErrorLLM):
     pass
 
 
-class ExplanationError(Exception):
+class WarningError(ErrorLLM):
     pass
 
 
-class EditingError(Exception):
+class ExplanationError(ErrorLLM):
+    pass
+
+
+class EditingError(ErrorLLM):
     pass

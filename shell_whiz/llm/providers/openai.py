@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from openai import AsyncOpenAI
 
@@ -7,7 +7,7 @@ from .api import ProviderLLM
 
 class ClientOpenAI(ProviderLLM):
     # These JSON schemas are part of the prompts
-    __translation_jsonschema: Dict[str, Any] = {
+    __translation_jsonschema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "shell_command": {
@@ -17,7 +17,7 @@ class ClientOpenAI(ProviderLLM):
         },
         "required": ["shell_command"],
     }
-    __dangerous_command_jsonschema: Dict[str, Any] = {
+    __dangerous_command_jsonschema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "dangerous_to_run": {"type": "boolean"},
@@ -28,7 +28,7 @@ class ClientOpenAI(ProviderLLM):
         },
         "required": ["dangerous_to_run"],
     }
-    __edited_shell_command_jsonschema: Dict[str, Any] = {
+    __edited_shell_command_jsonschema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "edited_shell_command": {
@@ -120,7 +120,7 @@ class ClientOpenAI(ProviderLLM):
         if stream:
             return response
         else:
-            return response.choices[0].message.content
+            return response.choices[0].message.content  # type: ignore
 
     async def get_explanation_of_shell_command_by_chunks(
         self, stream: Any
