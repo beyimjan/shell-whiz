@@ -15,8 +15,8 @@ class ProviderLLM(ABC):
     async def get_explanation_of_shell_command(
         self,
         shell_command: str,
+        stream: bool,
         explain_using: Optional[str] = None,
-        stream: bool = False,
     ) -> Any:
         pass
 

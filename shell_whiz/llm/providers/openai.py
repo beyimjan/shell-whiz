@@ -101,10 +101,10 @@ class ClientOpenAI(ProviderLLM):
     async def get_explanation_of_shell_command(
         self,
         shell_command: str,
+        stream: bool,
         explain_using: Optional[str] = None,
-        stream: bool = False,
     ) -> Any:
-        return await self.__client.chat.completions.create(
+        response = await self.__client.chat.completions.create(
             model=explain_using or self.__explain_using,
             temperature=0.1,
             max_tokens=512,
@@ -116,6 +116,11 @@ class ClientOpenAI(ProviderLLM):
                 }
             ],
         )
+
+        if stream:
+            return response
+        else:
+            return response.choices[0].message.content
 
     async def get_explanation_of_shell_command_by_chunks(
         self, stream: Any

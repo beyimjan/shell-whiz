@@ -37,7 +37,7 @@ class ClientLLM:
         self.__api = api
 
     async def suggest_shell_command(self, prompt: str) -> str:
-        shell_command = self.__validate_jsonschema(
+        shell_command = self.__validate_json(
             await self.__api.suggest_shell_command(prompt),
             self.__translation_jsonschema,
             TranslationError,
@@ -45,13 +45,13 @@ class ClientLLM:
 
         if shell_command == "":
             raise TranslationError("Extracted shell command is empty.")
-
-        return shell_command
+        else:
+            return shell_command
 
     async def recognize_dangerous_command(
         self, shell_command: str
     ) -> Tuple[bool, str]:
-        dangerous_command_json = self.__validate_jsonschema(
+        dangerous_command_json = self.__validate_json(
             await self.__api.recognize_dangerous_command(shell_command),
             self.__dangerous_command_jsonschema,
             WarningError,
@@ -77,15 +77,17 @@ class ClientLLM:
         self,
         shell_command: str,
         explain_using: Optional[str] = None,
-        stream: bool = False,
+        stream: bool = True,
     ) -> Any:
         return await self.__api.get_explanation_of_shell_command(
-            shell_command, explain_using=explain_using, stream=stream
+            shell_command, stream, explain_using=explain_using
         )
 
     async def get_explanation_of_shell_command_by_chunks(
         self, stream=Any
     ) -> Any:
+        """Note: Validation is incomplete, so results may not be consistent"""
+
         is_first_chunk = True
         skip_initial_spaces = True
         async for chunk in self.__api.get_explanation_of_shell_command_by_chunks(  # type: ignore
@@ -109,7 +111,7 @@ class ClientLLM:
             yield chunk
 
     async def edit_shell_command(self, shell_command: str, prompt: str) -> str:
-        edited_shell_command = self.__validate_jsonschema(
+        edited_shell_command = self.__validate_json(
             await self.__api.edit_shell_command(shell_command, prompt),
             self.__edited_shell_command_jsonschema,
             EditingError,
@@ -120,17 +122,19 @@ class ClientLLM:
 
         return edited_shell_command
 
-    def __validate_jsonschema(
+    def __validate_json(
         self, s: str, schema: Dict[str, Any], error: Any
     ) -> Dict[str, Any]:
         try:
             res = json.loads(s)
         except json.JSONDecodeError:
-            raise error("Could not extract JSON.")
+            raise error("LLM's response is not valid JSON.")
 
         try:
             jsonschema.validate(instance=res, schema=schema)
         except jsonschema.ValidationError:
-            raise error("Generated JSON is not valid.")
+            raise error(
+                "LLM's response doesn't match the expected JSON schema."
+            )
 
         return res
