@@ -29,6 +29,7 @@ jobs:
       - name: Cache Poetry
         uses: actions/setup-python@v5
         with:
+          python-version: ${{ vars.PYTHON_VERSION }}
           cache: poetry
 
       - name: Install dependencies
