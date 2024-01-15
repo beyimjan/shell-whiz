@@ -33,7 +33,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: poetry install --only dev
+        run: poetry install
 
       - name: Run Black
         run: poetry run black --color --check --diff --verbose shell_whiz
