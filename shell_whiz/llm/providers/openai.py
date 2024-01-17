@@ -40,15 +40,11 @@ class ProviderOpenAI(ProviderLLM):
     }
 
     def __init__(
-        self,
-        api_key: str,
-        model: str,
-        preferences: str,
-        explain_using: Optional[str] = None,
+        self, api_key: str, model: str, explain_using: str, preferences: str
     ) -> None:
         self.__client = AsyncOpenAI(api_key=api_key)
         self.__model = model
-        self.__explain_using = explain_using or model
+        self.__explain_using = explain_using
 
         self.__preferences = (
             f"These are my preferences: ####\n{preferences}\n####"

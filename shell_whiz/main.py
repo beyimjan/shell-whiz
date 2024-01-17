@@ -52,37 +52,37 @@ def _config(config: Config) -> None:
     "-s",
     "--shell",
     type=click.Path(executable=True),
-    help="Set the shell executable",
+    help="Set the shell executable.",
 )
 @click.option(
     "-p",
     "--preferences",
     type=str,
     default="I use Bash on Linux",
-    help="Set your preferences (default: I use Bash on Linux)",
+    help="Set your preferences (default: I use Bash on Linux).",
 )
 @click.option(
     "-m",
     "--model",
     type=str,
     default="gpt-3.5-turbo",
-    help="Select the model to use (default: gpt-3.5-turbo)",
+    help="Select the model to use (default: gpt-3.5-turbo).",
 )
 @click.option(
     "--explain-using",
     type=str,
-    help="Select the model to explain (defaults to --model)",
+    help="Select the model to explain (defaults to --model).",
 )
 @click.option(
-    "-n", "--dont-explain", is_flag=True, help="Skip the explanation part"
+    "-n", "--dont-explain", is_flag=True, help="Skip the explanation part."
 )
-@click.option("--dont-warn", is_flag=True, help="Skip the warning part")
-@click.option("-q", "--quiet", is_flag=True, help="Skip the interactive part")
+@click.option("--dont-warn", is_flag=True, help="Skip the warning part.")
+@click.option("-q", "--quiet", is_flag=True, help="Skip the interactive part.")
 @click.option(
     "-o",
     "--output",
     type=click.Path(dir_okay=False, writable=True),
-    help="Output file to write the command to",
+    help="Output file to write the command to.",
 )
 @click.argument("prompt", nargs=-1, required=True)
 @click.pass_obj
