@@ -2,6 +2,7 @@ import asyncio
 import os
 import subprocess
 import sys
+from typing import Any
 
 import questionary
 import rich
@@ -18,23 +19,20 @@ from shell_whiz.llm.errors import (
 )
 
 
-def _cat(shell_command):
+def _cat(shell_command: str) -> None:
     rich.print(
         "\n ==================== [bold green]Command[/] ====================\n"
     )
     print(" " + " ".join(shell_command.splitlines(keepends=True)) + "\n")
 
 
-async def _explain(stream, insert_newline=False):
-    if insert_newline:
-        print()
-
+async def _explain(stream: Any) -> None:
     rich.print(
         " ================== [bold green]Explanation[/] =================="
     )
 
     try:
-        with Live("", auto_refresh=False) as live:
+        with Live(auto_refresh=False) as live:
             explanation = ""
             async for chunk in stream:
                 explanation += chunk
@@ -45,7 +43,9 @@ async def _explain(stream, insert_newline=False):
     print()
 
 
-async def _run(shell_command, is_dangerous, shell=None, output=None):
+async def _run(
+    shell_command: str, is_dangerous: bool, shell=None, output=None
+):
     if is_dangerous:
         if not await questionary.confirm(
             "Are you sure you want to run this command?"
@@ -198,6 +198,7 @@ class AskCLI:
                     )
                 )
             elif action == "Explain using GPT-4 Turbo [BETA]":
+                print()
                 await _explain(
                     self.__llm.get_explanation_of_shell_command_by_chunks(
                         await self.__llm.get_explanation_of_shell_command(
@@ -205,17 +206,16 @@ class AskCLI:
                             True,
                             explain_using="gpt-4-1106-preview",
                         )
-                    ),
-                    insert_newline=True,
+                    )
                 )
             elif action == "Explain using GPT-4":
+                print()
                 await _explain(
-                    await self.__llm.get_explanation_of_shell_command_by_chunks(
+                    self.__llm.get_explanation_of_shell_command_by_chunks(
                         await self.__llm.get_explanation_of_shell_command(
                             self.__shell_command, True, explain_using="gpt-4"
                         )
-                    ),
-                    insert_newline=True,
+                    )
                 )
             elif action == "Revise query":
                 self.__revise()

@@ -74,14 +74,10 @@ def _config(config: Config) -> None:
     help="Select the model to explain (defaults to --model)",
 )
 @click.option(
-    "-n", "--dont-explain", is_flag=True, help="Don't explain the command"
+    "-n", "--dont-explain", is_flag=True, help="Skip the explanation part"
 )
-@click.option(
-    "--dont-warn", is_flag=True, help="Don't warn about dangerous commands"
-)
-@click.option(
-    "-q", "--quiet", is_flag=True, help="Don't show the menu, end immediately"
-)
+@click.option("--dont-warn", is_flag=True, help="Skip the warning part")
+@click.option("-q", "--quiet", is_flag=True, help="Skip the interactive part")
 @click.option(
     "-o",
     "--output",
@@ -103,6 +99,32 @@ def ask(
     prompt,
 ) -> None:
     """Ask for a shell command."""
+
+    preferences = preferences.strip()
+    if preferences == "":
+        rich.print(
+            "[bold yellow]Error[/]: Please provide your preferences.",
+            file=sys.stderr,
+        )
+        exit(1)
+
+    model = model.strip()
+    if model == "":
+        rich.print(
+            "[bold yellow]Error[/]: Please provide a model.", file=sys.stderr
+        )
+        exit(1)
+
+    if explain_using is None:
+        explain_using = model
+    else:
+        explain_using = explain_using.strip()
+        if explain_using == "":
+            rich.print(
+                "[bold yellow]Error[/]: Please provide a model to explain.",
+                file=sys.stderr,
+            )
+            exit(1)
 
     prompt = " ".join(prompt).strip()
     if prompt == "":
