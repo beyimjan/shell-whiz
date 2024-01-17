@@ -1,12 +1,15 @@
 import json
 import os
-from typing import Any
+from typing import Any, TypeAlias
 
 import jsonschema
 
 
 class WritingError(Exception):
     pass
+
+
+ConfigData: TypeAlias = dict[str, str]
 
 
 class Config:
@@ -47,10 +50,10 @@ class Config:
             self.__data = {}
 
     @property
-    def data(self) -> dict[str, str]:
+    def data(self) -> ConfigData:
         return self.__data
 
-    def write(self, data: dict[str, str]) -> None:
+    def write(self, data: ConfigData) -> None:
         try:
             jsonschema.validate(data, self.__jsonschema)
         except jsonschema.ValidationError:

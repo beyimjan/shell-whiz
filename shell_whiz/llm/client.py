@@ -85,7 +85,7 @@ class ClientLLM:
         )
 
     async def get_explanation_of_shell_command_by_chunks(
-        self, stream=Any
+        self, stream: Any
     ) -> Any:
         """Note: Validation is incomplete, so results may not be consistent."""
 
@@ -120,8 +120,8 @@ class ClientLLM:
 
         if edited_shell_command == "":
             raise EditingError("Edited shell command is empty.")
-
-        return edited_shell_command
+        else:
+            return edited_shell_command
 
     def __validate_json(
         self, s: str, schema: dict[str, Any], error: type[ErrorLLM]
@@ -137,5 +137,5 @@ class ClientLLM:
             raise error(
                 "LLM's response doesn't match the expected JSON schema."
             )
-
-        return res
+        else:
+            return res

@@ -10,6 +10,7 @@ from rich.live import Live
 from rich.markdown import Markdown
 from rich.status import Status
 
+from shell_whiz.config import ConfigData
 from shell_whiz.llm import ClientLLM, ProviderOpenAI
 from shell_whiz.llm.errors import (
     EditingError,
@@ -44,7 +45,7 @@ async def _explain(stream: Any) -> None:
 
 
 async def _run(
-    shell_command: str, is_dangerous: bool, shell=None, output=None
+    shell_command: str, is_dangerous: bool, shell: Any, output: Any
 ) -> None:
     if is_dangerous:
         if not await questionary.confirm(
@@ -68,15 +69,15 @@ async def _run(
 class AskCLI:
     def __init__(
         self,
-        config: dict[str, str],
-        shell,
-        preferences,
-        model,
-        explain_using,
-        dont_explain,
-        dont_warn,
-        quiet,
-        output,
+        config: ConfigData,
+        shell: Any,
+        preferences: Any,
+        model: Any,
+        explain_using: Any,
+        dont_explain: Any,
+        dont_warn: Any,
+        quiet: Any,
+        output: Any,
     ) -> None:
         self.__dont_warn = dont_warn
         self.__dont_explain = dont_explain

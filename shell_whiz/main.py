@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+from typing import Any
 
 import click
 import openai
@@ -88,15 +89,15 @@ def _config(config: Config) -> None:
 @click.pass_obj
 def ask(
     config: Config,
-    shell,
-    preferences,
-    model,
-    explain_using,
-    dont_explain,
-    dont_warn,
-    quiet,
-    output,
-    prompt,
+    shell: Any,
+    preferences: Any,
+    model: Any,
+    explain_using: Any,
+    dont_explain: Any,
+    dont_warn: Any,
+    quiet: Any,
+    output: Any,
+    prompt: Any,
 ) -> None:
     """Ask for a shell command"""
 
@@ -151,54 +152,63 @@ def ask(
     )
 
 
-def run():
+def run() -> None:
     try:
         cli()
+    except KeyboardInterrupt:
+        print("\nAborted!")
+        sys.exit(1)
     except openai.BadRequestError:
         rich.print(
             "[bold yellow]Error[/]: Your request was malformed or missing some required parameters, such as a token or an input.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.AuthenticationError:
         rich.print(
             "[bold yellow]Error[/]: You are not authorized to access the OpenAI API. You may have entered the wrong API key. Your API key is invalid, expired or revoked. Please run [bold green]sw config[/] to set up the API key. Visit https://platform.openai.com/account/api-keys to get your API key.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.PermissionDeniedError:
         rich.print(
             "[bold yellow]Error[/]: Your API key or token does not have the required scope or role to perform the requested action. Make sure your API key has the appropriate permissions for the action or model accessed.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.RateLimitError:
         rich.print(
             "[bold yellow]Error[/]: OpenAI API request exceeded rate limit. If you are on a free plan, please upgrade to a paid plan for a better experience with Shell Whiz. Visit https://platform.openai.com/account/billing/limits for more information.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.APITimeoutError:
         rich.print(
             "[bold yellow]Error[/]: OpenAI API request timed out. Please retry your request after a brief wait.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.APIConnectionError:
         rich.print(
             "[bold yellow]Error[/]: OpenAI API request failed to connect. Please check your internet connection and try again.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.InternalServerError:
         rich.print(
             "[bold yellow]Error[/]: OpenAI API request failed due to a temporary server-side issue. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.APIStatusError:
         rich.print(
             "[bold yellow]Error[/]: An error occurred while connecting to the OpenAI API. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information.",
             file=sys.stderr,
         )
+        sys.exit(1)
     except openai.APIError:
         rich.print(
             "[bold yellow]Error[/]: An unknown error occurred while connecting to the OpenAI API. Please retry your request after a brief wait.",
             file=sys.stderr,
         )
-    except KeyboardInterrupt:
-        print("\nAborted!")
-    sys.exit(1)  # This line is only reached if an error occurs
+        sys.exit(1)
