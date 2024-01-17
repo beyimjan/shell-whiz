@@ -45,7 +45,7 @@ async def _explain(stream: Any) -> None:
 
 async def _run(
     shell_command: str, is_dangerous: bool, shell=None, output=None
-):
+) -> None:
     if is_dangerous:
         if not await questionary.confirm(
             "Are you sure you want to run this command?"
@@ -117,7 +117,7 @@ class AskCLI:
         while True:
             await self.__warn_and_explain()
             if self.__quiet:
-                break
+                sys.exit(1)
 
             await self.__perform_selected_action()
 
