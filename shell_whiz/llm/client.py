@@ -77,7 +77,7 @@ class ClientLLM:
     async def get_explanation_of_shell_command(
         self,
         shell_command: str,
-        stream: bool = True,
+        stream: bool,
         explain_using: Optional[str] = None,
     ) -> Any:
         return await self.__api.get_explanation_of_shell_command(

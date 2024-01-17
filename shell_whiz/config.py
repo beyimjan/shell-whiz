@@ -9,10 +9,6 @@ class WritingError(Exception):
     pass
 
 
-class ReadingError(Exception):
-    pass
-
-
 class Config:
     __jsonschema: dict[str, Any] = {
         "type": "object",
@@ -43,7 +39,25 @@ class Config:
         self.__config_dir = os.path.join(self.__config_dir, "shell-whiz")
         self.__config_file = os.path.join(self.__config_dir, "config.json")
 
-    async def write(self, config: dict[str, Any]) -> None:
+        try:
+            with open(self.__config_file) as f:
+                self.__data = json.load(f)
+            jsonschema.validate(self.data, self.__jsonschema)
+        except (os.error, json.JSONDecodeError, jsonschema.ValidationError):
+            self.__data = {}
+
+    @property
+    def data(self) -> dict[str, str]:
+        return self.__data
+
+    def write(self, data: dict[str, str]) -> None:
+        try:
+            jsonschema.validate(data, self.__jsonschema)
+        except jsonschema.ValidationError:
+            raise WritingError("Invalid configuration.")
+        else:
+            self.__data = data
+
         try:
             os.makedirs(self.__config_dir, exist_ok=True)
         except os.error:
@@ -53,7 +67,7 @@ class Config:
 
         try:
             with open(self.__config_file, "w") as f:
-                json.dump(config, f)
+                json.dump(self.__data, f)
         except os.error:
             raise WritingError(f"Couldn't write to file {self.__config_file}.")
 
@@ -63,23 +77,3 @@ class Config:
             raise WritingError(
                 f"Failed to change permissions for {self.__config_file}."
             )
-
-    async def read(self) -> dict[str, Any]:
-        try:
-            with open(self.__config_file) as f:
-                config = json.load(f)
-        except os.error:
-            raise ReadingError(f"Couldn't read file {self.__config_file}.")
-        except json.JSONDecodeError:
-            raise ReadingError(
-                f"Couldn't parse JSON from {self.__config_file}."
-            )
-
-        try:
-            jsonschema.validate(config, self.__jsonschema)
-        except jsonschema.ValidationError:
-            raise ReadingError(
-                f"JSON schema validation failed for {self.__config_file}."
-            )
-        else:
-            return config

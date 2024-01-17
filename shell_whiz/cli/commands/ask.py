@@ -5,13 +5,12 @@ import sys
 
 import questionary
 import rich
-from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
+from rich.status import Status
 
-from .config_cli import ConfigCLI
-from .llm import ClientLLM, ProviderOpenAI
-from .llm.errors import (
+from shell_whiz.llm import ClientLLM, ProviderOpenAI
+from shell_whiz.llm.errors import (
     EditingError,
     ExplanationError,
     TranslationError,
@@ -20,10 +19,11 @@ from .llm.errors import (
 
 
 class AskCLI:
-    __thinking_msg = "Wait, Shell Whiz is thinking..."
+    __thinking_msg = ""
 
     def __init__(
         self,
+        config,
         shell,
         preferences,
         model,
@@ -32,55 +32,40 @@ class AskCLI:
         dont_warn,
         quiet,
         output,
-        prompt,
     ):
-        self.__shell = shell
-        self.__preferences = preferences
-        self.__model = model
-        self.__explain_using = explain_using
-        self.__dont_explain = dont_explain
         self.__dont_warn = dont_warn
+        self.__dont_explain = dont_explain
         self.__quiet = quiet
-        self.__output_file = output
-        self.__prompt = prompt
+        self.__output = output
+        self.__shell = shell
 
-        self.__choices = AskCLI.__get_choices(dont_explain, explain_using)
-
-        self.__console = Console()
-
-    async def __call__(self):
-        config = await ConfigCLI().get()
+        self.__choices = AskCLI.__get_actions(
+            dont_explain, explain_using or model
+        )
 
         self.__llm = ClientLLM(
             ProviderOpenAI(
                 config["OPENAI_API_KEY"],
-                self.__model,
-                self.__preferences,
-                explain_using=self.__explain_using,
+                model,
+                preferences,
+                explain_using=explain_using,
             )
         )
 
+    async def __call__(self, prompt):
         try:
-            with self.__console.status(self.__thinking_msg, spinner="dots"):
-                shell_command = await self.__llm.suggest_shell_command(
-                    self.__prompt
-                )
+            with Status("Wait, Shell Whiz is thinking..."):
+                shell_command = await self.__llm.suggest_shell_command(prompt)
         except TranslationError:
             rich.print("Sorry, I don't know how to do this.")
             sys.exit(1)
 
-        edit_prompt = ""
         while True:
-            if edit_prompt != "":
-                shell_command = await self.__edit_shell_command_cli(
-                    shell_command, edit_prompt
-                )
-
             if not self.__dont_explain:
                 self.__print_command(shell_command)
                 stream_task = asyncio.create_task(
                     self.__llm.get_explanation_of_shell_command(
-                        shell_command, stream=True
+                        shell_command, True
                     )
                 )
 
@@ -110,7 +95,7 @@ class AskCLI:
             if self.__quiet:
                 break
 
-            shell_command, edit_prompt = await self.__perform_selected_action(
+            shell_command = await self.__perform_selected_action(
                 shell_command, is_dangerous
             )
 
@@ -123,22 +108,21 @@ class AskCLI:
             if choice == "Exit":
                 sys.exit(1)
             elif choice == "Run this command":
-                if self.__output_file:
+                cancel_run = (
+                    is_dangerous
+                    and not self.__view.confirm_running_dangerous_command()
+                )
+                if cancel_run:
+                    continue
+
+                if self.__output:
                     try:
-                        with open(self.__output_file, "w", newline="\n") as f:
+                        with open(self.__output, "w", newline="\n") as f:
                             f.write(shell_command)
                     except os.error:
                         rich.print("Couldn't write to output file.")
                         sys.exit(1)
                 else:
-                    cancel_run = (
-                        is_dangerous
-                        and not await questionary.confirm(
-                            "Are you sure you want to run this command?"
-                        ).unsafe_ask_async()
-                    )
-                    if cancel_run:
-                        sys.exit(1)
                     subprocess.run(
                         shell_command, executable=self.__shell, shell=True
                     )
@@ -164,8 +148,11 @@ class AskCLI:
                         "Enter your revision"
                     ).unsafe_ask_async()
                 ).strip()
+
                 if edit_prompt != "":
-                    return shell_command, edit_prompt
+                    shell_command = await self.__edit_shell_command_cli(
+                        shell_command, edit_prompt
+                    )
             elif choice == "Edit manually":
                 edited_shell_command = (
                     await questionary.text(
@@ -181,8 +168,8 @@ class AskCLI:
                     return edited_shell_command, ""
 
     @staticmethod
-    def __get_choices(dont_explain, explain_using):
-        choices = [
+    def __get_actions(dont_explain, explain_using) -> list[str]:
+        actions = [
             "Run this command",
             "Explain this command",
             "Explain using GPT-4 Turbo [BETA]",
@@ -193,14 +180,14 @@ class AskCLI:
         ]
 
         if not dont_explain:
-            choices.remove("Explain this command")
+            actions.remove("Explain this command")
 
         if explain_using == "gpt-4-1106-preview":
-            choices.remove("Explain using GPT-4 Turbo [BETA]")
+            actions.remove("Explain using GPT-4 Turbo [BETA]")
         elif explain_using == "gpt-4":
-            choices.remove("Explain using GPT-4")
+            actions.remove("Explain using GPT-4")
 
-        return choices
+        return actions
 
     @staticmethod
     def __print_command(shell_command):
@@ -210,7 +197,7 @@ class AskCLI:
         print(" " + " ".join(shell_command.splitlines(keepends=True)) + "\n")
 
     async def __recognize_dangerous_command(self, shell_command):
-        with self.__console.status(
+        with Status(
             "Shell Whiz is checking the command for danger...", spinner="dots"
         ):
             try:
@@ -252,7 +239,7 @@ class AskCLI:
 
     async def __edit_shell_command_cli(self, shell_command, prompt):
         try:
-            with self.__console.status(self.__thinking_msg, spinner="dots"):
+            with Status("Wait, Shell Whiz is thinking..."):
                 shell_command = await self.__llm.edit_shell_command(
                     shell_command, prompt
                 )
