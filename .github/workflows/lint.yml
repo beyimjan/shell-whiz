@@ -54,7 +54,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .mypy_cache
-          key: ${{ runner.os }}-mypy-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ matrix.os }}-mypy-${{ hashFiles('**/pyproject.toml') }}
 
       - name: Run mypy
         run: poetry run mypy -p shell_whiz
