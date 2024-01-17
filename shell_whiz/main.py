@@ -23,7 +23,7 @@ def cli(ctx: click.Context) -> None:
 @cli.command()
 @click.pass_obj
 def config(config: Config) -> None:
-    """Set OpenAI API key."""
+    """Set OpenAI API key"""
 
     _config(config)
 
@@ -98,7 +98,7 @@ def ask(
     output,
     prompt,
 ) -> None:
-    """Ask for a shell command."""
+    """Ask for a shell command"""
 
     preferences = preferences.strip()
     if preferences == "":
