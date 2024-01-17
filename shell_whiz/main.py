@@ -3,15 +3,16 @@ import os
 import sys
 
 import click
+import openai
 import questionary
 import rich
-from rich.console import Console
 
 from .cli import AskCLI
 from .config import Config, WritingError
 
 
 @click.group()
+@click.version_option()
 @click.pass_context
 def cli(ctx: click.Context) -> None:
     """Shell Whiz: AI assistant for command line"""
@@ -47,7 +48,12 @@ def _config(config: Config) -> None:
 
 
 @cli.command()
-@click.option("-s", "--shell", type=str, help="Set the shell executable")
+@click.option(
+    "-s",
+    "--shell",
+    type=click.Path(executable=True),
+    help="Set the shell executable",
+)
 @click.option(
     "-p",
     "--preferences",
@@ -77,7 +83,10 @@ def _config(config: Config) -> None:
     "-q", "--quiet", is_flag=True, help="Don't show the menu, end immediately"
 )
 @click.option(
-    "-o", "--output", type=str, help="Output file to write the command to"
+    "-o",
+    "--output",
+    type=click.Path(dir_okay=False, writable=True),
+    help="Output file to write the command to",
 )
 @click.argument("prompt", nargs=-1, required=True)
 @click.pass_obj
@@ -122,14 +131,52 @@ def ask(
 
 def run():
     try:
-        if sys.stdin.isatty() and sys.stdout.isatty():
-            cli()
-        else:
-            rich.print(
-                "[bold yellow]Error[/]: Working in non-interactive mode is not supported.",
-                file=sys.stderr,
-            )
-            sys.exit(1)
+        cli()
+    except openai.BadRequestError:
+        rich.print(
+            "[bold yellow]Error[/]: Your request was malformed or missing some required parameters, such as a token or an input.",
+            file=sys.stderr,
+        )
+    except openai.AuthenticationError:
+        rich.print(
+            "[bold yellow]Error[/]: You are not authorized to access the OpenAI API. You may have entered the wrong API key. Your API key is invalid, expired or revoked. Please run [bold green]sw config[/] to set up the API key. Visit https://platform.openai.com/account/api-keys to get your API key.",
+            file=sys.stderr,
+        )
+    except openai.PermissionDeniedError:
+        rich.print(
+            "[bold yellow]Error[/]: Your API key or token does not have the required scope or role to perform the requested action. Make sure your API key has the appropriate permissions for the action or model accessed.",
+            file=sys.stderr,
+        )
+    except openai.RateLimitError:
+        rich.print(
+            "[bold yellow]Error[/]: OpenAI API request exceeded rate limit. If you are on a free plan, please upgrade to a paid plan for a better experience with Shell Whiz. Visit https://platform.openai.com/account/billing/limits for more information.",
+            file=sys.stderr,
+        )
+    except openai.APITimeoutError:
+        rich.print(
+            "[bold yellow]Error[/]: OpenAI API request timed out. Please retry your request after a brief wait.",
+            file=sys.stderr,
+        )
+    except openai.APIConnectionError:
+        rich.print(
+            "[bold yellow]Error[/]: OpenAI API request failed to connect. Please check your internet connection and try again.",
+            file=sys.stderr,
+        )
+    except openai.InternalServerError:
+        rich.print(
+            "[bold yellow]Error[/]: OpenAI API request failed due to a temporary server-side issue. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information.",
+            file=sys.stderr,
+        )
+    except openai.APIStatusError:
+        rich.print(
+            "[bold yellow]Error[/]: An error occurred while connecting to the OpenAI API. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information.",
+            file=sys.stderr,
+        )
+    except openai.APIError:
+        rich.print(
+            "[bold yellow]Error[/]: An unknown error occurred while connecting to the OpenAI API. Please retry your request after a brief wait.",
+            file=sys.stderr,
+        )
     except KeyboardInterrupt:
         print("\nAborted!")
-        sys.exit(1)
+    sys.exit(1)  # This line is only reached if an error occurs
