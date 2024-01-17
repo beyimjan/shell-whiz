@@ -14,14 +14,19 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10"]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ vars.PYTHON_VERSION }}
+          python-version: ${{ matrix.python-version }}
           cache: pip
 
       - name: Setup Poetry
@@ -30,7 +35,7 @@ jobs:
       - name: Cache Poetry
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ vars.PYTHON_VERSION }}
+          python-version: ${{ matrix.python-version }}
           cache: poetry
 
       - name: Install dependencies
