@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, TypeAlias
+from typing import Any
 
 import jsonschema
 
@@ -9,7 +9,7 @@ class WritingError(Exception):
     pass
 
 
-ConfigData: TypeAlias = dict[str, str]
+ConfigData = dict[str, str]
 
 
 class Config:
