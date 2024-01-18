@@ -38,7 +38,7 @@ jobs:
           cache: pip
 
       - name: Setup Poetry
-        run: pip install poetry==${{ vars.POETRY_VERSION}}
+        run: pip install poetry==${{ vars.POETRY_VERSION }}
 
       - name: Cache Poetry
         uses: actions/setup-python@v5

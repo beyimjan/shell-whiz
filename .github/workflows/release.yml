@@ -22,7 +22,7 @@ jobs:
           cache: pip
 
       - name: Setup Poetry
-        run: pip install poetry==${{ vars.POETRY_VERSION}}
+        run: pip install poetry==${{ vars.POETRY_VERSION }}
 
       - name: Load PyPI token
         run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
