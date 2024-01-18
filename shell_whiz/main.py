@@ -26,12 +26,9 @@ def cli(ctx: click.Context) -> None:
 def config(config: Config) -> None:
     """Set OpenAI API key"""
 
-    _config(config)
-
-
-def _config(config: Config) -> None:
     rich.print(
-        "Visit https://platform.openai.com/account/api-keys to get your API key."
+        "Hello! I'm Shell Whiz, your AI assistant for the command line!\n\n"
+        "Visit https://platform.openai.com/account/api-keys to get the API key."
     )
 
     try:
@@ -45,14 +42,15 @@ def _config(config: Config) -> None:
             }
         )
     except WritingError as e:
-        rich.print(f"[bold yellow]Error[/]: {e}", file=sys.stderr)
+        rich.print(f"\n[bold yellow]Error[/]: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 @cli.command()
 @click.option(
     "-s",
     "--shell",
-    type=click.Path(executable=True),
+    type=click.Path(dir_okay=False, executable=True),
     help="Set the shell executable.",
 )
 @click.option(
@@ -135,7 +133,11 @@ def ask(
         exit(1)
 
     if not config.data:
-        _config(config)
+        rich.print(
+            "[bold yellow]Error[/]: Please set your OpenAI API key via [bold green]sw config[/] and try again.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     asyncio.run(
         AskCLI(
