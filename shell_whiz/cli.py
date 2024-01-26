@@ -111,7 +111,7 @@ def get_filtered_choices(dont_explain, explain_using):
     if not dont_explain:
         choices.remove("Explain this command")
 
-    if explain_using == "gpt-4-1106-preview":
+    if explain_using == "gpt-4-turbo-preview":
         choices.remove("Explain using GPT-4 Turbo [BETA]")
     elif explain_using == "gpt-4":
         choices.remove("Explain using GPT-4")
@@ -171,7 +171,7 @@ async def perform_selected_action(
             await print_explanation(
                 shell_command=shell_command,
                 preferences=preferences,
-                explain_using="gpt-4-1106-preview",
+                explain_using="gpt-4-turbo-preview",
                 insert_newline=True,
             )
         elif choice == "Explain using GPT-4":
