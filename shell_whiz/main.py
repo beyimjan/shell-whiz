@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-from typing import Any
 
 import click
 import openai
@@ -87,15 +86,15 @@ def config(config: Config) -> None:
 @click.pass_obj
 def ask(
     config: Config,
-    shell: Any,
-    preferences: Any,
-    model: Any,
-    explain_using: Any,
-    dont_explain: Any,
-    dont_warn: Any,
-    quiet: Any,
-    output: Any,
-    prompt: Any,
+    shell,
+    preferences,
+    model,
+    explain_using,
+    dont_explain,
+    dont_warn,
+    quiet,
+    output,
+    prompt,
 ) -> None:
     """Ask for a shell command"""
 
@@ -116,14 +115,12 @@ def ask(
 
     if explain_using is None:
         explain_using = model
-    else:
-        explain_using = explain_using.strip()
-        if explain_using == "":
-            rich.print(
-                "[bold yellow]Error[/]: Please provide a model to explain.",
-                file=sys.stderr,
-            )
-            exit(1)
+    elif explain_using.strip() == "":
+        rich.print(
+            "[bold yellow]Error[/]: Please provide a model to explain.",
+            file=sys.stderr,
+        )
+        exit(1)
 
     prompt = " ".join(prompt).strip()
     if prompt == "":
@@ -140,17 +137,15 @@ def ask(
         sys.exit(1)
 
     asyncio.run(
-        AskCLI(
-            config.data,
-            shell,
-            preferences,
-            model,
+        AskCLI(config.data, model, preferences)(
+            prompt,
             explain_using,
             dont_explain,
             dont_warn,
             quiet,
+            shell,
             output,
-        )(prompt)
+        )
     )
 
 

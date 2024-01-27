@@ -39,12 +39,9 @@ class ProviderOpenAI(ProviderLLM):
         "required": ["edited_shell_command"],
     }
 
-    def __init__(
-        self, api_key: str, model: str, explain_using: str, preferences: str
-    ) -> None:
+    def __init__(self, api_key: str, model: str, preferences: str) -> None:
         self.__client = AsyncOpenAI(api_key=api_key)
         self.__model = model
-        self.__explain_using = explain_using
 
         self.__preferences = (
             f"These are my preferences: ####\n{preferences}\n####"
@@ -101,7 +98,7 @@ class ProviderOpenAI(ProviderLLM):
         explain_using: Optional[str] = None,
     ) -> Any:
         response = await self.__client.chat.completions.create(
-            model=explain_using or self.__explain_using,
+            model=explain_using or self.__model,
             temperature=0.1,
             max_tokens=512,
             stream=stream,
