@@ -213,7 +213,7 @@ class AskCLI:
                         await self.__llm.get_explanation_of_shell_command(
                             cmd.shell_command,
                             True,
-                            explain_using="gpt-4-1106-preview",
+                            explain_using="gpt-4-turbo-preview",
                         )
                     )
                 )
@@ -248,7 +248,7 @@ class AskCLI:
         if not dont_explain:
             actions.remove("Explain this command")
 
-        if explain_using == "gpt-4-1106-preview":
+        if explain_using == "gpt-4-turbo-preview":
             actions.remove("Explain using GPT-4 Turbo [BETA]")
         elif explain_using == "gpt-4":
             actions.remove("Explain using GPT-4")
