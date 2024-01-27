@@ -1,4 +1,4 @@
 {
   "postCreateCommand": "pipx install poetry==1.7.1 && poetry install && npm install -g aicommits",
-  "postStartCommand": "aicommits config set generate=5 model=gpt-4-1106-preview"
+  "postStartCommand": "aicommits config set generate=5 model=gpt-4-turbo-preview"
 }
