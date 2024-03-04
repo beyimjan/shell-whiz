@@ -126,4 +126,6 @@ class Config:
         try:
             return _ConfigModelNotStrict(**deserialized_config)
         except ValidationError:
-            raise ConfigError("Validation failed for the configuration file.")
+            raise ConfigError(
+                "Configuration file doesn't follow the expected JSON schema."
+            )
