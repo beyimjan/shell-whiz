@@ -25,6 +25,7 @@ sw = "shell_whiz.cli:run"
 flake8 = "^5.0.4"
 black = "^23.3.0"
 isort = {version = "^5.11.5", extras = ["colors"]}
+mypy = "^1.8.0"
 
 [build-system]
 requires = ["poetry-core"]
