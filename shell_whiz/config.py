@@ -40,22 +40,20 @@ class Config:
         except ConfigError:
             config_from_file = None
 
-        if config_from_env and config_from_file:
-            try:
+        try:
+            if config_from_env and config_from_file:
                 Config.__config = ConfigModel(
                     **config_from_file.model_dump(exclude_none=True)
                     | config_from_env.model_dump(exclude_none=True)
                 )
-            except ValidationError:
-                raise ConfigError(
-                    "Validation failed for the configuration data."
-                )
-        elif config_from_env:
-            Config.__config = config_from_env
-        elif config_from_file:
-            Config.__config = config_from_file
-        else:
-            raise ConfigError("Configuration data is missing.")
+            elif config_from_env:
+                Config.__config = ConfigModel(**config_from_env.model_dump())
+            elif config_from_file:
+                Config.__config = ConfigModel(**config_from_file.model_dump())
+            else:
+                raise ConfigError("Configuration data is missing.")
+        except ValidationError:
+            raise ConfigError("Validation failed for the configuration data.")
 
         return cls.__instance
 
