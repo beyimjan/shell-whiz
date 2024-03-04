@@ -16,10 +16,7 @@ packages = [{include = "shell_whiz"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9 <4"
-openai = "^1.2.4"
-jsonschema = "^4.19.0"
-rich = "^13.5.2"
-questionary = "^2.0.0"
+pydantic = "^2.6.3"
 
 [tool.poetry.scripts]
 sw = "shell_whiz.cli:run"

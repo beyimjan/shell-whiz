@@ -1,36 +1,67 @@
-name: Release to PyPI
+name: Lint
 
 on:
+  workflow_call:
+  workflow_dispatch:
   push:
-    tags:
-      - "v*"
+    branches:
+      - "**"
+    paths:
+      - "shell_whiz/**/*.py"
+      - pyproject.toml
+      - .flake8
+      - poetry.lock
 
 jobs:
-  release:
-    name: Release to PyPI
-    runs-on: ubuntu-22.04
+  lint:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            ubuntu-20.04,
+            ubuntu-22.04,
+            windows-2019,
+            windows-2022,
+            macos-11,
+            macos-12,
+          ]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-poetry-1.7.0
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install Poetry
-        run: pip install poetry==1.7.0
+      - uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: ${{ vars.PYTHON_VERSION }}
+          cache: pip
 
-      - name: Load PyPI token
-        run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+      - name: Setup Poetry
+        run: pip install poetry==${{ vars.POETRY_VERSION }}
 
-      - name: Build and publish
-        run: poetry publish --build
+      - name: Cache Poetry
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ vars.PYTHON_VERSION }}
+          cache: poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run Black
+        run: poetry run black --color --check --diff --verbose shell_whiz
+
+      - name: Run Flake8
+        run: poetry run flake8 --color always --verbose shell_whiz
+
+      - name: Run isort
+        run: poetry run isort --color --check --diff --verbose shell_whiz
+
+      - name: Cache mypy
+        uses: actions/cache@v3
+        with:
+          path: .mypy_cache
+          key: mypy-${{ matrix.os }}-python-${{ vars.PYTHON_VERSION }}-${{ hashFiles('**/pyproject.toml') }}
+
+      - name: Run mypy
+        run: poetry run mypy -p shell_whiz

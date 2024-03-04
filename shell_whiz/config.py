@@ -1,84 +1,129 @@
 import json
 import os
+from typing import Optional
 
-import questionary
-import rich
-
-from shell_whiz.constants import ERROR_PREFIX_RICH
+from pydantic import BaseModel, ValidationError
 
 
-def get_config_paths():
-    config_dir = os.path.join(
-        (
-            os.environ.get("XDG_CONFIG_HOME")
-            or os.environ.get("APPDATA")
-            or os.path.join(os.environ.get("HOME", os.getcwd()), ".config")
-        ),
-        "shell-whiz",
-    )
-    config_file = os.path.join(config_dir, "config.json")
-
-    return config_dir, config_file
+class ConfigError(Exception):
+    pass
 
 
-async def edit_config_cli():
-    rich.print(
-        "Visit https://platform.openai.com/account/api-keys to get your API key."
-    )
-    openai_api_key = await questionary.text(
-        "OpenAI API key",
-        default=os.environ.get("OPENAI_API_KEY", ""),
-        validate=lambda text: len(text) > 0,
-    ).unsafe_ask_async()
-
-    return {"OPENAI_API_KEY": openai_api_key}
+class _ConfigModelNotStrict(BaseModel):
+    openai_api_key: Optional[str] = None
+    openai_org_id: Optional[str] = None
 
 
-async def edit_config():
-    config = await edit_config_cli()
-
-    config_dir, config_file = get_config_paths()
-
-    try:
-        os.makedirs(config_dir, exist_ok=True)
-    except OSError:
-        rich.print(
-            f"{ERROR_PREFIX_RICH}: Couldn't create directory {config_dir}"
-        )
-        return config
-
-    try:
-        with open(config_file, "w") as f:
-            json.dump(config, f)
-    except OSError:
-        rich.print(f"{ERROR_PREFIX_RICH}: Couldn't write to file {config_file}")
-        return config
-
-    try:
-        os.chmod(config_file, 0o600)
-    except OSError:
-        rich.print(
-            f"{ERROR_PREFIX_RICH}: Failed to change permissions for {config_file}"
-        )
-
-    return config
+class ConfigModel(BaseModel):
+    openai_api_key: str
+    openai_org_id: Optional[str] = None
 
 
-def read_config():
-    _, config_file = get_config_paths()
+class Config:
+    __instance = None
+    __config = None
 
-    try:
-        with open(config_file) as f:
-            config = json.load(f)
-    except (OSError, json.JSONDecodeError):
-        return {}
-    else:
-        return config
+    def __new__(cls):
+        if cls.__instance:
+            return cls.__instance
 
+        cls.__instance = super().__new__(cls)
 
-async def configure():
-    config = read_config()
-    if "OPENAI_API_KEY" not in config:
-        config = await edit_config()
+        try:
+            config_from_env = Config.__get_config_from_env()
+        except ConfigError:
+            config_from_env = None
 
-    os.environ["OPENAI_API_KEY"] = config["OPENAI_API_KEY"]
+        try:
+            _, config_file = Config.__get_config_path()
+            config_from_file = Config.__get_config_from_file(config_file)
+        except ConfigError:
+            config_from_file = None
+
+        if config_from_env and config_from_file:
+            try:
+                Config.__config = ConfigModel(
+                    **config_from_file.model_dump(exclude_none=True)
+                    | config_from_env.model_dump(exclude_none=True)
+                )
+            except ValidationError:
+                raise ConfigError(
+                    "Validation failed for the configuration data."
+                )
+        elif config_from_env:
+            Config.__config = config_from_env
+        elif config_from_file:
+            Config.__config = config_from_file
+        else:
+            raise ConfigError("Configuration data is missing.")
+
+        return cls.__instance
+
+    def __getattr__(self, name):
+        return getattr(Config.__config, name)
+
+    @staticmethod
+    def __get_config_path() -> tuple[str, str]:
+        directory = None
+        config_file = None
+
+        os_name = os.name
+        if os_name == "posix":
+            xdg_config_home = os.environ.get("XDG_CONFIG_HOME")
+            home = os.environ.get("HOME")
+
+            if xdg_config_home:
+                directory = xdg_config_home
+            elif home:
+                directory = os.path.join(home, ".config")
+            else:
+                error_message = "Set either $XDG_CONFIG_HOME or $HOME."
+        elif os_name == "nt":
+            appdata = os.environ.get("APPDATA")
+            if appdata:
+                directory = appdata
+            else:
+                error_message = "Set $APPDATA."
+
+        if not directory:
+            raise ConfigError(
+                "Unable to find the configuration directory. " + error_message
+                or "Something went wrong."
+            )
+
+        directory = os.path.join(directory, "shell-whiz")
+        config_file = os.path.join(directory, "config.json")
+
+        return directory, config_file
+
+    @staticmethod
+    def __get_config_from_env() -> _ConfigModelNotStrict:
+        openai_api_key = os.environ.get("OPENAI_API_KEY")
+        openai_org_id = os.environ.get("OPENAI_ORG_ID")
+
+        try:
+            return _ConfigModelNotStrict(
+                openai_api_key=openai_api_key, openai_org_id=openai_org_id
+            )
+        except ValidationError:
+            raise ConfigError(
+                "Validation failed for either $OPENAI_API_KEY or $OPENAI_ORG_ID."
+            )
+
+    @staticmethod
+    def __get_config_from_file(config_file: str) -> _ConfigModelNotStrict:
+        try:
+            with open(config_file) as f:
+                deserialized_config = json.load(f)
+        except (os.error, json.JSONDecodeError):
+            raise ConfigError("Unable to read the configuration file.")
+
+        if not isinstance(deserialized_config, dict):
+            raise ConfigError(
+                "Configuration file doesn't follow the expected JSON schema."
+            )
+
+        try:
+            return _ConfigModelNotStrict(**deserialized_config)
+        except ValidationError:
+            raise ConfigError("Validation failed for the configuration file.")
