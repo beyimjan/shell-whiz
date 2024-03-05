@@ -61,6 +61,28 @@ class Config:
         return getattr(Config.__config, name)
 
     @staticmethod
+    def write(config: ConfigModel):
+        directory, config_file = Config.__get_config_path()
+
+        try:
+            os.makedirs(directory, exist_ok=True)
+        except os.error:
+            raise ConfigError(f"Failed to create directory {directory}.")
+
+        try:
+            with open(config_file, "w") as f:
+                f.write(config.model_dump_json(exclude_none=True))
+        except os.error:
+            raise ConfigError(f"Failed to create file {config_file}.")
+
+        try:
+            os.chmod(config_file, 0o600)
+        except os.error:
+            raise ConfigError(
+                f"Failed to change permissions for file {config_file} to read and write only for the current user."
+            )
+
+    @staticmethod
     def __get_config_path() -> tuple[str, str]:
         directory = None
         config_file = None
