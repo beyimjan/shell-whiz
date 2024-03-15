@@ -4,7 +4,12 @@ from typing import Any
 
 import jsonschema
 
-from shell_whiz.llm.errors import ErrorLLM, SuggestionError, WarningError
+from shell_whiz.llm.errors import (
+    ErrorLLM,
+    ExplanationError,
+    SuggestionError,
+    WarningError,
+)
 from shell_whiz.llm.providers.api import ProviderLLM
 
 
@@ -71,9 +76,25 @@ class ClientLLM:
     async def get_explanation_of_shell_command_by_chunks(
         self, stream: Any
     ) -> AsyncGenerator[str, None]:
-        async for chunk in self.__api.get_explanation_of_shell_command_by_chunks(
-            stream
-        ):
+        """Note: Validation is incomplete, so results may not be consistent."""
+
+        is_first_chunk = True
+        skip_initial_spaces = True
+        async for (
+            chunk
+        ) in self.__api.get_explanation_of_shell_command_by_chunks(stream):
+            if skip_initial_spaces:
+                chunk = chunk.lstrip()
+                if chunk:
+                    skip_initial_spaces = False
+                else:
+                    continue
+
+            if is_first_chunk:
+                if not chunk.startswith("-"):
+                    raise ExplanationError("Explanation didn't start with -.")
+                is_first_chunk = False
+
             yield chunk
 
     def __validate_response(

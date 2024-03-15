@@ -8,3 +8,7 @@ class SuggestionError(ErrorLLM):
 
 class WarningError(ErrorLLM):
     pass
+
+
+class ExplanationError(ErrorLLM):
+    pass
