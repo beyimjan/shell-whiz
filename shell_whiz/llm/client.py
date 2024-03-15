@@ -45,7 +45,7 @@ class ClientLLM:
 
     async def recognise_dangerous_command(
         self, shell_command: str
-    ) -> list[bool, str]:
+    ) -> tuple[bool, str]:
         response = await self.__api.recognise_dangerous_command(shell_command)
 
         evaluation = self.__validate_response(
