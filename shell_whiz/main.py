@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 from pathlib import Path
@@ -47,7 +48,7 @@ def ask(
         ),
     ] = "I use Bash on Linux.",
     model: Annotated[
-        str, typer.Option(help="AI model to use.")
+        str, typer.Option("-m", "--model", help="AI model to use.")
     ] = "gpt-3.5-turbo",
     explain_using: Annotated[
         Optional[str],
@@ -106,20 +107,22 @@ def ask(
         )
         sys.exit(1)
 
-    AskCLI(
-        openai_api_key=config.openai_api_key,
-        openai_organization=config.openai_org_id,
-        model=model,
-        explain_using=explain_using,
-        preferences=preferences,
-    )(
-        prompt=prompt,
-        explain_using=explain_using,
-        dont_warn=dont_warn,
-        dont_explain=dont_explain,
-        quiet=quiet,
-        shell=shell,
-        output=output,
+    asyncio.run(
+        AskCLI(
+            openai_api_key=config.openai_api_key,
+            openai_org_id=config.openai_org_id,
+            model=model,
+            explain_using=explain_using,
+            preferences=preferences,
+        )(
+            prompt=prompt,
+            explain_using=explain_using,
+            dont_warn=dont_warn,
+            dont_explain=dont_explain,
+            quiet=quiet,
+            shell=shell,
+            output=output,
+        )
     )
 
 
