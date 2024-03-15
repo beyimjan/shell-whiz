@@ -1,6 +1,11 @@
 from pathlib import Path
 from typing import Optional
 
+import rich
+from rich.live import Live
+from rich.markdown import Markdown
+from rich.status import Status
+
 from shell_whiz.llm import ClientLLM, ProviderOpenAI
 
 
@@ -33,18 +38,39 @@ class AskCLI:
         shell: Optional[Path] = None,
         output: Optional[Path] = None,
     ):
-        shell_command = await self.__llm.suggest_shell_command(
-            " ".join(prompt)
+        with Status("Wait, Shell Whiz is thinking..."):
+            shell_command = await self.__llm.suggest_shell_command(
+                " ".join(prompt)
+            )
+
+        rich.print(
+            "\n ==================== [bold green]Command[/] ====================\n"
         )
-        print(shell_command)
+        print(" " + " ".join(shell_command.splitlines(keepends=True)) + "\n")
 
-        (
-            is_dangerous,
-            dangerous_consequences,
-        ) = await self.__llm.recognise_dangerous_command(shell_command)
-        print(f"{is_dangerous=}, {dangerous_consequences=}")
+        with Status("Shell Whiz is checking the command for danger..."):
+            (
+                is_dangerous,
+                dangerous_consequences,
+            ) = await self.__llm.recognise_dangerous_command(shell_command)
 
-        async for chunk in self.__llm.get_explanation_of_shell_command_by_chunks(
-            await self.__llm.get_explanation_of_shell_command(shell_command)
-        ):
-            print(chunk, end="", flush=True)
+        if is_dangerous:
+            rich.print(
+                " [bold red]Warning[/]: [bold yellow]{0}[/]\n".format(
+                    dangerous_consequences
+                )
+            )
+
+        rich.print(
+            " ================== [bold green]Explanation[/] =================="
+        )
+
+        with Live(auto_refresh=False) as live:
+            explanation = ""
+            async for chunk in self.__llm.get_explanation_of_shell_command_by_chunks(
+                await self.__llm.get_explanation_of_shell_command(
+                    shell_command
+                )
+            ):
+                explanation += chunk
+                live.update(Markdown(explanation), refresh=True)
