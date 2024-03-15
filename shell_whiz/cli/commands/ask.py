@@ -43,3 +43,8 @@ class AskCLI:
             dangerous_consequences,
         ) = await self.__llm.recognise_dangerous_command(shell_command)
         print(f"{is_dangerous=}, {dangerous_consequences=}")
+
+        async for chunk in self.__llm.get_explanation_of_shell_command_by_chunks(
+            await self.__llm.get_explanation_of_shell_command(shell_command)
+        ):
+            print(chunk, end="", flush=True)

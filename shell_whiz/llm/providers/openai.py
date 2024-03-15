@@ -22,10 +22,14 @@ class ProviderOpenAI(ProviderLLM):
         self.__model = model
         self.__explain_using = explain_using
 
+        self.__preferences = (
+            f"These are my preferences: ####\n{preferences}\n####"
+        )
+
         self.__messages = [
             {
                 "role": "system",
-                "content": f"You are Shell Whiz, an AI assistant for the command line.\n\nUnless I specify otherwise in my preferences below, you typically provide expert-level responses.\n\nHere are my preferences: ####\n{preferences}\n####",
+                "content": f"You are Shell Whiz, an AI assistant for the command line.\n\nUnless I specify otherwise in my preferences below, you typically provide expert-level responses.\n\n{self.__preferences}",
             }
         ]
 
@@ -66,7 +70,23 @@ class ProviderOpenAI(ProviderLLM):
     ) -> Any:
         """Explains a shell command."""
 
-        raise NotImplementedError
+        prompt = yaml.safe_load(
+            (
+                Path(__file__).parent.parent
+                / "prompts"
+                / "explain_shell_command.yml"
+            ).read_text()
+        )
+        prompt["messages"][0]["content"] = prompt["messages"][0][
+            "content"
+        ].format(self.__preferences)
+        prompt["messages"].append({"role": "user", "content": shell_command})
+
+        stream = await self.__create_chat_completion(
+            model=explain_using or self.__explain_using, stream=True, **prompt
+        )
+
+        return stream
 
     async def get_explanation_of_shell_command_by_chunks(
         self, stream: Any
@@ -76,9 +96,10 @@ class ProviderOpenAI(ProviderLLM):
         the `get_explanation_of_shell_command` function.
         """
 
-        # Related issue: https://github.com/python/mypy/issues/5070
-        if False:
-            yield
+        async for chunk in stream:
+            content = chunk.choices[0].delta.content
+            if content:
+                yield content
 
     async def edit_shell_command(self, shell_command: str, prompt: str) -> str:
         """Edits a shell command based on the given prompt. Returns JSON."""
@@ -135,4 +156,7 @@ class ProviderOpenAI(ProviderLLM):
             temperature=temperature,
         )
 
-        return response.choices[0].message
+        if stream:
+            return response
+        else:
+            return response.choices[0].message

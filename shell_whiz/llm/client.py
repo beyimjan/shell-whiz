@@ -1,4 +1,5 @@
 import json
+from collections.abc import AsyncGenerator
 from typing import Any
 
 import jsonschema
@@ -61,6 +62,19 @@ class ClientLLM:
             )
         else:
             return True, dangerous_consequences
+
+    async def get_explanation_of_shell_command(
+        self, shell_command: str
+    ) -> str:
+        return await self.__api.get_explanation_of_shell_command(shell_command)
+
+    async def get_explanation_of_shell_command_by_chunks(
+        self, stream: Any
+    ) -> AsyncGenerator[str, None]:
+        async for chunk in self.__api.get_explanation_of_shell_command_by_chunks(
+            stream
+        ):
+            yield chunk
 
     def __validate_response(
         self, s: str, schema: dict[str, Any], error: type[ErrorLLM]
