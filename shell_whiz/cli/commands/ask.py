@@ -74,3 +74,25 @@ class AskCLI:
             ):
                 explanation += chunk
                 live.update(Markdown(explanation), refresh=True)
+
+        actions = AskCLI.__get_actions(explain_using, dont_explain)
+        print(f"\n{actions=}")
+
+    @staticmethod
+    def __get_actions(explain_using: str, dont_explain: bool) -> list[str]:
+        actions = [
+            "Run this command",
+            "Explain this command",
+            "Explain using GPT-4",
+            "Revise query",
+            "Edit manually",
+            "Exit",
+        ]
+
+        if not dont_explain:
+            actions.remove("Explain this command")
+
+        if explain_using.startswith("gpt-4"):
+            actions.remove("Explain using GPT-4")
+
+        return actions
