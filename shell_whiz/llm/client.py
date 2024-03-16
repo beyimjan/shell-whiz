@@ -1,6 +1,6 @@
 import json
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Any, Optional
 
 import jsonschema
 
@@ -69,7 +69,7 @@ class ClientLLM:
             return True, dangerous_consequences
 
     async def get_explanation_of_shell_command(
-        self, shell_command: str
+        self, shell_command: str, explain_using: Optional[str] = None
     ) -> str:
         return await self.__api.get_explanation_of_shell_command(shell_command)
 
