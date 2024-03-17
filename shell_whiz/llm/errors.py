@@ -12,3 +12,7 @@ class WarningError(ErrorLLM):
 
 class ExplanationError(ErrorLLM):
     pass
+
+
+class EditingError(ErrorLLM):
+    pass

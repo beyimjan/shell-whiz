@@ -1,0 +1,17 @@
+temperature: 0.2
+max_tokens: 256
+function_call:
+  name: edit_shell_command
+functions:
+  - name: edit_shell_command
+    description: >
+      Edit a shell command.
+      You need to modify the provided shell command to achieve a specific objective.
+    parameters:
+      type: object
+      properties:
+        shell_command:
+          type: string
+          description: The edited shell command.
+      required:
+        - shell_command

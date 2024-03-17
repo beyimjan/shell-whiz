@@ -1,3 +1,5 @@
+# TODO: Clarify error messages
+
 import asyncio
 import os
 import sys
@@ -17,7 +19,7 @@ app = typer.Typer(help="Shell Whiz: AI assistant for the command line")
 
 
 @app.command()
-def config():
+def config() -> None:
     """Set up OpenAI API key"""
 
     try:
@@ -94,7 +96,7 @@ def ask(
             show_default=False,
         ),
     ] = None,
-):
+) -> None:
     """Get assistance from AI"""
 
     explain_using = explain_using or model
@@ -127,7 +129,7 @@ def ask(
     )
 
 
-def run():
+def run() -> None:
     try:
         app()
     except openai.BadRequestError:

@@ -1,3 +1,5 @@
+# TODO: Evaluate the performance of prompts
+
 from collections.abc import AsyncGenerator
 from pathlib import Path
 from typing import Any, Optional
@@ -17,6 +19,8 @@ class ProviderOpenAI(ProviderLLM):
         preferences: str,
         organization: Optional[str] = None,
     ) -> None:
+        # TODO: Add support for `base_url` parameter
+
         self.__client = AsyncOpenAI(api_key=api_key, organization=organization)
 
         self.__model = model
@@ -79,7 +83,7 @@ class ProviderOpenAI(ProviderLLM):
         )
         prompt["messages"][0]["content"] = prompt["messages"][0][
             "content"
-        ].format(self.__preferences)
+        ].format(preferences=self.__preferences)
         prompt["messages"].append({"role": "user", "content": shell_command})
 
         stream = await self.__create_chat_completion(
@@ -104,7 +108,18 @@ class ProviderOpenAI(ProviderLLM):
     async def edit_shell_command(self, shell_command: str, prompt: str) -> str:
         """Edits a shell command based on the given prompt. Returns JSON."""
 
-        raise NotImplementedError
+        message = await self.__continue_conversation(
+            f"{shell_command}\n\n{prompt}",
+            **yaml.safe_load(
+                (
+                    Path(__file__).parent.parent
+                    / "prompts"
+                    / "edit_shell_command.yml"
+                ).read_text()
+            ),
+        )
+
+        return message.function_call.arguments
 
     async def __continue_conversation(
         self,
@@ -114,19 +129,17 @@ class ProviderOpenAI(ProviderLLM):
         functions: Optional[list[dict[str, Any]]] = None,
         max_tokens: Optional[int] = None,
         response_format: Optional[dict[str, str]] = None,
-        stream: bool = False,
         temperature: Optional[float] = None,
     ) -> Any:
         self.__messages.append({"role": "user", "content": prompt})
 
         message = await self.__create_chat_completion(
-            messages=self.__messages,
-            model=model or self.__model,
+            self.__messages,
+            model or self.__model,
             function_call=function_call,
             functions=functions,
             max_tokens=max_tokens,
             response_format=response_format,
-            stream=stream,
             temperature=temperature,
         )
 
@@ -137,14 +150,14 @@ class ProviderOpenAI(ProviderLLM):
     async def __create_chat_completion(
         self,
         messages: list[dict[str, str]],
-        model: Optional[str] = None,
+        model: str,
         function_call: Optional[dict[str, str]] = None,
         functions: Optional[list[dict[str, Any]]] = None,
         max_tokens: Optional[int] = None,
         response_format: Optional[dict[str, str]] = None,
         stream: bool = False,
         temperature: Optional[float] = None,
-    ):
+    ) -> Any:
         response = await self.__client.chat.completions.create(  # type: ignore
             messages=messages,
             model=model,

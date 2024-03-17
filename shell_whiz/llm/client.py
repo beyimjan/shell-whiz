@@ -1,16 +1,19 @@
+# TODO: Clarify error messages
+
 import json
 from collections.abc import AsyncGenerator
 from typing import Any, Optional
 
 import jsonschema
 
-from shell_whiz.llm.errors import (
+from .errors import (
+    EditingError,
     ErrorLLM,
     ExplanationError,
     SuggestionError,
     WarningError,
 )
-from shell_whiz.llm.providers.api import ProviderLLM
+from .providers.api import ProviderLLM
 
 
 class ClientLLM:
@@ -19,7 +22,7 @@ class ClientLLM:
         "properties": {"shell_command": {"type": "string"}},
         "required": ["shell_command"],
     }
-    __execution_risk_jsonschema = {
+    __warning_jsonschema = {
         "type": "object",
         "properties": {
             "dangerous_to_run": {"type": "boolean"},
@@ -33,7 +36,6 @@ class ClientLLM:
 
     async def suggest_shell_command(self, prompt: str) -> str:
         response = await self.__api.suggest_shell_command(prompt)
-
         shell_command = self.__validate_response(
             response, self.__shell_command_jsonschema, SuggestionError
         )["shell_command"]
@@ -47,9 +49,8 @@ class ClientLLM:
         self, shell_command: str
     ) -> tuple[bool, str]:
         response = await self.__api.recognise_dangerous_command(shell_command)
-
         evaluation = self.__validate_response(
-            response, self.__execution_risk_jsonschema, WarningError
+            response, self.__warning_jsonschema, WarningError
         )
 
         is_dangerous = evaluation["dangerous_to_run"]
@@ -71,13 +72,13 @@ class ClientLLM:
     async def get_explanation_of_shell_command(
         self, shell_command: str, explain_using: Optional[str] = None
     ) -> str:
-        return await self.__api.get_explanation_of_shell_command(shell_command)
+        return await self.__api.get_explanation_of_shell_command(
+            shell_command, explain_using=explain_using
+        )
 
     async def get_explanation_of_shell_command_by_chunks(
         self, stream: Any
     ) -> AsyncGenerator[str, None]:
-        """Note: Validation is incomplete, so results may not be consistent."""
-
         is_first_chunk = True
         skip_initial_spaces = True
         async for (
@@ -97,6 +98,17 @@ class ClientLLM:
 
             yield chunk
 
+    async def edit_shell_command(self, shell_command: str, prompt: str) -> str:
+        response = await self.__api.edit_shell_command(shell_command, prompt)
+        shell_command = self.__validate_response(
+            response, self.__shell_command_jsonschema, EditingError
+        )["shell_command"]
+
+        if shell_command == "":
+            raise EditingError("Edited shell command is empty.")
+        else:
+            return shell_command
+
     def __validate_response(
         self, s: str, schema: dict[str, Any], error: type[ErrorLLM]
     ) -> dict[str, Any]:
@@ -106,7 +118,7 @@ class ClientLLM:
             raise error("LLM's response is not valid JSON.")
 
         try:
-            jsonschema.validate(instance=res, schema=schema)
+            jsonschema.validate(res, schema)
         except jsonschema.ValidationError:
             raise error(
                 "LLM's response didn't match the expected JSON schema."

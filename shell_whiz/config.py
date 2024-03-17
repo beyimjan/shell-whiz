@@ -1,6 +1,8 @@
+# TODO: Clarify error messages
+
 import json
 import os
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ValidationError
 
@@ -23,7 +25,7 @@ class Config:
     __instance = None
     __config = None
 
-    def __new__(cls):
+    def __new__(cls) -> "Config":
         if cls.__instance:
             return cls.__instance
 
@@ -57,11 +59,11 @@ class Config:
 
         return cls.__instance
 
-    def __getattr__(self, name):
-        return getattr(Config.__config, name)
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.__config, name)
 
     @staticmethod
-    def write(config: ConfigModel):
+    def write(config: ConfigModel) -> None:
         directory, config_file = Config.__get_config_path()
 
         try:
@@ -70,7 +72,7 @@ class Config:
             raise ConfigError(f"Failed to create directory {directory}.")
 
         try:
-            with open(config_file, "w") as f:
+            with open(config_file, mode="w") as f:
                 f.write(config.model_dump_json(exclude_none=True))
         except os.error:
             raise ConfigError(f"Failed to create file {config_file}.")
@@ -134,17 +136,17 @@ class Config:
     def __get_config_from_file(config_file: str) -> _ConfigModelNotStrict:
         try:
             with open(config_file) as f:
-                deserialized_config = json.load(f)
+                config = json.load(f)
         except (os.error, json.JSONDecodeError):
             raise ConfigError("Unable to read the configuration file.")
 
-        if not isinstance(deserialized_config, dict):
+        if not isinstance(config, dict):
             raise ConfigError(
                 "Configuration file doesn't follow the expected JSON schema."
             )
 
         try:
-            return _ConfigModelNotStrict(**deserialized_config)
+            return _ConfigModelNotStrict(**config)
         except ValidationError:
             raise ConfigError(
                 "Configuration file doesn't follow the expected JSON schema."

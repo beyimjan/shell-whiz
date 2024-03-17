@@ -17,7 +17,7 @@ messages:
 
       Remember, the objective is to provide a clear and informative breakdown of the command's parts, tailored for users familiar with the command line. By abbreviating long parts of the command, you ensure readability and ease of understanding.
 
-      {0}
+      {preferences}
   - role: user
     content: "netstat -tuln"
   - role: assistant
