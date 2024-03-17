@@ -139,7 +139,7 @@ class AskCLI:
         while True:
             if not dont_explain:
                 cmd.cat()
-                explanation_task = asyncio.create_task(
+                explanation = asyncio.create_task(
                     self.__llm.get_explanation_of_shell_command(
                         cmd.shell_command
                     )
@@ -168,7 +168,7 @@ class AskCLI:
                 cmd.warn()
 
             if not dont_explain:
-                await self.__explain_shell_command(explanation_task)
+                await self.__explain_shell_command(explanation)
 
             if quiet:
                 break
@@ -194,14 +194,14 @@ class AskCLI:
             elif action == "Explain this command":
                 print()
                 await self.__explain_shell_command(
-                    await self.__llm.get_explanation_of_shell_command(
+                    self.__llm.get_explanation_of_shell_command(
                         cmd.shell_command
                     )
                 )
             elif action == "Explain using GPT-4":
                 print()
                 await self.__explain_shell_command(
-                    await self.__llm.get_explanation_of_shell_command(
+                    self.__llm.get_explanation_of_shell_command(
                         cmd.shell_command, explain_using="gpt-4-turbo-preview"
                     )
                 )
@@ -209,10 +209,10 @@ class AskCLI:
                 cmd.shell_command = await self.__edit_shell_command(
                     cmd.shell_command
                 )
-                break
+                return
             elif action == "Edit manually":
                 await cmd.edit()
-                break
+                return
 
     @staticmethod
     def __get_actions(explain_using: str, dont_explain: bool) -> list[str]:
@@ -245,12 +245,9 @@ class AskCLI:
             rich.print(" Sorry, I don't know how to explain this command.\n")
 
     async def __edit_shell_command(self, shell_command: str) -> str:
-        prompt = (
-            await questionary.text("Enter your revision").unsafe_ask_async()
-        ).strip()
-
-        if prompt == "":
-            return
+        prompt = await questionary.text(
+            "Enter your revision", validate=lambda x: x != ""
+        ).unsafe_ask_async()
 
         try:
             with Status("Wait, Shell Whiz is thinking..."):
