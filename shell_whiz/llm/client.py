@@ -1,5 +1,3 @@
-# TODO: Clarify error messages
-
 import json
 from collections.abc import AsyncGenerator
 from typing import Any, Optional
@@ -32,7 +30,7 @@ class ClientLLM:
     }
 
     def __init__(self, api: ProviderLLM) -> None:
-        self.__api = api
+        self.__api = api  # It's called dependency injection
 
     async def suggest_shell_command(self, prompt: str) -> str:
         response = await self.__api.suggest_shell_command(prompt)
@@ -41,7 +39,7 @@ class ClientLLM:
         )["shell_command"]
 
         if shell_command == "":
-            raise SuggestionError("Suggested shell command is empty.")
+            raise SuggestionError("LLM didn't return a shell command.")
         else:
             return shell_command
 
@@ -54,23 +52,21 @@ class ClientLLM:
         )
 
         is_dangerous = evaluation["dangerous_to_run"]
-        dangerous_consequences = evaluation.get(
-            "dangerous_consequences", ""
-        ).strip()
+        dangerous_consequences = evaluation.get("dangerous_consequences", "")
 
         if not is_dangerous:
             return False, ""
         elif dangerous_consequences == "":
-            raise WarningError("Dangerous consequences are empty.")
+            raise WarningError("LLM didn't return any dangerous consequences.")
         elif "\n" in dangerous_consequences:
             raise WarningError(
-                "Dangerous consequences contain a newline character."
+                "LLM returned a multi-line dangerous consequences."
             )
         else:
             return True, dangerous_consequences
 
     async def get_explanation_of_shell_command(
-        self, shell_command: str, explain_using: Optional[str] = None
+        self, shell_command: str, *, explain_using: Optional[str] = None
     ) -> str:
         return await self.__api.get_explanation_of_shell_command(
             shell_command, explain_using=explain_using
@@ -93,7 +89,9 @@ class ClientLLM:
 
             if is_first_chunk:
                 if not chunk.startswith("-"):
-                    raise ExplanationError("Explanation didn't start with -.")
+                    raise ExplanationError(
+                        "LLM's response didn't start with '-'."
+                    )
                 is_first_chunk = False
 
             yield chunk
@@ -105,7 +103,7 @@ class ClientLLM:
         )["shell_command"]
 
         if shell_command == "":
-            raise EditingError("Edited shell command is empty.")
+            raise EditingError("LLM didn't return a shell command.")
         else:
             return shell_command
 
@@ -115,7 +113,7 @@ class ClientLLM:
         try:
             res = json.loads(s)
         except json.JSONDecodeError:
-            raise error("LLM's response is not valid JSON.")
+            raise error("LLM's response is not a valid JSON.")
 
         try:
             jsonschema.validate(res, schema)
