@@ -1,5 +1,3 @@
-# TODO: Clarify error messages
-
 import json
 import os
 from typing import Any, Optional
@@ -55,7 +53,7 @@ class Config:
             else:
                 raise ConfigError("Configuration data is missing.")
         except ValidationError:
-            raise ConfigError("Validation failed for the configuration data.")
+            raise ConfigError("Failed to validate configuration data.")
 
         return cls.__instance
 
@@ -81,13 +79,15 @@ class Config:
             os.chmod(config_file, 0o600)
         except os.error:
             raise ConfigError(
-                f"Failed to change permissions for file {config_file} to read and write only for the current user."
+                f"Failed to change permissions for {config_file} to read and write for the current user only."
             )
 
     @staticmethod
     def __get_config_path() -> tuple[str, str]:
         directory = None
         config_file = None
+
+        error_message = None
 
         os_name = os.name
         if os_name == "posix":
@@ -142,12 +142,12 @@ class Config:
 
         if not isinstance(config, dict):
             raise ConfigError(
-                "Configuration file doesn't follow the expected JSON schema."
+                "Configuration file doesn't match the expected JSON schema."
             )
 
         try:
             return _ConfigModelNotStrict(**config)
         except ValidationError:
             raise ConfigError(
-                "Configuration file doesn't follow the expected JSON schema."
+                "Configuration file doesn't match the expected JSON schema."
             )
