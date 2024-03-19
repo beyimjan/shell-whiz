@@ -19,7 +19,7 @@ class ProviderLLM(ABC):
 
     @abstractmethod
     async def get_explanation_of_shell_command(
-        self, shell_command: str, explain_using: Optional[str] = None
+        self, shell_command: str, *, explain_using: Optional[str] = None
     ) -> Any:
         """Explains a shell command."""
 

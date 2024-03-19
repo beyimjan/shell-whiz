@@ -1,5 +1,3 @@
-# TODO: Evaluate the performance of prompts
-
 from collections.abc import AsyncGenerator
 from pathlib import Path
 from typing import Any, Optional
@@ -13,15 +11,17 @@ from .api import ProviderLLM
 class ProviderOpenAI(ProviderLLM):
     def __init__(
         self,
+        *,
         api_key: str,
         model: str,
         explain_using: str,
         preferences: str,
         organization: Optional[str] = None,
+        base_url: Optional[str] = None,
     ) -> None:
-        # TODO: Add support for `base_url` parameter
-
-        self.__client = AsyncOpenAI(api_key=api_key, organization=organization)
+        self.__client = AsyncOpenAI(
+            api_key=api_key, organization=organization, base_url=base_url
+        )
 
         self.__model = model
         self.__explain_using = explain_using
@@ -70,7 +70,7 @@ class ProviderOpenAI(ProviderLLM):
         return message.function_call.arguments
 
     async def get_explanation_of_shell_command(
-        self, shell_command: str, explain_using: Optional[str] = None
+        self, shell_command: str, *, explain_using: Optional[str] = None
     ) -> Any:
         """Explains a shell command."""
 
@@ -124,6 +124,7 @@ class ProviderOpenAI(ProviderLLM):
     async def __continue_conversation(
         self,
         prompt: str,
+        *,
         model: Optional[str] = None,
         function_call: Optional[dict[str, str]] = None,
         functions: Optional[list[dict[str, Any]]] = None,
@@ -134,8 +135,8 @@ class ProviderOpenAI(ProviderLLM):
         self.__messages.append({"role": "user", "content": prompt})
 
         message = await self.__create_chat_completion(
-            self.__messages,
-            model or self.__model,
+            messages=self.__messages,
+            model=model or self.__model,
             function_call=function_call,
             functions=functions,
             max_tokens=max_tokens,
@@ -149,6 +150,7 @@ class ProviderOpenAI(ProviderLLM):
 
     async def __create_chat_completion(
         self,
+        *,
         messages: list[dict[str, str]],
         model: str,
         function_call: Optional[dict[str, str]] = None,
