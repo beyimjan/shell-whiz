@@ -1,8 +1,7 @@
-# TODO: Clarify error messages
-
 import asyncio
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, NoReturn, Optional
 
@@ -75,7 +74,10 @@ class _CMD:
                 with open(output, mode="w", newline="\n") as f:
                     f.write(self.shell_command)
             except os.error:
-                rich.print("Couldn't write to output file.")
+                rich.print(
+                    "[bold yellow]Error[/]: Couldn't write to output file.",
+                    file=sys.stderr,
+                )
                 raise typer.Exit(1)
         else:
             subprocess.run(self.shell_command, executable=shell, shell=True)
@@ -83,13 +85,11 @@ class _CMD:
         raise typer.Exit()
 
     async def edit(self) -> None:
-        res = (
-            await questionary.text(
-                "Edit command",
-                default=self.shell_command,
-                multiline="\n" in self.shell_command,
-            ).unsafe_ask_async()
-        ).strip()
+        res = await questionary.text(
+            "Edit command",
+            default=self.shell_command,
+            multiline="\n" in self.shell_command,
+        ).unsafe_ask_async()
 
         if res not in ("", self.shell_command):
             self.shell_command = res

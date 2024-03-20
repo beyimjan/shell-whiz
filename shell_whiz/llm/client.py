@@ -39,7 +39,10 @@ class ClientLLM:
         )["shell_command"]
 
         if shell_command == "":
-            raise SuggestionError("LLM didn't return a shell command.")
+            raise SuggestionError(
+                f"Failed to suggest a shell command on request: {prompt}.\n"
+                "The suggested shell command is empty."
+            )
         else:
             return shell_command
 
@@ -57,10 +60,12 @@ class ClientLLM:
         if not is_dangerous:
             return False, ""
         elif dangerous_consequences == "":
-            raise WarningError("LLM didn't return any dangerous consequences.")
+            raise WarningError(
+                f"Expected dangerous consequences for {shell_command}, but got an empty string."
+            )
         elif "\n" in dangerous_consequences:
             raise WarningError(
-                "LLM returned a multi-line dangerous consequences."
+                f"Unexpected newline in dangerous consequences for {shell_command}: {dangerous_consequences}."
             )
         else:
             return True, dangerous_consequences
@@ -90,7 +95,7 @@ class ClientLLM:
             if is_first_chunk:
                 if not chunk.startswith("-"):
                     raise ExplanationError(
-                        "LLM's response didn't start with '-'."
+                        "The first chunk of the explanation doesn't start with a dash."
                     )
                 is_first_chunk = False
 
@@ -103,7 +108,10 @@ class ClientLLM:
         )["shell_command"]
 
         if shell_command == "":
-            raise EditingError("LLM didn't return a shell command.")
+            raise EditingError(
+                f"Failed to edit {shell_command} on request: {prompt}.\n"
+                "The edited shell command is empty."
+            )
         else:
             return shell_command
 
@@ -113,13 +121,13 @@ class ClientLLM:
         try:
             res = json.loads(s)
         except json.JSONDecodeError:
-            raise error("LLM's response is not a valid JSON.")
+            raise error(f"LLM's response is not a valid JSON: {s}.")
 
         try:
             jsonschema.validate(res, schema)
         except jsonschema.ValidationError:
             raise error(
-                "LLM's response didn't match the expected JSON schema."
+                f"LLM's response {res} doesn't match the expected JSON schema {schema}."
             )
         else:
             return res

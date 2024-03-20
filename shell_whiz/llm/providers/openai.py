@@ -17,11 +17,8 @@ class ProviderOpenAI(ProviderLLM):
         explain_using: str,
         preferences: str,
         organization: Optional[str] = None,
-        base_url: Optional[str] = None,
     ) -> None:
-        self.__client = AsyncOpenAI(
-            api_key=api_key, organization=organization, base_url=base_url
-        )
+        self.__client = AsyncOpenAI(api_key=api_key, organization=organization)
 
         self.__model = model
         self.__explain_using = explain_using

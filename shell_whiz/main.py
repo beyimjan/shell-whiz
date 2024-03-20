@@ -1,5 +1,3 @@
-# TODO: Clarify error messages
-
 import asyncio
 import os
 import sys
@@ -37,7 +35,7 @@ def config() -> None:
     try:
         Config.write(config)
     except ConfigError as e:
-        rich.print(e, file=sys.stderr)
+        rich.print(f"[bold yellow]Error[/]: {e}", file=sys.stderr)
         raise typer.Exit(1)
 
 
@@ -132,33 +130,39 @@ def ask(
 def run() -> None:
     try:
         app()
-    except openai.BadRequestError:
+    except openai.APITimeoutError:  # API connection error
+        rich.print(
+            "[bold yellow]Error[/]: OpenAI API request timed out. Please retry your request after a brief wait.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    except openai.BadRequestError:  # API status error
         rich.print(
             "[bold yellow]Error[/]: Your request was malformed or missing some required parameters, such as a token or an input.",
             file=sys.stderr,
         )
         sys.exit(1)
-    except openai.AuthenticationError:
+    except openai.AuthenticationError:  # API status error
         rich.print(
-            "[bold yellow]Error[/]: You are not authorized to access the OpenAI API. You may have entered the wrong API key. Your API key is invalid, expired or revoked. Please run [bold green]sw config[/] to set up the API key. Visit https://platform.openai.com/account/api-keys to get your API key.",
+            "[bold yellow]Error[/]: Check your API key and make sure it is correct and active. You may need to generate a new one from https://platform.openai.com/api-keys.",
             file=sys.stderr,
         )
         sys.exit(1)
-    except openai.PermissionDeniedError:
+    except openai.PermissionDeniedError:  # API status error
         rich.print(
-            "[bold yellow]Error[/]: Your API key or token does not have the required scope or role to perform the requested action. Make sure your API key has the appropriate permissions for the action or model accessed.",
+            "[bold yellow]Error[/]: Your API key does not have the required scope or role to perform the requested action. Make sure your API key has the appropriate permissions for the action or model accessed.",
             file=sys.stderr,
         )
         sys.exit(1)
-    except openai.RateLimitError:
+    except openai.RateLimitError:  # API status error
         rich.print(
-            "[bold yellow]Error[/]: OpenAI API request exceeded rate limit. If you are on a free plan, please upgrade to a paid plan for a better experience with Shell Whiz. Visit https://platform.openai.com/account/billing/limits for more information.",
+            "[bold yellow]Error[/]: OpenAI API request exceeded rate limit. If you are on a free plan, please upgrade to a paid plan for a better experience. Visit https://platform.openai.com/account/limits for more information.",
             file=sys.stderr,
         )
         sys.exit(1)
-    except openai.APITimeoutError:
+    except openai.InternalServerError:  # API status error
         rich.print(
-            "[bold yellow]Error[/]: OpenAI API request timed out. Please retry your request after a brief wait.",
+            "[bold yellow]Error[/]: OpenAI API request failed due to a temporary server-side issue. Please retry your request after a brief wait. Visit https://status.openai.com for more information.",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -168,15 +172,9 @@ def run() -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    except openai.InternalServerError:
-        rich.print(
-            "[bold yellow]Error[/]: OpenAI API request failed due to a temporary server-side issue. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
     except openai.APIStatusError:
         rich.print(
-            "[bold yellow]Error[/]: An error occurred while connecting to the OpenAI API. Please retry your request after a brief wait. The problem is on the side of the OpenAI. Visit https://status.openai.com for more information.",
+            "[bold yellow]Error[/]: An error occurred while connecting to the OpenAI API. Please retry your request after a brief wait. Visit https://status.openai.com for more information.",
             file=sys.stderr,
         )
         sys.exit(1)
