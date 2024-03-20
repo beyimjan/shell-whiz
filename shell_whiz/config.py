@@ -87,7 +87,7 @@ class Config:
         directory = None
         config_file = None
 
-        error_message = None
+        error_message = ""
 
         os_name = os.name
         if os_name == "posix":

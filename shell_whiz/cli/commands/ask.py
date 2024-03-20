@@ -39,7 +39,7 @@ class _CMD:
         )
 
     def warn(self) -> None:
-        if self.is_dangerous and self.dangerous_consequences:
+        if self.is_dangerous:
             rich.print(
                 " [bold red]Warning[/]: [bold yellow]{0}[/]\n".format(
                     self.dangerous_consequences
@@ -75,7 +75,7 @@ class _CMD:
                     f.write(self.shell_command)
             except os.error:
                 rich.print(
-                    "[bold yellow]Error[/]: Couldn't write to output file.",
+                    "[bold yellow]Error[/]: Failed to write to the output file.",
                     file=sys.stderr,
                 )
                 raise typer.Exit(1)
@@ -98,6 +98,7 @@ class _CMD:
 class AskCLI:
     def __init__(
         self,
+        *,
         openai_api_key: str,
         model: str,
         explain_using: str,
@@ -107,15 +108,16 @@ class AskCLI:
         self.__llm = ClientLLM(
             ProviderOpenAI(
                 api_key=openai_api_key,
+                organization=openai_org_id,
                 model=model,
                 explain_using=explain_using,
                 preferences=preferences,
-                organization=openai_org_id,
             )
         )
 
     async def __call__(
         self,
+        *,
         prompt: list[str],
         explain_using: str,
         dont_warn: bool,
@@ -131,7 +133,8 @@ class AskCLI:
                 )
         except SuggestionError:
             rich.print(
-                "[bold yellow]Error[/]: Sorry, I don't know how to do this."
+                "[bold yellow]Error[/]: Sorry, I don't know how to do this.",
+                file=sys.stderr,
             )
             raise typer.Exit(1)
 
@@ -149,9 +152,7 @@ class AskCLI:
                 cmd.is_dangerous = False
             else:
                 try:
-                    with Status(
-                        "Shell Whiz is checking the command for danger..."
-                    ):
+                    with Status("Wait, Shell Whiz is thinking..."):
                         (
                             cmd.is_dangerous,
                             cmd.dangerous_consequences,

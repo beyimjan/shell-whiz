@@ -20,6 +20,10 @@ app = typer.Typer(help="Shell Whiz: AI assistant for the command line")
 def config() -> None:
     """Set up OpenAI API key"""
 
+    rich.print(
+        "Visit https://platform.openai.com/api-keys to get your API key."
+    )
+
     try:
         config = ConfigModel(
             openai_api_key=questionary.text(
@@ -29,7 +33,9 @@ def config() -> None:
             ).unsafe_ask()
         )
     except pydantic.ValidationError:
-        rich.print("Something went wrong.", file=sys.stderr)
+        rich.print(
+            "[bold yellow]Error[/]: Something went wrong.", file=sys.stderr
+        )
         raise typer.Exit(1)
 
     try:
@@ -78,7 +84,7 @@ def ask(
     shell: Annotated[
         Optional[Path],
         typer.Option(
-            help="Shell to use for running the command. Defaults to the user's default shell.",
+            help="Shell for executing the command. On Unix-like systems, this is usually /bin/sh. In Windows, it is usually cmd.exe.",
             dir_okay=False,
             show_default=False,
         ),
