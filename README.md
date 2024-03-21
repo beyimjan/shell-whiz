@@ -11,7 +11,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 
 <p align="center">
   <img
-    src=""
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
 
@@ -104,12 +104,12 @@ Run `sw ask --help` for more information.
 
 <p align="center">
   <img
-    src=""
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
 <p align="center">
   <img
-    src=""
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
 
@@ -117,21 +117,21 @@ Run `sw ask --help` for more information.
 
 <p align="center">
   <img
-    src=""
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
 <p align="center">
   <img
-    src=""
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
 <p align="center">
   <img
-    src=""
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
 <p align="center">
   <img
-    src=""
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
