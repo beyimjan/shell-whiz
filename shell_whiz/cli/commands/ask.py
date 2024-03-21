@@ -153,11 +153,10 @@ class AskCLI:
             else:
                 try:
                     with Status("Wait, Shell Whiz is thinking..."):
-                        (
-                            cmd.is_dangerous,
-                            cmd.dangerous_consequences,
-                        ) = await self.__llm.recognise_dangerous_command(
-                            cmd.shell_command
+                        (cmd.is_dangerous, cmd.dangerous_consequences) = (
+                            await self.__llm.recognise_dangerous_command(
+                                cmd.shell_command
+                            )
                         )
                 except WarningError:
                     cmd.is_dangerous = False
