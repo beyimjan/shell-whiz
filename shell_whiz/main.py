@@ -53,7 +53,7 @@ def ask(
         typer.Option(
             "-p", "--preferences", help="Preferences for the AI assistant."
         ),
-    ] = "I use Bash on Linux.",
+    ] = "I use Bash on Linux",
     model: Annotated[
         str, typer.Option("-m", "--model", help="AI model to use.")
     ] = "gpt-3.5-turbo",

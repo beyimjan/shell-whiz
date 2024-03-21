@@ -98,7 +98,7 @@ To track API usage and costs, periodically visit the [OpenAI API Usage](https://
 
 The assistant can be easily configured for any task using command line arguments.
 
-The most powerful option is `-p "..."` or `--preferences "..."`. This setting can be used to select the shell environment or even the language of the assistant's responses. The default value is `I use Bash on Linux.`.
+The most powerful option is `-p "..."` or `--preferences "..."`. This setting can be used to select the shell environment or even the language of the assistant's responses. The default value is `I use Bash on Linux`.
 
 Run `sw ask --help` for more information.
 
