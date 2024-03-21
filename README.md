@@ -27,7 +27,7 @@ This will add the `sw` command to your `PATH`.
 
 To use the assistant you'll need an API key from OpenAI. Obtain this key by visiting https://platform.openai.com/api-keys. Once you have the key, you can set it either by running `sw config` or by setting the `OPENAI_API_KEY` environment variable.
 
-## Usage 🎉
+## Getting started ✨
 
 You can run the assistant directly using `sw ask`, but I recommend creating an alias for it. For example, you can add the following line to the bottom of your `~/.bashrc` file:
 
