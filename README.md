@@ -112,26 +112,3 @@ Run `sw ask --help` for more information.
     src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
   />
 </p>
-
-## More examples
-
-<p align="center">
-  <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
-  />
-</p>
-<p align="center">
-  <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
-  />
-</p>
-<p align="center">
-  <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
-  />
-</p>
-<p align="center">
-  <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
-  />
-</p>
