@@ -11,7 +11,7 @@ Shell Whiz is an AI assistant for the command line. It will help you find the ri
 
 <p align="center">
   <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/6c716b44-5ea8-4f3d-a08f-9ebae06ae4dc"
   />
 </p>
 
@@ -104,11 +104,11 @@ Run `sw ask --help` for more information.
 
 <p align="center">
   <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/fe99bdf8-aeeb-4293-a923-67a1a2245ee1"
   />
 </p>
 <p align="center">
   <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/0509a35d-bb27-41f6-9d5e-739f175c23e2"
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/be058866-a28d-49ad-9e6e-41d8072ab738"
   />
 </p>
