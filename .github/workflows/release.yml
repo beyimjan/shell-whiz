@@ -1,32 +1,17 @@
-name: Lint
+name: Release
 
 on:
-  workflow_call:
-  workflow_dispatch:
   push:
-    branches:
-      - "**"
-    paths:
-      - "shell_whiz/**/*.py"
-      - pyproject.toml
-      - .flake8
-      - poetry.lock
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+*
 
 jobs:
   lint:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          [
-            ubuntu-20.04,
-            ubuntu-22.04,
-            windows-2019,
-            windows-2022,
-            macos-11,
-            macos-12,
-          ]
-    runs-on: ${{ matrix.os }}
+    uses: ./.github/workflows/lint.yml
+
+  release-to-pypi:
+    runs-on: ubuntu-latest
+    needs: lint
     steps:
       - uses: actions/checkout@v4
 
@@ -39,29 +24,8 @@ jobs:
       - name: Setup Poetry
         run: pip install poetry==${{ vars.POETRY_VERSION }}
 
-      - name: Cache Poetry
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ vars.PYTHON_VERSION }}
-          cache: poetry
+      - name: Load PyPI token
+        run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
 
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Run Black
-        run: poetry run black --color --check --diff --verbose shell_whiz
-
-      - name: Run Flake8
-        run: poetry run flake8 --color always --verbose shell_whiz
-
-      - name: Run isort
-        run: poetry run isort --color --check --diff --verbose shell_whiz
-
-      - name: Cache mypy
-        uses: actions/cache@v3
-        with:
-          path: .mypy_cache
-          key: mypy-${{ matrix.os }}-python-${{ vars.PYTHON_VERSION }}-${{ hashFiles('**/pyproject.toml') }}
-
-      - name: Run mypy
-        run: poetry run mypy -p shell_whiz
+      - name: Build and publish
+        run: poetry publish --build
