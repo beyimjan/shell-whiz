@@ -84,6 +84,8 @@ def ask(
     shell: Annotated[
         Optional[Path],
         typer.Option(
+            "-s",
+            "--shell",
             help="Shell for executing the command. On Unix-like systems, this is usually /bin/sh. In Windows, it is usually cmd.exe.",
             dir_okay=False,
             show_default=False,
