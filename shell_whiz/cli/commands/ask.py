@@ -127,8 +127,9 @@ async def _run(
             file=sys.stderr,
         )
         raise typer.Exit(1)
+    else:
+        print()
 
-    print()
     while True:
         shell_command.display()
 
