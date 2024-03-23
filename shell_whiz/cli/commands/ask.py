@@ -55,7 +55,6 @@ async def _edit_shell_command(
     print()
     try:
         with Status("Wait, Shell Whiz is thinking..."):
-            raise EditingError
             shell_command.args = await ai.edit_shell_command(
                 shell_command.args, prompt
             )
