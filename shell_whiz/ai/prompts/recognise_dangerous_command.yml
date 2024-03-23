@@ -4,7 +4,10 @@ function_call:
   name: recognise_dangerous_command
 functions:
   - name: recognise_dangerous_command
-    description: Recognise a dangerous shell command. This function should be extremely insensitive, marking a command as dangerous only if it has very severe consequences.
+    description: >
+      Recognise a dangerous shell command.
+      This function should be extremely insensitive, marking a command as
+      dangerous only if it has very severe consequences.
     parameters:
       type: object
       properties:

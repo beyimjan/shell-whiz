@@ -1,5 +1,5 @@
 ---
-temperature: 0.1
+temperature: 0
 max_tokens: 512
 messages:
   - role: system
@@ -51,7 +51,7 @@ messages:
     content: |
       - `git log` displays the commit logs.
         - `--name-only` lists the file names that were changed.
-        - `--pretty=format:` sets the log format to empty, just file names
+        - `--pretty=format:` sets the log format to empty, just file names.
       - `| sort` sorts the output of the previous command alphabetically.
       - `| uniq -c` counts the number of occurrences of each line in the output.
       - `| sort -nr` sorts the output numerically in reverse order.

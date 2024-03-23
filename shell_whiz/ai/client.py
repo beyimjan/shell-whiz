@@ -78,7 +78,7 @@ class ClientAI:
         )
 
     async def get_explanation_of_shell_command_by_chunks(
-        self, stream: Any
+        self, stream: Any, *, permissive: bool = False
     ) -> AsyncGenerator[str, None]:
         is_first_chunk = True
         skip_initial_spaces = True
@@ -93,7 +93,7 @@ class ClientAI:
                     continue
 
             if is_first_chunk:
-                if not chunk.startswith("-"):
+                if not chunk.startswith("-") and not permissive:
                     raise ExplanationError(
                         "The first chunk of the explanation doesn't start with a dash."
                     )
