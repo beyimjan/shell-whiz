@@ -1,0 +1,13 @@
+function_call:
+  name: perform_task_in_command_line
+functions:
+  - name: perform_task_in_command_line
+    description: Perform the task in the command line. You just get things done, rather than trying to explain.
+    parameters:
+      type: object
+      properties:
+        shell_command:
+          type: string
+          description: The shell command to perform the task.
+      required:
+        - shell_command

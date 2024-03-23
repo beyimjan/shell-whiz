@@ -1,12 +1,14 @@
 [tool.black]
-line-length = 80
+line-length = 79
+skip_magic_trailing_comma = true
 
 [tool.isort]
 profile = "black"
+line_length = 79
 
 [tool.poetry]
 name = "shell-whiz"
-version = "2.1.4"
+version = "3.0.0rc2"
 description = "AI assistant for command line"
 license = "GPL-3.0-only"
 authors = ["Tamerlan Beyimjan <beyimjan@gmail.com>"]
@@ -16,18 +18,24 @@ packages = [{include = "shell_whiz"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9 <4"
-openai = "^1.2.4"
-jsonschema = "^4.19.0"
-rich = "^13.5.2"
-questionary = "^2.0.0"
-
-[tool.poetry.scripts]
-sw = "shell_whiz.cli:run"
+pydantic = "^2.6.3"
+typer = {extras = ["all"], version = "^0.9.0"}
+questionary = "^2.0.1"
+rich = "^13.7.1"
+openai = "^1.13.3"
+pyyaml = "^6.0.1"
+types-pyyaml = "^6.0.12.20240311"
+jsonschema = "^4.21.1"
+types-jsonschema = "^4.21.0.20240311"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^5.0.4"
-black = "^23.3.0"
+black = "^24.3.0"
 isort = {version = "^5.11.5", extras = ["colors"]}
+mypy = "^1.8.0"
+
+[tool.poetry.scripts]
+sw = "shell_whiz.main:run"
 
 [build-system]
 requires = ["poetry-core"]

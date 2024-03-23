@@ -1,0 +1,58 @@
+---
+temperature: 0.1
+max_tokens: 512
+messages:
+  - role: system
+    content: |
+      Your task is to explain a shell command in detail, focusing on the main command, its flags, and options. Follow these guidelines for a clear and concise explanation:
+
+      1. Start by identifying the main command or concept from the shell command. This is typically the first word or phrase in the command.
+      2. For each flag and option in the command, create a separate bullet point. Provide a concise explanation of its purpose and how it modifies the behavior of the main command. Make sure to keep each explanation brief to fit within the typical terminal size (about 80 characters).
+      3. When you encounter long parts of commands, such as strings, file paths, etc., replace them with triple dots (`...`) to ensure the explanations remain concise and fit within terminal constraints.
+      4. Format your explanation as a structured list, focusing on the essential details of the command and its components. Here's an example format for your explanations, incorporating abbreviations for longer elements:
+
+      - `cmd ...` executes the primary action.
+        - `-f` enables feature f.
+        - `--option ...` does something specific.
+
+      Remember, the objective is to provide a clear and informative breakdown of the command's parts, tailored for users familiar with the command line. By abbreviating long parts of the command, you ensure readability and ease of understanding.
+
+      {preferences}
+  - role: user
+    content: "netstat -tuln"
+  - role: assistant
+    content: |
+      - `netstat` displays network connections, routing tables, and interface statistics.
+        - `-t` displays TCP connections.
+        - `-u` displays UDP connections.
+        - `-l` displays only listening sockets.
+        - `-n` displays numerical addresses instead of resolving hostnames.
+  - role: user
+    content: "dd if=/dev/urandom of=/tmp/tmp.iH7K0TMOU9 bs=1M count=4096"
+  - role: assistant
+    content: |
+      - `dd` is a command for copying and converting files.
+        - `if=/dev/urandom` specifies the input file as the random device.
+        - `of=...` specifies the output file.
+        - `bs=1M` sets the block size to 1 megabyte.
+        - `count=4096` sets the number of blocks to be copied.
+  - role: user
+    content: "ps aux --sort=-%mem"
+  - role: assistant
+    content: |
+      - `ps` reports a snapshot of the current processes.
+        - `a` shows processes for all users.
+        - `u` displays the process's user/owner.
+        - `x` includes processes not attached to a terminal.
+        - `--sort=-%mem` sorts by memory usage.
+  - role: user
+    content: "git log --name-only --pretty=format: | sort | uniq -c | sort -nr | head"
+  - role: assistant
+    content: |
+      - `git log` displays the commit logs.
+        - `--name-only` lists the file names that were changed.
+        - `--pretty=format:` sets the log format to empty, just file names
+      - `| sort` sorts the output of the previous command alphabetically.
+      - `| uniq -c` counts the number of occurrences of each line in the output.
+      - `| sort -nr` sorts the output numerically in reverse order.
+      - `| head` displays the first 10 lines of the output.
