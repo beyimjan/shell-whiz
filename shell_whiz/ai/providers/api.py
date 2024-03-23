@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 from typing import Any, Optional
 
 
-class ProviderLLM(ABC):
+class ProviderAI(ABC):
     """
     Helper class that defines the interface to implement Shell Whiz
     using different LLM providers (e.g. OpenAI, Anthropic, etc.).
@@ -19,7 +19,7 @@ class ProviderLLM(ABC):
 
     @abstractmethod
     async def get_explanation_of_shell_command(
-        self, shell_command: str, *, explain_using: Optional[str] = None
+        self, shell_command: str, *, model: Optional[str] = None
     ) -> Any:
         """Explains a shell command."""
 

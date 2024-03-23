@@ -6,15 +6,15 @@ import jsonschema
 
 from .errors import (
     EditingError,
-    ErrorLLM,
+    ErrorAI,
     ExplanationError,
     SuggestionError,
     WarningError,
 )
-from .providers.api import ProviderLLM
+from .providers.api import ProviderAI
 
 
-class ClientLLM:
+class ClientAI:
     __shell_command_jsonschema = {
         "type": "object",
         "properties": {"shell_command": {"type": "string"}},
@@ -29,8 +29,8 @@ class ClientLLM:
         "required": ["dangerous_to_run"],
     }
 
-    def __init__(self, api: ProviderLLM) -> None:
-        self.__api = api  # It's called dependency injection
+    def __init__(self, api: ProviderAI) -> None:
+        self.__api = api
 
     async def suggest_shell_command(self, prompt: str) -> str:
         response = await self.__api.suggest_shell_command(prompt)
@@ -71,10 +71,10 @@ class ClientLLM:
             return True, dangerous_consequences
 
     async def get_explanation_of_shell_command(
-        self, shell_command: str, *, explain_using: Optional[str] = None
+        self, shell_command: str, *, model: Optional[str] = None
     ) -> str:
         return await self.__api.get_explanation_of_shell_command(
-            shell_command, explain_using=explain_using
+            shell_command, model=model
         )
 
     async def get_explanation_of_shell_command_by_chunks(
@@ -116,7 +116,7 @@ class ClientLLM:
             return shell_command
 
     def __validate_response(
-        self, s: str, schema: dict[str, Any], error: type[ErrorLLM]
+        self, s: str, schema: dict[str, Any], error: type[ErrorAI]
     ) -> dict[str, Any]:
         try:
             res = json.loads(s)

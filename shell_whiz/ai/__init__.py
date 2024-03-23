@@ -1,7 +1,7 @@
-from .client import ClientLLM
+from .client import ClientAI
 from .errors import (
     EditingError,
-    ErrorLLM,
+    ErrorAI,
     ExplanationError,
     SuggestionError,
     WarningError,

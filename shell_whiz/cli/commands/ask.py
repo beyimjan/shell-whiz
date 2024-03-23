@@ -1,9 +1,7 @@
 import asyncio
-import os
-import subprocess
 import sys
 from pathlib import Path
-from typing import Any, NoReturn, Optional
+from typing import Annotated, Any, Optional
 
 import questionary
 import rich
@@ -12,251 +10,259 @@ from rich.live import Live
 from rich.markdown import Markdown
 from rich.status import Status
 
-from shell_whiz.llm import (
-    ClientLLM,
+from shell_whiz.ai import (
+    ClientAI,
     EditingError,
     ExplanationError,
     ProviderOpenAI,
     SuggestionError,
     WarningError,
 )
+from shell_whiz.config import Config, ConfigError
+
+from ..core.shell_command import ShellCommand
 
 
-class _CMD:
-    shell_command: str
-    is_dangerous: bool = False
-    dangerous_consequences: str = ""
+async def _explain_shell_command(*, ai: ClientAI, coro: Any) -> None:
+    with Status("Wait, Shell Whiz is thinking..."):
+        stream = await coro
 
-    def __init__(self, shell_command: str) -> None:
-        self.shell_command = shell_command
+    rich.print(
+        " ================== [bold green]Explanation[/] =================="
+    )
 
-    def cat(self) -> None:
-        rich.print(
-            "\n ==================== [bold green]Command[/] ====================\n"
-        )
-        print(
-            " " + " ".join(self.shell_command.splitlines(keepends=True)) + "\n"
-        )
-
-    def warn(self) -> None:
-        if self.is_dangerous:
-            rich.print(
-                " [bold red]Warning[/]: [bold yellow]{0}[/]\n".format(
-                    self.dangerous_consequences
-                )
-            )
-
-    @staticmethod
-    async def explain(stream: Any) -> None:
-        rich.print(
-            " ================== [bold green]Explanation[/] =================="
-        )
-
-        with Live(auto_refresh=False) as live:
-            explanation = ""
-            async for chunk in stream:
+    explanation = ""
+    with Live(auto_refresh=False) as live:
+        try:
+            async for chunk in ai.get_explanation_of_shell_command_by_chunks(
+                stream
+            ):
                 explanation += chunk
                 live.update(Markdown(explanation), refresh=True)
+        except ExplanationError:
+            live.update("\n Sorry, I don't know how to explain this command.")
 
-        print()
-
-    async def run(
-        self, shell: Optional[Path] = None, output: Optional[Path] = None
-    ) -> NoReturn:
-        if self.is_dangerous:
-            if not await questionary.confirm(
-                "Are you sure you want to run this command?"
-            ).unsafe_ask_async():
-                raise typer.Exit(1)
-
-        if output:
-            try:
-                with open(output, mode="w", newline="\n") as f:
-                    f.write(self.shell_command)
-            except os.error:
-                rich.print(
-                    "[bold yellow]Error[/]: Failed to write to the output file.",
-                    file=sys.stderr,
-                )
-                raise typer.Exit(1)
-        else:
-            subprocess.run(self.shell_command, executable=shell, shell=True)
-
-        raise typer.Exit()
-
-    async def edit(self) -> None:
-        res = await questionary.text(
-            "Edit command",
-            default=self.shell_command,
-            multiline="\n" in self.shell_command,
-        ).unsafe_ask_async()
-
-        if res not in ("", self.shell_command):
-            self.shell_command = res
+    print()
 
 
-class AskCLI:
-    def __init__(
-        self,
-        *,
-        openai_api_key: str,
-        model: str,
-        explain_using: str,
-        preferences: str,
-        openai_org_id: Optional[str] = None,
-    ) -> None:
-        self.__llm = ClientLLM(
-            ProviderOpenAI(
-                api_key=openai_api_key,
-                organization=openai_org_id,
-                model=model,
-                explain_using=explain_using,
-                preferences=preferences,
+async def _edit_shell_command(
+    *, ai: ClientAI, shell_command: ShellCommand
+) -> None:
+    prompt = await questionary.text(
+        "Enter your revision", validate=lambda x: x != ""
+    ).unsafe_ask_async()
+
+    print()
+    try:
+        with Status("Wait, Shell Whiz is thinking..."):
+            raise EditingError
+            shell_command.args = await ai.edit_shell_command(
+                shell_command.args, prompt
             )
+    except EditingError:
+        rich.print(
+            " Sorry, I couldn't edit the command. I left it unchanged.\n"
         )
 
-    async def __call__(
-        self,
-        *,
-        prompt: list[str],
-        explain_using: str,
-        dont_warn: bool,
-        dont_explain: bool,
-        quiet: bool,
-        shell: Optional[Path] = None,
-        output: Optional[Path] = None,
-    ) -> None:
-        try:
-            with Status("Wait, Shell Whiz is thinking..."):
-                cmd = _CMD(
-                    await self.__llm.suggest_shell_command(" ".join(prompt))
-                )
-        except SuggestionError:
-            rich.print(
-                "[bold yellow]Error[/]: Sorry, I don't know how to do this.",
-                file=sys.stderr,
-            )
-            raise typer.Exit(1)
 
-        actions = AskCLI.__get_actions(explain_using, dont_explain)
-        while True:
-            if not dont_explain:
-                cmd.cat()
-                explanation = asyncio.create_task(
-                    self.__llm.get_explanation_of_shell_command(
-                        cmd.shell_command
-                    )
-                )
-
-            if dont_warn:
-                cmd.is_dangerous = False
-            else:
-                try:
-                    with Status("Wait, Shell Whiz is thinking..."):
-                        (cmd.is_dangerous, cmd.dangerous_consequences) = (
-                            await self.__llm.recognise_dangerous_command(
-                                cmd.shell_command
-                            )
-                        )
-                except WarningError:
-                    cmd.is_dangerous = False
-
-            if dont_explain:
-                cmd.cat()
-
-            if not dont_warn:
-                cmd.warn()
-
-            if not dont_explain:
-                await self.__explain_shell_command(explanation)
-
-            if quiet:
-                break
-
-            await self.__perform_selected_action(cmd, actions, shell, output)
-
-    async def __perform_selected_action(
-        self,
-        cmd: _CMD,
-        actions: list[str],
-        shell: Optional[Path] = None,
-        output: Optional[Path] = None,
-    ) -> None:
-        while True:
-            action = await questionary.select(
-                "Select an action", actions
-            ).unsafe_ask_async()
-
-            if action == "Exit":
-                raise typer.Exit(1)
-            elif action == "Run this command":
-                await cmd.run(shell, output)
-            elif action == "Explain this command":
-                print()
-                await self.__explain_shell_command(
-                    self.__llm.get_explanation_of_shell_command(
-                        cmd.shell_command
-                    )
-                )
-            elif action == "Explain using GPT-4":
-                print()
-                await self.__explain_shell_command(
-                    self.__llm.get_explanation_of_shell_command(
-                        cmd.shell_command, explain_using="gpt-4-turbo-preview"
-                    )
-                )
-            elif action == "Revise query":
-                cmd.shell_command = await self.__edit_shell_command(
-                    cmd.shell_command
-                )
-                return
-            elif action == "Edit manually":
-                await cmd.edit()
-                return
-
-    @staticmethod
-    def __get_actions(explain_using: str, dont_explain: bool) -> list[str]:
-        actions = [
-            "Run this command",
-            "Explain this command",
-            "Explain using GPT-4",
-            "Revise query",
-            "Edit manually",
-            "Exit",
-        ]
-
-        if not dont_explain:
-            actions.remove("Explain this command")
-
-        if explain_using.startswith("gpt-4"):
-            actions.remove("Explain using GPT-4")
-
-        return actions
-
-    async def __explain_shell_command(self, coro: Any) -> None:
-        with Status("Wait, Shell Whiz is thinking..."):
-            stream = await coro
-
-        try:
-            await _CMD.explain(
-                self.__llm.get_explanation_of_shell_command_by_chunks(stream)
-            )
-        except ExplanationError:
-            rich.print(" Sorry, I don't know how to explain this command.\n")
-
-    async def __edit_shell_command(self, shell_command: str) -> str:
-        prompt = await questionary.text(
-            "Enter your revision", validate=lambda x: x != ""
+async def _perform_selected_action(
+    *,
+    ai: ClientAI,
+    shell_command: ShellCommand,
+    actions: list[str],
+    shell: Optional[Path] = None,
+    output_file: Optional[Path] = None,
+) -> None:
+    while True:
+        action = await questionary.select(
+            "Select an action", actions
         ).unsafe_ask_async()
 
-        try:
-            with Status("Wait, Shell Whiz is thinking..."):
-                shell_command = await self.__llm.edit_shell_command(
-                    shell_command, prompt
-                )
-        except EditingError:
-            rich.print(
-                "\n  Sorry, I couldn't edit the command. I left it unchanged."
+        if action == "Exit":
+            raise typer.Exit(1)
+        elif action == "Run this command":
+            await shell_command.run(shell=shell, output_file=output_file)
+        elif action == "Explain this command":
+            print()
+            await _explain_shell_command(
+                ai=ai,
+                coro=ai.get_explanation_of_shell_command(shell_command.args),
+            )
+        elif action == "Explain using GPT-4":
+            print()
+            await _explain_shell_command(
+                ai=ai,
+                coro=ai.get_explanation_of_shell_command(
+                    shell_command.args, model="gpt-4-turbo-preview"
+                ),
+            )
+        elif action == "Revise query":
+            await _edit_shell_command(ai=ai, shell_command=shell_command)
+            return
+        elif action == "Edit manually":
+            await shell_command.edit_manually()
+            print()
+            return
+
+
+async def _run(
+    *,
+    ai: ClientAI,
+    prompt: list[str],
+    dont_warn: bool,
+    dont_explain: bool,
+    quiet: bool,
+    actions: list[str],
+    shell: Path | None,
+    output_file: Path | None,
+) -> None:
+    try:
+        with Status("Wait, Shell Whiz is thinking..."):
+            shell_command = ShellCommand(
+                await ai.suggest_shell_command(" ".join(prompt))
+            )
+    except SuggestionError:
+        rich.print(
+            "[bold yellow]Error[/]: Sorry, I don't know how to do this.",
+            file=sys.stderr,
+        )
+        raise typer.Exit(1)
+
+    print()
+    while True:
+        shell_command.display()
+
+        if not dont_explain:
+            explanation_task = asyncio.create_task(
+                ai.get_explanation_of_shell_command(shell_command.args)
             )
 
-        return shell_command
+        if not dont_warn:
+            try:
+                with Status("Wait, Shell Whiz is thinking..."):
+                    (
+                        shell_command.is_dangerous,
+                        shell_command.dangerous_consequences,
+                    ) = await ai.recognise_dangerous_command(
+                        shell_command.args
+                    )
+            except WarningError:
+                shell_command.is_dangerous = False
+
+        if not dont_warn:
+            shell_command.display_warning()
+
+        if not dont_explain:
+            await _explain_shell_command(ai=ai, coro=explanation_task)
+
+        if quiet:
+            break
+
+        await _perform_selected_action(
+            ai=ai,
+            shell_command=shell_command,
+            actions=actions,
+            shell=shell,
+            output_file=output_file,
+        )
+
+
+def _get_actions(*, dont_explain: bool, model: str) -> list[str]:
+    actions = [
+        "Run this command",
+        "Explain this command",
+        "Explain using GPT-4",
+        "Revise query",
+        "Edit manually",
+        "Exit",
+    ]
+
+    if not dont_explain:
+        actions.remove("Explain this command")
+
+    if model.startswith("gpt-4"):
+        actions.remove("Explain using GPT-4")
+
+    return actions
+
+
+def ask(
+    prompt: Annotated[list[str], typer.Argument(show_default=False)],
+    preferences: Annotated[
+        str,
+        typer.Option(
+            "-p", "--preferences", help="Preferences for the AI assistant."
+        ),
+    ] = "I use Bash on Linux",
+    model: Annotated[
+        str, typer.Option("-m", "--model", help="AI model to use.")
+    ] = "gpt-3.5-turbo",
+    dont_warn: Annotated[
+        bool, typer.Option(help="Skip the warning part.")
+    ] = False,
+    dont_explain: Annotated[
+        bool,
+        typer.Option(
+            "-n",
+            "--dont-explain/--no-dont-explain",
+            help="Skip the explanation part.",
+        ),
+    ] = False,
+    quiet: Annotated[
+        bool,
+        typer.Option(
+            "-q", "--quiet/--no-quiet", help="Skip the interactive part."
+        ),
+    ] = False,
+    shell: Annotated[
+        Optional[Path],
+        typer.Option(
+            "-s",
+            "--shell",
+            help="Shell for executing the command. On Unix-like systems, this is usually /bin/sh. In Windows, it is usually cmd.exe.",
+            dir_okay=False,
+            show_default=False,
+        ),
+    ] = None,
+    output_file: Annotated[
+        Optional[Path],
+        typer.Option(
+            "-o",
+            "--output",
+            help="Instead of running the command, specify the output file for post-processing.",
+            dir_okay=False,
+            writable=True,
+            show_default=False,
+        ),
+    ] = None,
+) -> None:
+    """Get assistance from AI"""
+
+    try:
+        config = Config()
+    except ConfigError:
+        rich.print(
+            "[bold yellow]Error[/]: Please set your OpenAI API key via [bold green]sw config[/] and try again.",
+            file=sys.stderr,
+        )
+        raise typer.Exit(1)
+
+    asyncio.run(
+        _run(
+            ai=ClientAI(
+                ProviderOpenAI(
+                    api_key=config.openai_api_key,
+                    organization=config.openai_org_id,
+                    model=model,
+                    preferences=preferences,
+                )
+            ),
+            prompt=prompt,
+            dont_warn=dont_warn,
+            dont_explain=dont_explain,
+            quiet=quiet,
+            actions=_get_actions(dont_explain=dont_explain, model=model),
+            shell=shell,
+            output_file=output_file,
+        )
+    )

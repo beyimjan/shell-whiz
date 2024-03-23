@@ -5,23 +5,21 @@ from typing import Any, Optional
 import yaml
 from openai import AsyncOpenAI
 
-from .api import ProviderLLM
+from .api import ProviderAI
 
 
-class ProviderOpenAI(ProviderLLM):
+class ProviderOpenAI(ProviderAI):
     def __init__(
         self,
         *,
         api_key: str,
         model: str,
-        explain_using: str,
         preferences: str,
         organization: Optional[str] = None,
     ) -> None:
         self.__client = AsyncOpenAI(api_key=api_key, organization=organization)
 
         self.__model = model
-        self.__explain_using = explain_using
 
         self.__preferences = (
             f"These are my preferences: ####\n{preferences}\n####"
@@ -67,7 +65,7 @@ class ProviderOpenAI(ProviderLLM):
         return message.function_call.arguments
 
     async def get_explanation_of_shell_command(
-        self, shell_command: str, *, explain_using: Optional[str] = None
+        self, shell_command: str, *, model: Optional[str] = None
     ) -> Any:
         """Explains a shell command."""
 
@@ -84,7 +82,7 @@ class ProviderOpenAI(ProviderLLM):
         prompt["messages"].append({"role": "user", "content": shell_command})
 
         stream = await self.__create_chat_completion(
-            model=explain_using or self.__explain_using, stream=True, **prompt
+            model=model or self.__model, stream=True, **prompt
         )
 
         return stream
