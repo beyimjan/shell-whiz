@@ -20,7 +20,7 @@ async def _run(ai: ClientAI, shell_command: str):
     explanation = ""
     with Live(auto_refresh=False) as live:
         async for chunk in ai.get_explanation_of_shell_command_by_chunks(
-            stream, permissive=True
+            stream
         ):
             if is_first_chunk:
                 if chunk.startswith("-"):

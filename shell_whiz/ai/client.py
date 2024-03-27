@@ -4,13 +4,7 @@ from typing import Any, Optional
 
 import jsonschema
 
-from .errors import (
-    EditingError,
-    ErrorAI,
-    ExplanationError,
-    SuggestionError,
-    WarningError,
-)
+from .errors import EditingError, ErrorAI, SuggestionError, WarningError
 from .providers.api import ProviderAI
 
 
@@ -78,27 +72,11 @@ class ClientAI:
         )
 
     async def get_explanation_of_shell_command_by_chunks(
-        self, stream: Any, *, permissive: bool = False
+        self, stream: Any
     ) -> AsyncGenerator[str, None]:
-        is_first_chunk = True
-        skip_initial_spaces = True
         async for (
             chunk
         ) in self.__api.get_explanation_of_shell_command_by_chunks(stream):
-            if skip_initial_spaces:
-                chunk = chunk.lstrip()
-                if chunk:
-                    skip_initial_spaces = False
-                else:
-                    continue
-
-            if is_first_chunk:
-                if not chunk.startswith("-") and not permissive:
-                    raise ExplanationError(
-                        "The first chunk of the explanation doesn't start with a dash."
-                    )
-                is_first_chunk = False
-
             yield chunk
 
     async def edit_shell_command(self, shell_command: str, prompt: str) -> str:

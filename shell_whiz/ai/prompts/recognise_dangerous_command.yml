@@ -15,7 +15,9 @@ functions:
           type: boolean
         dangerous_consequences:
           type: string
-          description: Brief explanation of the potential side effects of running the command. Less than 12 words.
+          description: >
+            Brief explanation of the potential side effects of running
+            the command. Less than 12 words.
           optional: true
           dependencies:
             dangerous_to_run: true

@@ -13,7 +13,6 @@ from rich.status import Status
 from shell_whiz.ai import (
     ClientAI,
     EditingError,
-    ExplanationError,
     ProviderOpenAI,
     SuggestionError,
     WarningError,
@@ -31,16 +30,18 @@ async def _explain_shell_command(*, ai: ClientAI, coro: Any) -> None:
         " ================== [bold green]Explanation[/] =================="
     )
 
+    is_first_chunk = True
     explanation = ""
     with Live(auto_refresh=False) as live:
-        try:
-            async for chunk in ai.get_explanation_of_shell_command_by_chunks(
-                stream
-            ):
-                explanation += chunk
-                live.update(Markdown(explanation), refresh=True)
-        except ExplanationError:
-            live.update("\n Sorry, I don't know how to explain this command.")
+        async for chunk in ai.get_explanation_of_shell_command_by_chunks(
+            stream
+        ):
+            if is_first_chunk:
+                if not chunk.startswith("-"):
+                    print()
+                is_first_chunk = False
+            explanation += chunk
+            live.update(Markdown(explanation), refresh=True)
 
     print()
 

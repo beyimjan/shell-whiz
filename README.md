@@ -42,7 +42,7 @@ function ?? {
   sw ask `
     -s (Get-Command powershell.exe).Source `
     -m gpt-4-turbo-preview `
-    -p "I use PowerShell" `
+    -p "I use PowerShell on a daily basis" `
     @Args
 }
 ```

@@ -15,18 +15,11 @@ messages:
         - `-f` enables feature f.
         - `--option ...` does something specific.
 
-      Remember, the objective is to provide a clear and informative breakdown of the command's parts, tailored for users familiar with the command line. By abbreviating long parts of the command, you ensure readability and ease of understanding.
-
       {preferences}
-  - role: user
-    content: "netstat -tuln"
-  - role: assistant
-    content: |
-      - `netstat` displays network connections, routing tables, and interface statistics.
-        - `-t` displays TCP connections.
-        - `-u` displays UDP connections.
-        - `-l` displays only listening sockets.
-        - `-n` displays numerical addresses instead of resolving hostnames.
+
+      Remember, the goal is to provide a clear, informative and, most importantly, useful explanation of the command, tailored to users familiar with the command line.
+
+      Never warn about the shell command being dangerous or suggest any modifications. Focus solely on explaining the shell command.
   - role: user
     content: "dd if=/dev/urandom of=/tmp/tmp.iH7K0TMOU9 bs=1M count=4096"
   - role: assistant
@@ -41,7 +34,7 @@ messages:
   - role: assistant
     content: |
       - `ps` reports a snapshot of the current processes.
-        - `a` shows processes for all users.
+        - `a` displays processes from all users.
         - `u` displays the process's user/owner.
         - `x` includes processes not attached to a terminal.
         - `--sort=-%mem` sorts by memory usage.
