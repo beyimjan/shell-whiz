@@ -104,7 +104,7 @@ Run `sw ask --help` for more information.
 
 <p align="center">
   <img
-    src="https://github.com/beyimjan/shell-whiz/assets/109351730/fe99bdf8-aeeb-4293-a923-67a1a2245ee1"
+    src="https://github.com/beyimjan/shell-whiz/assets/109351730/5753885e-360c-410a-a2fd-b51a014c94c0"
   />
 </p>
 <p align="center">
