@@ -8,7 +8,7 @@ line_length = 79
 
 [tool.poetry]
 name = "shell-whiz"
-version = "3.2.0"
+version = "3.2.1"
 description = "AI assistant for command line"
 license = "GPL-3.0-only"
 authors = ["Tamerlan Beyimjan <beyimjan@gmail.com>"]

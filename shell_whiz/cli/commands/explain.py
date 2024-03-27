@@ -12,7 +12,7 @@ from shell_whiz.ai import ClientAI, ProviderOpenAI
 from shell_whiz.config import Config, ConfigError
 
 
-async def _run(ai: ClientAI, shell_command: str):
+async def _run(ai: ClientAI, shell_command: str) -> None:
     with Status("Wait, Shell Whiz is thinking..."):
         stream = await ai.get_explanation_of_shell_command(shell_command)
 
