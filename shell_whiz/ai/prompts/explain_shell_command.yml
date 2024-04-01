@@ -27,7 +27,7 @@ messages:
       - `dd` is a command for copying and converting files.
         - `if=/dev/urandom` specifies the input file as the random device.
         - `of=...` specifies the output file.
-        - `bs=1M` sets the block size to 1 megabyte.
+        - `bs=1M` sets the block size to 1 MB.
         - `count=4096` sets the number of blocks to be copied.
   - role: user
     content: "ps aux --sort=-%mem"
