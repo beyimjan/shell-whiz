@@ -38,9 +38,6 @@ def config() -> None:
         )
         raise typer.Exit(1)
 
-    print(config)
-    return
-
     try:
         Config.write(config)
     except ConfigError as e:

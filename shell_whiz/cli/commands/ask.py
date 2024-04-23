@@ -93,7 +93,7 @@ async def _perform_selected_action(
             await _explain_shell_command(
                 ai=ai,
                 coro=ai.get_explanation_of_shell_command(
-                    shell_command.args, model="gpt-4-turbo-preview"
+                    shell_command.args, model="gpt-4-turbo"
                 ),
             )
         elif action == "Revise query":
