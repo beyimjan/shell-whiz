@@ -47,7 +47,7 @@ PowerShell users can create a function in their [PowerShell profile](https://lea
 function ?? {
   sw ask `
     -s (Get-Command powershell.exe).Source `
-    -m gpt-4-turbo `
+    -m gpt-4o `
     -p "I use PowerShell on a daily basis" `
     @Args
 }

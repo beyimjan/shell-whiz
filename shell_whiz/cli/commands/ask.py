@@ -88,12 +88,12 @@ async def _perform_selected_action(
                 ai=ai,
                 coro=ai.get_explanation_of_shell_command(shell_command.args),
             )
-        elif action == "Explain using GPT-4":
+        elif action == "Explain using GPT-4o":
             print()
             await _explain_shell_command(
                 ai=ai,
                 coro=ai.get_explanation_of_shell_command(
-                    shell_command.args, model="gpt-4-turbo"
+                    shell_command.args, model="gpt-4o"
                 ),
             )
         elif action == "Revise query":
@@ -172,7 +172,7 @@ def _get_actions(*, dont_explain: bool, model: str) -> list[str]:
     actions = [
         "Run this command",
         "Explain this command",
-        "Explain using GPT-4",
+        "Explain using GPT-4o",
         "Revise query",
         "Edit manually",
         "Exit",
@@ -182,7 +182,7 @@ def _get_actions(*, dont_explain: bool, model: str) -> list[str]:
         actions.remove("Explain this command")
 
     if model.startswith("gpt-4"):
-        actions.remove("Explain using GPT-4")
+        actions.remove("Explain using GPT-4o")
 
     return actions
 
