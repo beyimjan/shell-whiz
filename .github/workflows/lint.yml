@@ -21,10 +21,14 @@ jobs:
           [
             ubuntu-20.04,
             ubuntu-22.04,
+            ubuntu-24.04,
+            macos-12-large,
+            macos-13-large,
+            macos-13-xlarge,
+            macos-14-large,
+            macos-14-xlarge,
             windows-2019,
             windows-2022,
-            macos-11,
-            macos-12,
           ]
     runs-on: ${{ matrix.os }}
     steps:
