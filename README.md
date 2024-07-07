@@ -23,6 +23,12 @@ To install Shell Whiz, run the following command:
 pip install shell-whiz
 ```
 
+Or, if you prefer to use [pipx](https://github.com/pypa/pipx):
+
+```bash
+pipx install shell-whiz
+```
+
 This will add the `sw` command to your `PATH`.
 
 To use the assistant you'll need an API key from OpenAI. Obtain this key by visiting https://platform.openai.com/api-keys. Once you have the key, you can set it either by running `sw config` or by setting the `OPENAI_API_KEY` environment variable.
@@ -51,6 +57,7 @@ You can also create a function that allows you to save executed commands in hist
 
 ```bash
 # ~/.bashrc
+
 whiz-shell() {
   TMPFILE=$(mktemp)
   trap 'rm -f $TMPFILE' EXIT
@@ -73,6 +80,7 @@ alias '??'='whiz-shell'
 
 ```zsh
 # ~/.zshrc
+
 whiz-shell() {
   TMPFILE=$(mktemp)
   trap 'rm -f $TMPFILE' EXIT
