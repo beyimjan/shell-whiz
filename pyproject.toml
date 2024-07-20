@@ -11,7 +11,7 @@ name = "shell-whiz"
 version = "3.2.3"
 description = "AI assistant for command line"
 license = "GPL-3.0-only"
-authors = ["Tamerlan Beyimjan <beyimjan@gmail.com>"]
+authors = ["Tamerlan Temirbolatuly <beyimjan@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/beyimjan/shell-whiz"
 packages = [{include = "shell_whiz"}]
