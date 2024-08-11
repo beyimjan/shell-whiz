@@ -197,7 +197,7 @@ def ask(
     ] = "I use Bash on Linux",
     model: Annotated[
         str, typer.Option("-m", "--model", help="AI model to use.")
-    ] = "gpt-3.5-turbo",
+    ] = "gpt-4o-mini",
     dont_warn: Annotated[
         bool, typer.Option(help="Skip the warning part.")
     ] = False,
