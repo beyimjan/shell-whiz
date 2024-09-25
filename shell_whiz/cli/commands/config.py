@@ -22,7 +22,7 @@ def config() -> None:
     ).unsafe_ask()
 
     rich.print(
-        "\n[bold italic](Optional)[/] Leave blank if you are not a member of multiple organizations."
+        "[bold italic](Optional)[/] Leave blank if you are not a member of multiple organizations."
     )
     openai_org_id = questionary.text(
         "Organization ID", default=os.environ.get("OPENAI_ORG_ID", "")
