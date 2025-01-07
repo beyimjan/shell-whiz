@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/lint.yml
 
   release-to-pypi:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: lint
     steps:
       - uses: actions/checkout@v4
